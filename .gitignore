@@ -3,6 +3,22 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+*.meta
+Assets/Animations
+Assets/Fonts
+Assets/Scenes
+Assets/Settings
+Assets/Sprites
+Assets/TextMesh Pro
+Assets/UniversalRenderPipelineGlobalSettings.asset
+Library
+Logs
+obj
+Packages
+ProjectSettings
+Temp
+UserSettings
+
 # User-specific files
 *.rsuser
 *.suo
