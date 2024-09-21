@@ -5,7 +5,7 @@ using UnityEngine;
 public class FlightControl : MonoBehaviour
 {
     Rigidbody2D rb;
-    List<Vector3> forces;
+    List<Vector2> forces;
     SpriteRenderer spriteRenderer;
     [SerializeField] float airDensity;
     [SerializeField] float wingArea;
@@ -38,11 +38,11 @@ public class FlightControl : MonoBehaviour
 
         return new List<Vector3>() { backForce, frontForce };
     }
-    List<Vector2> BalancedForceConstrained(float moment, float totalForce, float length, float frontLever) 
+    List<Vector2> BalancedForceConstrained(float moment, Vector2 totalForce, float length, float frontLever) 
     {
-        float backForce = (frontLever * totalForce - moment) / length;
-        float frontForce = totalForce - backForce;
-        return new List<Vector2>() { new Vector2(0, frontForce), new Vector2(0, backForce) };
+        Vector2 backForce = (frontLever * totalForce - new Vector2(moment, moment)) / length;
+        Vector2 frontForce = totalForce - backForce;
+        return new List<Vector2>() { frontForce, backForce };
     }
     // Next steps
     // TODO: get curves
@@ -90,17 +90,21 @@ public class FlightControl : MonoBehaviour
 
         float lift = AeroForce(airDensity, rb.velocity, wingArea, Cl);
         float drag = AeroForce(airDensity, rb.velocity, wingArea, Cd);
-        //Vector2 totalForce = (Vector2.up * lift) + (Vector2.left * drag);
-        float totalForce = lift + drag;
+
+        Vector2 downwind = - rb.velocity / rb.velocity.magnitude; //unit vector downwind
+        Vector2 liftDir = Vector3.Cross(downwind, Vector3.forward);
+
+        Vector2 totalForce = (liftDir * lift) + (downwind * drag);
+        //float totalForce = lift + drag; //don't do this
        
         float torque = AeroForce(airDensity, rb.velocity, wingArea, Cm);
-        Vector2 localBack = Vector2.left * spriteRenderer.bounds.size.x;
-        Vector2 localFront = Vector2.right * spriteRenderer.bounds.size.x;
+        float localBack =  -spriteRenderer.bounds.size.x/2;
+        float localFront = spriteRenderer.bounds.size.x/2;
 
-        List<Vector2> balancedForce = BalancedForceConstrained(torque, totalForce, spriteRenderer.bounds.size.x * 2, localFront - rb.centerOfMass);
+        List<Vector2> balancedForce = BalancedForceConstrained(torque, totalForce, spriteRenderer.bounds.size.x, localFront - rb.centerOfMass.x);
 
-        rb.AddForceAtPosition(balancedForce[0], localBack);
-        rb.AddForceAtPosition(balancedForce[1], localFront);
+        rb.AddForceAtPosition(balancedForce[0], new Vector2(localFront, 0));
+        rb.AddForceAtPosition(balancedForce[1], new Vector2(localBack, 0));
 
         return balancedForce;
     }
@@ -121,8 +125,8 @@ public class FlightControl : MonoBehaviour
         
         if (spriteRenderer != null)
         {
-            Vector3 localBack = Vector2.left * spriteRenderer.bounds.size.x;
-            Vector3 localFront = Vector2.right * spriteRenderer.bounds.size.x;
+            Vector2 localBack = Vector2.left * spriteRenderer.bounds.size.x/2;
+            Vector2 localFront = Vector2.right * spriteRenderer.bounds.size.x/2;
             if (forces.Count > 0)
             {
                 Gizmos.DrawLine(transform.TransformPoint(localBack), transform.TransformPoint(localBack + forces[0]));
