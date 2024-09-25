@@ -6,8 +6,9 @@ public class FlightControl : MonoBehaviour
 {
     Rigidbody2D rb;
     List<Vector2> forces;
-    SpriteRenderer spriteRenderer;
+    [SerializeField] SpriteRenderer spriteRenderer;
     float length;
+    [SerializeField] Vector2 dimensions;
     [SerializeField] float airDensity;
     [SerializeField] float wingArea;
     [SerializeField] float centerOfMassGizmoRadius;
@@ -26,7 +27,7 @@ public class FlightControl : MonoBehaviour
         //Vector2 vsquared = new Vector2(Mathf.Pow(velocity.x, 2), Mathf.Pow(velocity.y, 2));
         float vsquared = Mathf.Pow(velocity.magnitude, 2);
         float magnitudeNoC = 0.5f * rho * vsquared * area;
-        if (maxC > 0) 
+        if (Mathf.Abs(maxC) > 0) 
         {
             if (Mathf.Abs(C) > maxC)
             {
@@ -56,13 +57,14 @@ public class FlightControl : MonoBehaviour
     }
     List<Vector2> BalancedForceConstrained(float moment, Vector2 totalForce, float length, float frontLever) 
     {
-        Vector2 backForce = (frontLever * totalForce - new Vector2(moment, moment)) / length;
-        if (backForce.magnitude > totalForce.magnitude) 
+        //float theta = Mathf.Atan2(totalForce.y, totalForce.x);
+        Vector2 backForce = (frontLever * totalForce - new Vector2(moment, moment)) / length;      
+        Vector2 frontForce = totalForce - backForce;
+
+        if (backForce.magnitude > totalForce.magnitude)
         {
             print("invalid force detected");
         }
-              
-        Vector2 frontForce = totalForce - backForce;
         if (backForce + frontForce != totalForce) 
         {
             print("Oops.. something's wrong");
@@ -102,10 +104,20 @@ public class FlightControl : MonoBehaviour
     List<Vector2> AeroUpdate(Plane plane, float length) 
     {
         //AoA calculation from dot product of velocity and orientation
-        Vector2 localVelocity = transform.InverseTransformDirection(rb.velocity);
-        float dotprod = Vector2.Dot(localVelocity, Vector2.right);
-        float AoA = Mathf.Acos(dotprod / localVelocity.magnitude);
-
+        float AoA = 0;
+        float localBack = -length / 2;
+        float localFront = length / 2;
+        float frontLever = localFront - rb.centerOfMass.x;
+        //Vector2 localVelocity = Vector2.zero;
+        Vector2 tangentialVelocity = rb.angularVelocity * centerOfMass;
+        Vector2 airspeed = tangentialVelocity + rb.velocity;
+        if (rb.velocity.magnitude > 0)
+        {
+            Vector2 localVelocity = transform.InverseTransformDirection(rb.velocity);
+            float dotprod = Vector2.Dot(localVelocity, Vector2.right);
+            AoA = Mathf.Acos(dotprod / localVelocity.magnitude);
+        }
+        
         float[] dragCurveCoefs = Coefs(plane.dragCurveCoefs, AoA, 4); //we only have cubic, so I just put 4 there. 
         float[] liftCurveCoefs = Coefs(plane.liftCurveCoefs, AoA, 4);
         float[] momentCurveCoefs = Coefs(plane.momentCurveCoefs, AoA, 4);
@@ -122,13 +134,12 @@ public class FlightControl : MonoBehaviour
 
         Vector2 totalForce = (liftDir * lift) + (downwind * drag);
         //float totalForce = lift + drag; //don't do this
-       
+
         float torque = AeroForce(airDensity, rb.velocity, wingArea, Cm, maxMomentCoefficient);
         Vector3 torqueVector = new Vector3(0, 0, torque);
-        float localBack =  -length/ 2;
-        float localFront = length / 2;
+        
 
-        List<Vector2> balancedForce = BalancedForceConstrained(torque, totalForce, length, localFront - rb.centerOfMass.x);
+        List<Vector2> balancedForce = BalancedForceConstrained(torque, totalForce, length, frontLever);
         //List<Vector3> balancedForce = BalancedForce(torqueVector, totalForce, length, new Vector2 (localFront,0) - rb.centerOfMass);
         //Vector2 backForce = new Vector2(balancedForce[1].x, balancedForce[1].y);
         //Vector2 frontForce = new Vector2(balancedForce[0].x, balancedForce[0].y);
@@ -143,8 +154,8 @@ public class FlightControl : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        length = spriteRenderer.bounds.size.x;
+        //spriteRenderer = GetComponent<SpriteRenderer>();
+        length = dimensions.x;
         rb = GetComponent<Rigidbody2D>();
         plane = ReadPlaneData(planeIndex);
         rb.centerOfMass = centerOfMass;
@@ -154,12 +165,15 @@ public class FlightControl : MonoBehaviour
     {
         Gizmos.color = Color.red;
         Gizmos.DrawSphere(transform.TransformPoint(centerOfMass), centerOfMassGizmoRadius);
+        Vector2 inPlayFront = length == 0 ? dimensions/2 : new Vector2(length/2, 0);
+        
+        Gizmos.DrawCube(transform.TransformPoint(inPlayFront), new Vector3(0.4f, 0.4f, 0.4f));
         
         if (spriteRenderer != null)
         {
-            Vector2 localBack = Vector2.left * spriteRenderer.bounds.size.x/2;
-            Vector2 localFront = Vector2.right * spriteRenderer.bounds.size.x/2;
-            if (forces.Count > 0)
+            Vector2 localBack = Vector2.left * dimensions.x/2;
+            Vector2 localFront = Vector2.right * dimensions.x/2;
+            if (forces != null && forces.Count > 0)
             {
                 Gizmos.DrawLine(transform.TransformPoint(localBack), transform.TransformPoint(localBack + forces[0]));
                 Gizmos.color = Color.blue;
