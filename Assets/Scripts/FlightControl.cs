@@ -11,6 +11,7 @@ public class FlightControl : MonoBehaviour
     [SerializeField] Vector2 dimensions;
     [SerializeField] float airDensity;
     [SerializeField] float wingArea;
+    [SerializeField] Range chord;
     [SerializeField] float centerOfMassGizmoRadius;
     [SerializeField] float maxLiftCoefficient;
     [SerializeField] float maxDragCoefficient;
@@ -19,7 +20,10 @@ public class FlightControl : MonoBehaviour
     public int planeIndex;
     public Vector2 centerOfMass;
 
-    
+    [System.Serializable]
+    struct Range {
+        public float min, max;
+    }
     //[SerializeField] float length;
     Plane plane;
     float AeroForce(float rho, Vector2 velocity, float area, float C, float maxC = 0) 
@@ -67,7 +71,7 @@ public class FlightControl : MonoBehaviour
         }
         if (backForce + frontForce != totalForce) 
         {
-            print("Oops.. something's wrong");
+            print("backForce + frontForce != totalForce");
         }
 
         return new List<Vector2>() { backForce, frontForce };
@@ -103,17 +107,19 @@ public class FlightControl : MonoBehaviour
     }
     List<Vector2> AeroUpdate(Plane plane, float length) 
     {
+        
         //AoA calculation from dot product of velocity and orientation
         float AoA = 0;
         float localBack = -length / 2;
         float localFront = length / 2;
-        float frontLever = localFront - rb.centerOfMass.x;
+        float frontLever = new Vector2(localFront - rb.centerOfMass.x, localFront - rb.centerOfMass.y).magnitude;
         //Vector2 localVelocity = Vector2.zero;
-        Vector2 tangentialVelocity = rb.angularVelocity * centerOfMass;
-        Vector2 airspeed = tangentialVelocity + rb.velocity;
+        float acrossChord = Mathf.Max(rb.centerOfMass.x - chord.max, rb.centerOfMass.x - chord.min);
+        Vector2 tangentialVelocity = new Vector2(0, rb.angularVelocity * Mathf.Deg2Rad * acrossChord);
+        Vector2 airspeed = rb.velocity + tangentialVelocity;
         if (rb.velocity.magnitude > 0)
         {
-            Vector2 localVelocity = transform.InverseTransformDirection(rb.velocity);
+            Vector2 localVelocity = transform.InverseTransformDirection(airspeed);
             float dotprod = Vector2.Dot(localVelocity, Vector2.right);
             AoA = Mathf.Acos(dotprod / localVelocity.magnitude);
         }
@@ -122,30 +128,32 @@ public class FlightControl : MonoBehaviour
         float[] liftCurveCoefs = Coefs(plane.liftCurveCoefs, AoA, 4);
         float[] momentCurveCoefs = Coefs(plane.momentCurveCoefs, AoA, 4);
 
-        float Cd = PolynomialCurve(dragCurveCoefs, AoA);
+        float Cd = Mathf.Abs(PolynomialCurve(dragCurveCoefs, AoA));
         float Cl = PolynomialCurve(liftCurveCoefs, AoA);
         float Cm = PolynomialCurve(momentCurveCoefs, AoA);
 
-        float lift = AeroForce(airDensity, rb.velocity, wingArea, Cl, maxLiftCoefficient);
-        float drag = AeroForce(airDensity, rb.velocity, wingArea, Cd, maxDragCoefficient);
+        float lift = AeroForce(airDensity, airspeed, wingArea, Cl, maxLiftCoefficient);
+        float drag = AeroForce(airDensity, airspeed, wingArea, Cd, maxDragCoefficient);
 
-        Vector2 downwind = rb.velocity.magnitude > 0 ? - rb.velocity / rb.velocity.magnitude : Vector2.zero; //unit vector downwind
+        Vector2 downwind = airspeed.magnitude > 0 ? - airspeed / airspeed.magnitude : Vector2.zero; //unit vector downwind
         Vector2 liftDir = Vector3.Cross(downwind, Vector3.forward);
 
         Vector2 totalForce = (liftDir * lift) + (downwind * drag);
         //float totalForce = lift + drag; //don't do this
 
-        float torque = AeroForce(airDensity, rb.velocity, wingArea, Cm, maxMomentCoefficient);
+        float torque = AeroForce(airDensity, airspeed, wingArea, Cm, maxMomentCoefficient) * (chord.max - chord.min);
         Vector3 torqueVector = new Vector3(0, 0, torque);
-        
 
-        List<Vector2> balancedForce = BalancedForceConstrained(torque, totalForce, length, frontLever);
+        rb.AddForce(totalForce);
+        rb.AddTorque(-torque);
+
+        List<Vector2> balancedForce = BalancedForceConstrained(-torque, totalForce, length, frontLever);
         //List<Vector3> balancedForce = BalancedForce(torqueVector, totalForce, length, new Vector2 (localFront,0) - rb.centerOfMass);
         //Vector2 backForce = new Vector2(balancedForce[1].x, balancedForce[1].y);
         //Vector2 frontForce = new Vector2(balancedForce[0].x, balancedForce[0].y);
 
-        rb.AddForceAtPosition(balancedForce[1], new Vector2(localFront, 0));
-        rb.AddForceAtPosition(balancedForce[0], new Vector2(localBack, 0));
+        //rb.AddForceAtPosition(balancedForce[1], new Vector2(localFront, 0));
+        //rb.AddForceAtPosition(balancedForce[0], new Vector2(localBack, 0));
 
         return balancedForce;
     }
