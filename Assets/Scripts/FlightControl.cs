@@ -25,6 +25,8 @@ public class FlightControl : MonoBehaviour
     [SerializeField] float flapSpeed;
     [SerializeField] float flapInfluence;
     [SerializeField] bool flapsDirectlyIncreaseLift;
+    [Header("Impulse")]
+    public float initialThrowImpulse;
     [Header("Plane Specifications")]
     public TextAsset planeSpecsFile;
     public int planeIndex;
@@ -53,7 +55,7 @@ public class FlightControl : MonoBehaviour
         {
             if (Mathf.Abs(C) > maxC)
             {
-                print("ceiling");
+                
                 return magnitudeNoC * maxC;
             }
             else 
@@ -134,13 +136,21 @@ public class FlightControl : MonoBehaviour
         float frontLever = new Vector2(localFront - rb.centerOfMass.x, localFront - rb.centerOfMass.y).magnitude;
         //Vector2 localVelocity = Vector2.zero;
         float acrossChord = Mathf.Max(rb.centerOfMass.x - chord.max, rb.centerOfMass.x - chord.min);
-        Vector2 tangentialVelocity = new Vector2(0, rb.angularVelocity * Mathf.Deg2Rad * acrossChord);
-        Vector2 airspeed = rb.velocity + tangentialVelocity;
+        float chordLength = chord.max - chord.min;
+        float chordSign = acrossChord / Mathf.Abs(acrossChord);
+        Vector2 tangentialVelocity = new Vector2(0, rb.angularVelocity * Mathf.Deg2Rad * chordLength * chordSign);
+
+        Vector2 airspeed = rb.velocity - (tangentialVelocity * (1 / 9.8f));
         if (rb.velocity.magnitude > 0)
         {
             Vector2 localVelocity = transform.InverseTransformDirection(airspeed);
-            float dotprod = Vector2.Dot(localVelocity, Vector2.right);
-            AoA = Mathf.Acos(dotprod / localVelocity.magnitude);
+            //float dotprod = Vector2.Dot(localVelocity, Vector2.right);
+            //AoA = Mathf.Acos(dotprod / localVelocity.magnitude);
+            AoA = Vector2.SignedAngle(localVelocity, Vector2.right) * Mathf.Deg2Rad;
+            if (AoA < 0) 
+            {
+                AoA = (2 * Mathf.PI) + AoA;
+            }
         }
         
         float[] dragCurveCoefs = Coefs(plane.dragCurveCoefs, AoA, 4); //we only have cubic, so I just put 4 there. 
@@ -161,28 +171,22 @@ public class FlightControl : MonoBehaviour
         Vector2 totalForce = liftForce + dragForce;
 
 
-        float torque = AeroForce(airDensity, airspeed, wingArea, Cm, maxMomentCoefficient) * (chord.max - chord.min);
-        if (totalForce.magnitude > unusuallyLargeForceMagnitude)
+        float torque = AeroForce(airDensity, airspeed, wingArea, Cm, maxMomentCoefficient) * chordLength;
+        
+        KeyValuePair<Vector2, float> flapImpetus = KeyboardFlapControl(dragForce, liftForce, torque, Cd, Cl);
+        totalForce += flapImpetus.Key;
+        torque += flapImpetus.Value;
+        //print(torque);
+        if (totalForce.magnitude > rb.mass * 9.81f) //constrain all force to be under gravity
         {
-            print($"Unusually large force: totalForce = {totalForce}, Cd = {Cd}, Cl = {Cl}, airspeed = {airspeed} AoA:{AoA}");
-        }
-        else 
-        { 
-            KeyValuePair<Vector2, float> flapImpetus = KeyboardFlapControl(dragForce, liftForce, torque, Cd, Cl);
-            totalForce += flapImpetus.Key;
-            torque += flapImpetus.Value;
-            
-            if (totalForce.magnitude > rb.mass * 9.81f) //constrain all force to be under gravity
-            {
-                totalForce /= totalForce.magnitude;
-                totalForce *= rb.mass * 9.81f;
-            }
-
-            rb.AddForce(totalForce);
-            rb.AddTorque(-torque);
+            totalForce /= totalForce.magnitude;
+            totalForce *= rb.mass * 9.81f;
         }
 
-        List<Vector2> balancedForce = BalancedForceConstrained(-torque, totalForce, length, frontLever);
+        rb.AddForce(totalForce);
+        rb.AddTorque(torque);
+
+        List<Vector2> balancedForce = BalancedForceConstrained(torque, totalForce, length, frontLever);
         
         return balancedForce;
     }
@@ -196,19 +200,18 @@ public class FlightControl : MonoBehaviour
         }
         if (Input.GetKey(KeyCode.DownArrow) && flapAngle > - Mathf.PI / 2) 
         {
-            flapAngle -= degree * flapSpeed % (Mathf.PI/2);
+            flapAngle -= degree * flapSpeed;
         }
-        float flapFraction = flapAngle / Mathf.PI / 2;
+        float flapFraction = flapAngle / (Mathf.PI / 2);
         float liftToDragRatio = Cl / Cd;
         if (lift.magnitude != 0 && drag.magnitude != 0 && torque != 0)
         {
-            flapDrag = drag * flapFraction * flapInfluence / liftToDragRatio;
+            flapDrag = drag * Mathf.Abs(flapFraction) * flapInfluence / liftToDragRatio;
             if (flapsDirectlyIncreaseLift) 
             {
                 flapLift = lift * flapFraction * flapInfluence;
-                //rb.AddForce(flapLift);
             }
-            flapTorque = torque * flapFraction * flapInfluence;
+            flapTorque = Mathf.Abs(torque * flapInfluence) * flapFraction;
             
             return new KeyValuePair<Vector2, float>(flapDrag + flapLift, flapTorque);
         }
@@ -224,6 +227,7 @@ public class FlightControl : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         plane = ReadPlaneData(planeIndex);
         rb.centerOfMass = centerOfMass;
+        rb.AddForce(new Vector2(initialThrowImpulse, 0), ForceMode2D.Impulse);
 
     }
     private void OnDrawGizmos()
@@ -251,6 +255,7 @@ public class FlightControl : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+        
         forces = AeroUpdate(plane, length);
        
     }
