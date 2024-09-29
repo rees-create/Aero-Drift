@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class FlightControl : MonoBehaviour
 {
@@ -8,24 +10,40 @@ public class FlightControl : MonoBehaviour
     List<Vector2> forces;
     [SerializeField] SpriteRenderer spriteRenderer;
     float length;
+    [Header("Scale and Kinematic Properties")]
     [SerializeField] Vector2 dimensions;
-    [SerializeField] float airDensity;
+    public Vector2 centerOfMass;
+    [SerializeField] float centerOfMassGizmoRadius;
     [SerializeField] float wingArea;
     [SerializeField] Range chord;
-    [SerializeField] float centerOfMassGizmoRadius;
+    [Header("Other Adjustables")]
+    [SerializeField] float airDensity;
     [SerializeField] float maxLiftCoefficient;
     [SerializeField] float maxDragCoefficient;
     [SerializeField] float maxMomentCoefficient;
+    [Header("Flap Control")]
+    [SerializeField] float flapSpeed;
+    [SerializeField] float flapInfluence;
+    [SerializeField] bool flapsDirectlyIncreaseLift;
+    [Header("Plane Specifications")]
     public TextAsset planeSpecsFile;
     public int planeIndex;
-    public Vector2 centerOfMass;
+    [Header("Warnings")]
+    [SerializeField] float unusuallyLargeForceMagnitude;
 
     [System.Serializable]
     struct Range {
         public float min, max;
     }
-    //[SerializeField] float length;
+    [Header("Flap Data")]
+    public float AoA;
+    [SerializeField] float flapAngle;
+    [SerializeField] Vector2 flapDrag;
+    [SerializeField] Vector2 flapLift;
+    [SerializeField] float flapTorque;
+    
     Plane plane;
+
     float AeroForce(float rho, Vector2 velocity, float area, float C, float maxC = 0) 
     {
         //Vector2 vsquared = new Vector2(Mathf.Pow(velocity.x, 2), Mathf.Pow(velocity.y, 2));
@@ -35,6 +53,7 @@ public class FlightControl : MonoBehaviour
         {
             if (Mathf.Abs(C) > maxC)
             {
+                print("ceiling");
                 return magnitudeNoC * maxC;
             }
             else 
@@ -109,7 +128,7 @@ public class FlightControl : MonoBehaviour
     {
         
         //AoA calculation from dot product of velocity and orientation
-        float AoA = 0;
+        AoA = 0;
         float localBack = -length / 2;
         float localFront = length / 2;
         float frontLever = new Vector2(localFront - rb.centerOfMass.x, localFront - rb.centerOfMass.y).magnitude;
@@ -137,25 +156,63 @@ public class FlightControl : MonoBehaviour
 
         Vector2 downwind = airspeed.magnitude > 0 ? - airspeed / airspeed.magnitude : Vector2.zero; //unit vector downwind
         Vector2 liftDir = Vector3.Cross(downwind, Vector3.forward);
+        Vector2 liftForce = liftDir * lift;
+        Vector2 dragForce = downwind * drag;
+        Vector2 totalForce = liftForce + dragForce;
 
-        Vector2 totalForce = (liftDir * lift) + (downwind * drag);
-        //float totalForce = lift + drag; //don't do this
 
         float torque = AeroForce(airDensity, airspeed, wingArea, Cm, maxMomentCoefficient) * (chord.max - chord.min);
-        Vector3 torqueVector = new Vector3(0, 0, torque);
+        if (totalForce.magnitude > unusuallyLargeForceMagnitude)
+        {
+            print($"Unusually large force: totalForce = {totalForce}, Cd = {Cd}, Cl = {Cl}, airspeed = {airspeed} AoA:{AoA}");
+        }
+        else 
+        { 
+            KeyValuePair<Vector2, float> flapImpetus = KeyboardFlapControl(dragForce, liftForce, torque, Cd, Cl);
+            totalForce += flapImpetus.Key;
+            torque += flapImpetus.Value;
+            
+            if (totalForce.magnitude > rb.mass * 9.81f) //constrain all force to be under gravity
+            {
+                totalForce /= totalForce.magnitude;
+                totalForce *= rb.mass * 9.81f;
+            }
 
-        rb.AddForce(totalForce);
-        rb.AddTorque(-torque);
+            rb.AddForce(totalForce);
+            rb.AddTorque(-torque);
+        }
 
         List<Vector2> balancedForce = BalancedForceConstrained(-torque, totalForce, length, frontLever);
-        //List<Vector3> balancedForce = BalancedForce(torqueVector, totalForce, length, new Vector2 (localFront,0) - rb.centerOfMass);
-        //Vector2 backForce = new Vector2(balancedForce[1].x, balancedForce[1].y);
-        //Vector2 frontForce = new Vector2(balancedForce[0].x, balancedForce[0].y);
-
-        //rb.AddForceAtPosition(balancedForce[1], new Vector2(localFront, 0));
-        //rb.AddForceAtPosition(balancedForce[0], new Vector2(localBack, 0));
-
+        
         return balancedForce;
+    }
+
+    KeyValuePair<Vector2, float> KeyboardFlapControl(Vector2 drag, Vector2 lift, float torque, float Cd, float Cl) 
+    {
+        float degree = Mathf.PI / 180;
+        if (Input.GetKey(KeyCode.UpArrow) && flapAngle < Mathf.PI / 2) 
+        {
+            flapAngle += degree * flapSpeed;
+        }
+        if (Input.GetKey(KeyCode.DownArrow) && flapAngle > - Mathf.PI / 2) 
+        {
+            flapAngle -= degree * flapSpeed % (Mathf.PI/2);
+        }
+        float flapFraction = flapAngle / Mathf.PI / 2;
+        float liftToDragRatio = Cl / Cd;
+        if (lift.magnitude != 0 && drag.magnitude != 0 && torque != 0)
+        {
+            flapDrag = drag * flapFraction * flapInfluence / liftToDragRatio;
+            if (flapsDirectlyIncreaseLift) 
+            {
+                flapLift = lift * flapFraction * flapInfluence;
+                //rb.AddForce(flapLift);
+            }
+            flapTorque = torque * flapFraction * flapInfluence;
+            
+            return new KeyValuePair<Vector2, float>(flapDrag + flapLift, flapTorque);
+        }
+        return new KeyValuePair<Vector2, float>(Vector2.zero, 0);
     }
 
    
@@ -195,5 +252,6 @@ public class FlightControl : MonoBehaviour
     void FixedUpdate()
     {
         forces = AeroUpdate(plane, length);
+       
     }
 }
