@@ -59,9 +59,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\CloudAnimationRandomizer.cs" />
+    <Compile Include="Assets\Scripts\GalleryView.cs" />
     <Compile Include="Assets\Scripts\Plane.cs" />
     <Compile Include="Assets\Scripts\Planes.cs" />
     <Compile Include="Assets\Scripts\FlightControl.cs" />
+    <Compile Include="Assets\Scripts\SceneTransitionControl.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

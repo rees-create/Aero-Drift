@@ -227,7 +227,7 @@ public class FlightControl : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         plane = ReadPlaneData(planeIndex);
         rb.centerOfMass = centerOfMass;
-        rb.AddForce(new Vector2(initialThrowImpulse, 0), ForceMode2D.Impulse);
+        rb.AddForce(transform.TransformDirection(new Vector2(initialThrowImpulse, 0)), ForceMode2D.Impulse);
 
     }
     private void OnDrawGizmos()
@@ -236,7 +236,7 @@ public class FlightControl : MonoBehaviour
         Gizmos.DrawSphere(transform.TransformPoint(centerOfMass), centerOfMassGizmoRadius);
         Vector2 inPlayFront = length == 0 ? dimensions/2 : new Vector2(length/2, 0);
         
-        Gizmos.DrawCube(transform.TransformPoint(inPlayFront), new Vector3(0.4f, 0.4f, 0.4f));
+        //Gizmos.DrawCube(transform.TransformPoint(inPlayFront), new Vector3(0.4f, 0.4f, 0.4f));
         
         if (spriteRenderer != null)
         {
