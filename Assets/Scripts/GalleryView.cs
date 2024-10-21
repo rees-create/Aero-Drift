@@ -37,7 +37,7 @@ public class GalleryView : MonoBehaviour
 
         public float SlideDistance() 
         {
-            return (slideDuration / deltaTime) + slideDistanceNudge;
+            return (slideDuration * slideSpeed / deltaTime) + slideDistanceNudge;
         }
     }
     [Serializable]
@@ -48,6 +48,8 @@ public class GalleryView : MonoBehaviour
         public Vector2 scrollButtonAspectRatio;
         public int scrollButtonOffset;
     }
+    enum Aspect {None, Width, Height };
+
     IEnumerator Slide(GameObject[] slides, SlideSettings settings, int direction) 
     {
         while (Math.Abs(settings.elapsedTime) < settings.slideDuration)
@@ -61,12 +63,25 @@ public class GalleryView : MonoBehaviour
             }
         }
     }
-    void ScaleToThisObject(ref GameObject child, Vector2 scale = default, Vector2 relativeOffset = default) 
+    void ScaleToThisObject(ref GameObject child, Vector2 scale = default, Vector2 relativeOffset = default, Aspect aspectRatioPreserve = Aspect.None) 
     {
         RectTransform galleryTransform = GetComponent<RectTransform>();
         RectTransform childTransform = child.GetComponent<RectTransform>();
         float scaleToFrameX = galleryTransform.rect.width / childTransform.rect.width;
         float scaleToFrameY = galleryTransform.rect.height / childTransform.rect.height;
+
+        
+        if (aspectRatioPreserve == Aspect.Height) 
+        {
+            float aspectRatio = galleryTransform.rect.width / galleryTransform.rect.height;
+            scaleToFrameX = aspectRatio * scaleToFrameY;
+        }
+        if (aspectRatioPreserve == Aspect.Width)
+        {
+            float aspectRatio = galleryTransform.rect.height / galleryTransform.rect.width;
+            scaleToFrameY = aspectRatio * scaleToFrameX;
+        }
+
         if (scale == default) 
         {
             scale = Vector2.one;
@@ -101,14 +116,14 @@ public class GalleryView : MonoBehaviour
         }
 
         slides[0] = Instantiate(this.slides[currentSlide], gameObject.transform);
-        ScaleToThisObject(ref slides[0], Vector2.one * 0.8f);
+        ScaleToThisObject(ref slides[0], Vector2.one * 0.8f, aspectRatioPreserve: Aspect.Height);
 
         slides[1] = Instantiate(this.slides[nextSlide], gameObject.transform);
 
         int displacementArrow = rightClicked ? 1 : -1;
-        ScaleToThisObject(ref slides[1], Vector2.one * 0.8f, 
-            gameObject.transform.TransformPoint(Vector3.left * slideSettings.SlideDistance()) * displacementArrow);
-        print($"Displacement = {Vector3.left * slideSettings.SlideDistance() * displacementArrow}");
+        ScaleToThisObject(ref slides[1], Vector2.one * manualScaleSettings.imageToFrameRatio, 
+            transform.TransformPoint(Vector3.left * slideSettings.SlideDistance()) * displacementArrow, Aspect.Height);
+        
         //animate
         IEnumerator slideAnim = Slide(slides, slideSettings, displacementArrow);
         yield return StartCoroutine(slideAnim);
@@ -117,7 +132,7 @@ public class GalleryView : MonoBehaviour
         DestroyImmediate(slides[1]);
 
         slide_slot = Instantiate(this.slides[nextSlide], gameObject.transform);
-        ScaleToThisObject(ref slide_slot, Vector2.one * 0.8f);
+        ScaleToThisObject(ref slide_slot, Vector2.one * manualScaleSettings.imageToFrameRatio, aspectRatioPreserve: Aspect.Height);
 
         slideSettings.elapsedTime = 0;
         leftClicked = false;
@@ -172,7 +187,7 @@ public class GalleryView : MonoBehaviour
         ScaleToThisObject(ref angleArrowLeft, manualScaleSettings.scrollButtonAspectRatio, Vector2.left * manualScaleSettings.scrollButtonOffset);
         //StartCoroutine(SpawnSlide());
         slide_slot = Instantiate(slides[currentSlide], gameObject.transform);
-        ScaleToThisObject(ref slide_slot, Vector2.one * 0.8f);
+        ScaleToThisObject(ref slide_slot, Vector2.one * manualScaleSettings.imageToFrameRatio, aspectRatioPreserve: Aspect.Height);
         
         angleArrowRight.GetComponent<Button>().onClick.AddListener(OnClickRight);
         angleArrowLeft.GetComponent<Button>().onClick.AddListener(OnClickLeft);
