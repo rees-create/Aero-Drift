@@ -13,12 +13,13 @@ using UnityEngine.UI;
 
 public class GalleryView : MonoBehaviour
 {
-    public List<GameObject> slides;
-    public GameObject frame;
-    public GameObject mask;
-    public GameObject leftButton, rightButton;
-    public SlideSettings slideSettings;
-    public ManualScaleSettings manualScaleSettings;
+    [SerializeField] List<GameObject> slides;
+    [SerializeField] GameObject frame;
+    [SerializeField] GameObject mask;
+    [SerializeField] GameObject leftButton, rightButton;
+    [SerializeField] string sortingLayer;
+    [SerializeField] SlideSettings slideSettings;
+    [SerializeField] ManualScaleSettings manualScaleSettings;
 
 
     bool leftClicked = false, rightClicked = false;
@@ -31,13 +32,13 @@ public class GalleryView : MonoBehaviour
     public struct SlideSettings 
     {
         public float deltaTime;
-        public float slideSpeed, slideDuration;
-        public float elapsedTime;
-        public float slideDistanceNudge;
+        public float slideDistance, slideDuration;
+        [NonSerialized] public float elapsedTime;
+        //public float slideDistanceNudge;
 
-        public float SlideDistance() 
+        public float SlideSpeed() 
         {
-            return (slideDuration * slideSpeed / deltaTime) + slideDistanceNudge;
+            return slideDistance / slideDuration;
         }
     }
     [Serializable]
@@ -46,26 +47,34 @@ public class GalleryView : MonoBehaviour
         public float maskSize;
         public float imageToFrameRatio;
         public Vector2 scrollButtonAspectRatio;
-        public int scrollButtonOffset;
+        public float scrollButtonOffset;
     }
     enum Aspect {None, Width, Height };
 
+    Vector3 multiplyVectors(Vector3 a, Vector3 b) 
+    {
+        return new Vector3(a.x * b.x, a.y * b.y, a.z * b.z);
+    }
+    Vector3 divideVectors(Vector3 a, Vector3 b)
+    {
+        return new Vector3(a.x / b.x, a.y / b.y, a.z / b.z);
+    }
     IEnumerator Slide(GameObject[] slides, SlideSettings settings, int direction) 
     {
-        while (Math.Abs(settings.elapsedTime) < settings.slideDuration)
+        for (int i = 0; i < (int) settings.slideDuration / settings.deltaTime; i++)
         {
             yield return new WaitForSeconds(settings.deltaTime);
             settings.elapsedTime += settings.deltaTime;
-            Vector3 nudge = Vector3.right * settings.deltaTime * settings.slideSpeed * direction;
+            Vector3 nudge = Vector3.right * settings.deltaTime * settings.SlideSpeed() * direction;
             foreach(GameObject slide in slides) 
             {
                 slide.transform.position += nudge;
             }
         }
     }
-    void ScaleToThisObject(ref GameObject child, Vector2 scale = default, Vector2 relativeOffset = default, Aspect aspectRatioPreserve = Aspect.None) 
+    void ScaleToThisObject(ref GameObject child, GameObject parent, Vector2 scale = default, Vector2 relativeOffset = default, Aspect aspectRatioPreserve = Aspect.None) 
     {
-        RectTransform galleryTransform = GetComponent<RectTransform>();
+        RectTransform galleryTransform = parent.GetComponent<RectTransform>();
         RectTransform childTransform = child.GetComponent<RectTransform>();
         float scaleToFrameX = galleryTransform.rect.width / childTransform.rect.width;
         float scaleToFrameY = galleryTransform.rect.height / childTransform.rect.height;
@@ -91,7 +100,9 @@ public class GalleryView : MonoBehaviour
             relativeOffset = Vector2.zero;
         }
 
-        child.transform.localScale *= new Vector2(scaleToFrameX, scaleToFrameY) * scale;
+        child.transform.localScale *= scale;//multiplyVectors(child.transform.TransformVector(child.transform.localScale), 
+            //new Vector3(scaleToFrameX, scaleToFrameY) * scale);
+        
         child.transform.position += new Vector3(relativeOffset.x, relativeOffset.y, 0);
     }
     bool checkClicked() { return leftClicked || rightClicked; }
@@ -115,14 +126,26 @@ public class GalleryView : MonoBehaviour
             
         }
 
-        slides[0] = Instantiate(this.slides[currentSlide], gameObject.transform);
-        ScaleToThisObject(ref slides[0], Vector2.one * 0.8f, aspectRatioPreserve: Aspect.Height);
+        slides[0] = Instantiate(this.slides[currentSlide], mask.transform);
+        ScaleToThisObject(ref slides[0], mask, Vector2.one * manualScaleSettings.imageToFrameRatio, aspectRatioPreserve: Aspect.Height);
 
-        slides[1] = Instantiate(this.slides[nextSlide], gameObject.transform);
+        slides[1] = Instantiate(this.slides[nextSlide], mask.transform);
 
         int displacementArrow = rightClicked ? 1 : -1;
-        ScaleToThisObject(ref slides[1], Vector2.one * manualScaleSettings.imageToFrameRatio, 
-            transform.TransformPoint(Vector3.left * slideSettings.SlideDistance()) * displacementArrow, Aspect.Height);
+        Vector3 displacementVector = default;
+        int slideDArrow = displacementArrow;
+        if (transform.position.x > 0)
+        {
+            displacementVector = Vector3.right;
+            slideDArrow = -displacementArrow;
+        }
+        else if (transform.position.x < 0) 
+        {
+            displacementVector = Vector3.left;
+        }
+        
+        ScaleToThisObject(ref slides[1], mask, Vector2.one * manualScaleSettings.imageToFrameRatio, 
+            displacementVector * slideSettings.slideDistance * slideDArrow, Aspect.Height);
         
         //animate
         IEnumerator slideAnim = Slide(slides, slideSettings, displacementArrow);
@@ -131,8 +154,8 @@ public class GalleryView : MonoBehaviour
         DestroyImmediate(slides[0]);
         DestroyImmediate(slides[1]);
 
-        slide_slot = Instantiate(this.slides[nextSlide], gameObject.transform);
-        ScaleToThisObject(ref slide_slot, Vector2.one * manualScaleSettings.imageToFrameRatio, aspectRatioPreserve: Aspect.Height);
+        slide_slot = Instantiate(this.slides[nextSlide], mask.transform);
+        ScaleToThisObject(ref slide_slot, mask, Vector2.one * manualScaleSettings.imageToFrameRatio, aspectRatioPreserve: Aspect.Height);
 
         slideSettings.elapsedTime = 0;
         leftClicked = false;
@@ -149,14 +172,12 @@ public class GalleryView : MonoBehaviour
     {
         DestroyImmediate(slide_slot); //remove from hierarchy
         slide_slot = default;
-
         
         leftClicked = true;
         if (!spawnSlideRunning)
         {
             StartCoroutine(SpawnSlide());
         }
-        //print($"currentSlide = {currentSlide} slides.Count = {slides.Count} final = {(currentSlide - 1) % slides.Count}");
         currentSlide = mod(currentSlide - 1, slides.Count);
     }
     void OnClickRight()
@@ -164,30 +185,29 @@ public class GalleryView : MonoBehaviour
         DestroyImmediate(slide_slot); //remove slide slot from hierarchy
         slide_slot = default;
 
-       
         rightClicked = true;
         if (!spawnSlideRunning)
         {
             StartCoroutine(SpawnSlide());
         }
         currentSlide = mod(currentSlide + 1 , slides.Count);
-        //slide_slot = Instantiate(slides[currentSlide], gameObject.transform);
-        //ScaleToThisObject(ref slide_slot, Vector2.one * 0.8f);
     }
 
     void Start()
     {
-        GameObject mask = Instantiate(this.mask, gameObject.transform);
-        ScaleToThisObject(ref mask, Vector2.one * manualScaleSettings.maskSize);
         GameObject frame = Instantiate(this.frame, gameObject.transform);
-        ScaleToThisObject(ref frame);
+        ScaleToThisObject(ref frame, gameObject);
+        
+        mask = Instantiate(mask, frame.transform);
+        ScaleToThisObject(ref mask, frame, Vector2.one * manualScaleSettings.maskSize);
+        
         GameObject angleArrowRight = Instantiate(rightButton, gameObject.transform);
-        ScaleToThisObject(ref angleArrowRight, manualScaleSettings.scrollButtonAspectRatio, Vector2.right * manualScaleSettings.scrollButtonOffset);
+        ScaleToThisObject(ref angleArrowRight, gameObject, manualScaleSettings.scrollButtonAspectRatio, Vector2.right * manualScaleSettings.scrollButtonOffset);
         GameObject angleArrowLeft = Instantiate(leftButton, gameObject.transform);
-        ScaleToThisObject(ref angleArrowLeft, manualScaleSettings.scrollButtonAspectRatio, Vector2.left * manualScaleSettings.scrollButtonOffset);
-        //StartCoroutine(SpawnSlide());
-        slide_slot = Instantiate(slides[currentSlide], gameObject.transform);
-        ScaleToThisObject(ref slide_slot, Vector2.one * manualScaleSettings.imageToFrameRatio, aspectRatioPreserve: Aspect.Height);
+        ScaleToThisObject(ref angleArrowLeft, gameObject, manualScaleSettings.scrollButtonAspectRatio, Vector2.left * manualScaleSettings.scrollButtonOffset);
+        
+        slide_slot = Instantiate(slides[currentSlide], mask.transform);
+        ScaleToThisObject(ref slide_slot, gameObject, Vector2.one * manualScaleSettings.imageToFrameRatio, aspectRatioPreserve: Aspect.Height);
         
         angleArrowRight.GetComponent<Button>().onClick.AddListener(OnClickRight);
         angleArrowLeft.GetComponent<Button>().onClick.AddListener(OnClickLeft);
