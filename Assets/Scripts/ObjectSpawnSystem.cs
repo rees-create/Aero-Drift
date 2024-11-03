@@ -52,11 +52,15 @@ public class ObjectSpawnSystem : MonoBehaviour
                 int nDeleted = 0;
                 int childCount = transform.childCount;
                 print($"Initial child count: {childCount}");
-                
-                while(transform.childCount > 0)
+                int deleteAtIndex = 0;
+                while(transform.childCount > deleteAtIndex)
                 {
-                    //print($"childIndex = {0}; childCount = {transform.childCount}");
-                    Transform child = transform.GetChild(0);
+                    Transform child = transform.GetChild(deleteAtIndex);
+                    if (child.GetComponent<ObjectSpawnSystem>() != null) 
+                    {
+                        deleteAtIndex += 1;
+                        continue;
+                    }
                     child.parent = null;
                     DestroyImmediate(child.gameObject);
                     nDeleted += 1;
