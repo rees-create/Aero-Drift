@@ -13,13 +13,15 @@ public class SceneTransitionControl : MonoBehaviour
 
     void Start() 
     {
-        Button btn = triggerButton.GetComponent<Button>();
-        btn.onClick.AddListener(LoadNextLevel);
+        if (triggerButton != null)
+        {
+            Button btn = triggerButton.GetComponent<Button>();
+            btn.onClick.AddListener(LoadNextLevel);
+        }
     }
     
     public void LoadNextLevel() 
     {
-        Debug.Log("clicked Home");
         StartCoroutine(TransitionToScene(sceneName));
     }
 

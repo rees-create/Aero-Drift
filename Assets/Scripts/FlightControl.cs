@@ -18,9 +18,9 @@ public class FlightControl : MonoBehaviour
     [SerializeField] Range chord;
     [Header("Other Adjustables")]
     [SerializeField] float airDensity;
-    [SerializeField] float maxLiftCoefficient;
-    [SerializeField] float maxDragCoefficient;
-    [SerializeField] float maxMomentCoefficient;
+    [SerializeField] float liftCoefficientRange;
+    [SerializeField] float dragCoefficientRange;
+    [SerializeField] float momentCoefficientRange;
     [Header("Flap Control")]
     [SerializeField] float flapSpeed;
     [SerializeField] float flapInfluence;
@@ -30,8 +30,8 @@ public class FlightControl : MonoBehaviour
     [Header("Plane Specifications")]
     public TextAsset planeSpecsFile;
     public int planeIndex;
-    [Header("Warnings")]
-    [SerializeField] float unusuallyLargeForceMagnitude;
+    [Header("Exploding Force Guard")]
+    [SerializeField] float maxAllowedDifferential;
 
     [System.Serializable]
     struct Range {
@@ -45,24 +45,15 @@ public class FlightControl : MonoBehaviour
     [SerializeField] float flapTorque;
     
     Plane plane;
+    Vector2[] forceLog = new Vector2[2];
+    float[] torqueLog = new float[2];
+    int t_ = 0;
 
     float AeroForce(float rho, Vector2 velocity, float area, float C, float maxC = 0) 
     {
         //Vector2 vsquared = new Vector2(Mathf.Pow(velocity.x, 2), Mathf.Pow(velocity.y, 2));
         float vsquared = Mathf.Pow(velocity.magnitude, 2);
         float magnitudeNoC = 0.5f * rho * vsquared * area;
-        if (Mathf.Abs(maxC) > 0) 
-        {
-            if (Mathf.Abs(C) > maxC)
-            {
-                
-                return magnitudeNoC * maxC;
-            }
-            else 
-            {
-                return magnitudeNoC * C;
-            }
-        }
         return magnitudeNoC * C;
     }
 
@@ -88,11 +79,11 @@ public class FlightControl : MonoBehaviour
 
         if (backForce.magnitude > totalForce.magnitude)
         {
-            print("invalid force detected");
+            //print("invalid force detected");
         }
         if (backForce + frontForce != totalForce) 
         {
-            print("backForce + frontForce != totalForce");
+            //print("backForce + frontForce != totalForce");
         }
 
         return new List<Vector2>() { backForce, frontForce };
@@ -100,12 +91,23 @@ public class FlightControl : MonoBehaviour
     // Next steps
     // TODO: get curves
     // TODO: write PlaneSpecs.json file with sprite info, flight splines, etc
+    struct Bounds 
+    {
+        public float lower, higher;
+        public Bounds(float lower, float higher) 
+        {
+            this.lower = lower;
+            this.higher = higher;
+        }
+        //public Bounds() { }
+    }
     float PolynomialCurve(float[] coefs, float x) 
     {
         float value = 0;
+        
         for (int i = 0, power = coefs.Length - 1; i < coefs.Length; i++, power--) 
         {
-            value += coefs[i] * Mathf.Pow(x, power);
+            value += coefs[i] * Mathf.Pow(x, power); // valueDenominator;
         }
         return value;
     }
@@ -115,15 +117,44 @@ public class FlightControl : MonoBehaviour
         Planes planesInJSON = JsonUtility.FromJson<Planes>(planeSpecsFile.text);
         return planesInJSON.planes[planeIndex];
     }
-    float[] Coefs(float[] curveCoefs, float AoA, int nCurveCoefs) 
+    /// <summary>
+    /// Gets appropriate coefficients for a given AoA from the full list
+    /// </summary>
+    /// <param name="curveCoefs"></param>
+    /// <param name="AoA"></param>
+    /// <param name="nCurveCoefs"></param>
+    /// <param name="range"></param>
+    /// <returns></returns>
+    float[] Coefs(float[] curveCoefs, float AoA, int nCurveCoefs, float range, float flapValue = 0) 
     {
         float quad = Mathf.PI / 2;
         int coefStart = (int) Mathf.Floor(AoA / quad) * nCurveCoefs;
+       
+        //get coefficients first
         float[] coefs = new float[4];
         for (int i = 0, j = coefStart; i < nCurveCoefs; i++, j++) 
         {
-            coefs[i] = curveCoefs[j]; 
+            coefs[i] = curveCoefs[j];
         }
+        //add flap value to bias (last) coefficient
+        coefs[3] += flapValue;
+        //calculate range, value denominator
+        Bounds bounds = new Bounds();
+        float quadrant = coefStart / nCurveCoefs;
+        bounds.lower = PolynomialCurve(coefs, quadrant * quad);
+        bounds.higher = PolynomialCurve(coefs, ((quadrant + quad) * quad) % (quad * 4));
+        //print($"Bounds: ({bounds.lower}, {bounds.higher})");
+        float initRange = Mathf.Abs(bounds.higher - bounds.lower);
+        float valueDenominator = initRange / range;
+        //loop through coefs, divide by value denominator (if applicable) to constrain to range
+        if (valueDenominator > 1)
+        {
+            for (int i = 0; i < nCurveCoefs; i++)
+            {
+                coefs[i] /= valueDenominator;
+            }
+        }
+
         return coefs;
     }
     List<Vector2> AeroUpdate(Plane plane, float length) 
@@ -153,34 +184,50 @@ public class FlightControl : MonoBehaviour
             }
         }
         
-        float[] dragCurveCoefs = Coefs(plane.dragCurveCoefs, AoA, 4); //we only have cubic, so I just put 4 there. 
-        float[] liftCurveCoefs = Coefs(plane.liftCurveCoefs, AoA, 4);
-        float[] momentCurveCoefs = Coefs(plane.momentCurveCoefs, AoA, 4);
+        float[] dragCurveCoefs = Coefs(plane.dragCurveCoefs, AoA, 4, dragCoefficientRange, FlapValue(flapInfluence)); //we only have cubic, so I just put 4 there. 
+        float[] liftCurveCoefs = Coefs(plane.liftCurveCoefs, AoA, 4, liftCoefficientRange, FlapValue(flapInfluence));
+        float[] momentCurveCoefs = Coefs(plane.momentCurveCoefs, AoA, 4, momentCoefficientRange, FlapValue(flapInfluence)/10);
+
 
         float Cd = Mathf.Abs(PolynomialCurve(dragCurveCoefs, AoA));
         float Cl = PolynomialCurve(liftCurveCoefs, AoA);
         float Cm = PolynomialCurve(momentCurveCoefs, AoA);
 
-        float lift = AeroForce(airDensity, airspeed, wingArea, Cl, maxLiftCoefficient);
-        float drag = AeroForce(airDensity, airspeed, wingArea, Cd, maxDragCoefficient);
+        float lift = AeroForce(airDensity, airspeed, wingArea, Cl, liftCoefficientRange);
+        float drag = AeroForce(airDensity, airspeed, wingArea, Cd, dragCoefficientRange);
 
         Vector2 downwind = airspeed.magnitude > 0 ? - airspeed / airspeed.magnitude : Vector2.zero; //unit vector downwind
         Vector2 liftDir = Vector3.Cross(downwind, Vector3.forward);
         Vector2 liftForce = liftDir * lift;
         Vector2 dragForce = downwind * drag;
-        Vector2 totalForce = liftForce + dragForce;
+
+        float torque = AeroForce(airDensity, airspeed, wingArea, Cm, momentCoefficientRange) * chordLength;
+        //KeyValuePair<Vector2, float> flapImpetus = KeyboardFlapControl(dragForce, liftForce, torque, Cd, Cl);
+        //torque += flapImpetus.Value;
+
+        Vector2 totalForce = liftForce + dragForce; //+ flapImpetus.Key;
 
 
-        float torque = AeroForce(airDensity, airspeed, wingArea, Cm, maxMomentCoefficient) * chordLength;
         
-        KeyValuePair<Vector2, float> flapImpetus = KeyboardFlapControl(dragForce, liftForce, torque, Cd, Cl);
-        totalForce += flapImpetus.Key;
-        torque += flapImpetus.Value;
+        
+       
         //print(torque);
-        if (totalForce.magnitude > rb.mass * 9.81f) //constrain all force to be under gravity
+        //if (totalForce.magnitude > rb.mass * 9.81f) //constrain all force to be under gravity
+        //{ //instead restrict high force differentials
+        //    totalForce /= totalForce.magnitude;
+        //    totalForce *= rb.mass * 9.81f;
+        //}
+        
+        forceLog[t_] = totalForce;
+        torqueLog[t_] = torque;
+        t_ = (t_ + 1) % 2;
+        if ((forceLog[1] - forceLog[0]).magnitude > maxAllowedDifferential) 
         {
-            totalForce /= totalForce.magnitude;
-            totalForce *= rb.mass * 9.81f;
+            totalForce = Vector2.zero;
+        }
+        if (torqueLog[1] - torqueLog[0] > (maxAllowedDifferential / (chord.max-chord.min))) 
+        {
+            torque = 0;
         }
 
         rb.AddForce(totalForce);
@@ -189,6 +236,20 @@ public class FlightControl : MonoBehaviour
         List<Vector2> balancedForce = BalancedForceConstrained(torque, totalForce, length, frontLever);
         
         return balancedForce;
+    }
+
+    float FlapValue(float influence) {
+        float degree = Mathf.PI / 180;
+        if (Input.GetKey(KeyCode.UpArrow) && flapAngle < Mathf.PI / 2)
+        {
+            flapAngle += degree * flapSpeed;
+        }
+        if (Input.GetKey(KeyCode.DownArrow) && flapAngle > -Mathf.PI / 2)
+        {
+            flapAngle -= degree * flapSpeed;
+        }
+        float flapFraction = flapAngle / (Mathf.PI / 2);
+        return flapFraction * influence;
     }
 
     KeyValuePair<Vector2, float> KeyboardFlapControl(Vector2 drag, Vector2 lift, float torque, float Cd, float Cl) 
@@ -206,12 +267,12 @@ public class FlightControl : MonoBehaviour
         float liftToDragRatio = Cl / Cd;
         if (lift.magnitude != 0 && drag.magnitude != 0 && torque != 0)
         {
-            flapDrag = drag * Mathf.Abs(flapFraction) * flapInfluence / liftToDragRatio;
+            flapDrag = ((drag * Mathf.Abs(flapFraction) * flapInfluence) / liftToDragRatio);
             if (flapsDirectlyIncreaseLift) 
             {
-                flapLift = lift * flapFraction * flapInfluence;
+                flapLift = ((lift * flapFraction * flapInfluence) / liftToDragRatio);
             }
-            flapTorque = Mathf.Abs(torque * flapInfluence) * flapFraction;
+            flapTorque = Mathf.Abs(torque * flapInfluence) * flapFraction / liftToDragRatio;
             
             return new KeyValuePair<Vector2, float>(flapDrag + flapLift, flapTorque);
         }
