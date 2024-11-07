@@ -2,6 +2,7 @@ using Cinemachine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.VisualScripting;
 using Unity.VisualScripting.ReorderableList.Element_Adder_Menu;
 using UnityEngine;
@@ -16,21 +17,24 @@ public class ObjectSpawnSystem : MonoBehaviour
     //move to start without AeroUpdate call, just applying the previous force. 
     // Start is called before the first frame update
 
-    [SerializeField] GameObject element;
+    [SerializeField] List<GameObject> elements;
     [SerializeField] GameObject player;
     [SerializeField] Vector3 playerInitialPosition;
-    [SerializeField] GameObject virtualCamera;
-    [SerializeField] ElementVariation elementVariation;
+    //[SerializeField] GameObject virtualCamera;
+    [SerializeField] List<ElementVariation> elementVariations;
+    [Header("Pop Back Settings")]
+    public float popBackProximity;
+    public int popBackAtLast;
+    
+
     bool popBack = false;
 
     [Serializable]
-    struct ElementVariation
+    class ElementVariation
     {
         public int numberOfObjects;
-        [Header("Pop Back Settings")]
-        public float popBackProximity;
-        public int popBackAtLast;
         [NonSerialized] public Vector3 popBackAtLastPosition;
+        public bool triggersPopBack;
         [Header("Wave \"Randomization\" Properties")]
         public float phaseSeed;
         public float randomizationCycleFrequency;
@@ -67,48 +71,83 @@ public class ObjectSpawnSystem : MonoBehaviour
 
     IEnumerator SpawnObjects()
     {
-       
+        int numElements = elements.Count;
         while (true)
         {
-            if (popBack)
+            if (elements.Count != 0)
             {
-                elementVariation.phaseSeed += Mathf.PI;
-            }
-            if (transform.childCount != 0 || popBack)
-            {
-                int nDeleted = 0;
-                int childCount = transform.childCount;
+                //elementVariations.Clear();this is the problem
+                //add ElementVariations for each element
+                if (numElements != elements.Count)
+                {
+                    int sign = (elements.Count - numElements) / Mathf.Abs(numElements - elements.Count);
+                    for (int i = numElements; i != elements.Count; i += sign)
+                    {
+                        if (i > 0)
+                            elementVariations.Add(new ElementVariation());
+                        else
+                            elementVariations.RemoveAt(elements.Count - 1);
+                    }
+                    numElements = elements.Count;
+                }
+                //set each Element according to its elementVariation
                 
-                while(transform.childCount > 0)
+                //flush objects
+                print("flushed?");
+                if (popBack)
                 {
-                    Transform child = transform.GetChild(0);
-                    child.parent = null;
-                    DestroyImmediate(child.gameObject);
-                    nDeleted += 1;
+                    for (int elVarIdx = 0; elVarIdx < elementVariations.Count; elVarIdx++)
+                    {
+                        elementVariations[elVarIdx].phaseSeed += Mathf.PI;
+                    }
                 }
-                
+                if (transform.childCount != 0 || popBack)
+                {
+                    int nDeleted = 0;
+                    int childCount = transform.childCount;
+                    //unparent and destroy all child objects
+                    while (transform.childCount > 0)
+                    {
+                        Transform child = transform.GetChild(0);
+                        child.parent = null;
+                        DestroyImmediate(child.gameObject);
+                        nDeleted += 1;
+                    }
+
+                }
+
+                //spawn objects
+                for (int elVarIdx = 0; elVarIdx < elementVariations.Count; elVarIdx++)
+                {
+                    //foreach (GameObject element in elements)
+                    //{
+                    print("hello?");
+                        for (int i = 0; i < elementVariations[elVarIdx].numberOfObjects; i++)
+                        {
+                            print("is this doing anything");
+                            GameObject g = Instantiate(elements[elVarIdx], transform);
+                            g.name = gameObject.name + "_" + i;
+                            g.transform.localScale = elementVariations[elVarIdx].scale;
+                            g.transform.position = transform.TransformPoint(elementVariations[elVarIdx].spawnSpacing * i) + elementVariations[elVarIdx].position;
+                            if (player != null && i == elementVariations[elVarIdx].numberOfObjects - popBackAtLast
+                                && elementVariations[elVarIdx].triggersPopBack)
+                            {
+                                elementVariations[elVarIdx].popBackAtLastPosition = g.transform.position;
+                            }
+                            g.transform.eulerAngles = transform.TransformVector(elementVariations[elVarIdx].rotation);
+                            Vector4 color = elementVariations[elVarIdx].ColorRandomization(elementVariations[elVarIdx].phaseSeed, i, elementVariations[elVarIdx].numberOfObjects);
+                            //print($"Color of house {i} = {color}");
+                            if (elementVariations[elVarIdx].overwriteColor)
+                            {
+                                g.GetComponent<SpriteRenderer>().color = color;
+                            }
+                        }
+                    //}
+                }
             }
-            //spawn objects
-            for (int i = 0; i < elementVariation.numberOfObjects; i++)
-            {
-                GameObject g = Instantiate(element, transform);
-                g.name = gameObject.name + "_" + i;
-                g.transform.localScale = elementVariation.scale;
-                g.transform.position = transform.TransformPoint(elementVariation.spawnSpacing * i) + elementVariation.position;
-                if (player != null && i == elementVariation.numberOfObjects - elementVariation.popBackAtLast) 
-                {
-                    elementVariation.popBackAtLastPosition = g.transform.position;
-                }
-                g.transform.eulerAngles = transform.TransformVector(elementVariation.rotation);
-                Vector4 color = elementVariation.ColorRandomization(elementVariation.phaseSeed, i, elementVariation.numberOfObjects);
-                //print($"Color of house {i} = {color}");
-                if (elementVariation.overwriteColor)
-                {
-                    g.GetComponent<SpriteRenderer>().color = color;
-                }
-            }
-            ElementVariation oldElementVariation = elementVariation;
-            yield return new WaitUntil(() => popBack || !elementVariation.Equals(oldElementVariation));
+            List<ElementVariation> oldElementVariations = elementVariations;
+            print(!elementVariations.SequenceEqual(oldElementVariations));
+            yield return new WaitUntil(() => popBack || !elementVariations.SequenceEqual(oldElementVariations));
         }
     }
 
@@ -126,8 +165,18 @@ public class ObjectSpawnSystem : MonoBehaviour
     void Update()
     {
         popBack = false;
-        if (player != null && elementVariation.popBackAtLastPosition.x - player.transform.position.x
-            <= elementVariation.popBackProximity) //then pop back
+        Vector3 popBackAtLastPosition = new Vector3();
+
+        //To optimize performance, put the pop back triggering element in the front of the list!
+        foreach(ElementVariation elementVariation in elementVariations) 
+        {
+            if (elementVariation.triggersPopBack)
+                popBackAtLastPosition = elementVariation.popBackAtLastPosition;
+                break;
+        }
+        //pop back
+        if (player != null && popBackAtLastPosition.x - player.transform.position.x
+            <= popBackProximity) //then pop back
         {
             popBack = true;
             Vector3 velocity = player.GetComponent<Rigidbody2D>().velocity;
