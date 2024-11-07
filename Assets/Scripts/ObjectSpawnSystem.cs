@@ -19,7 +19,7 @@ public class ObjectSpawnSystem : MonoBehaviour
     [SerializeField] GameObject element;
     [SerializeField] GameObject player;
     [SerializeField] Vector3 playerInitialPosition;
-    [SerializeField] GameObject virtualCamera;
+    [SerializeField] bool flushOnPopBack;
     [SerializeField] ElementVariation elementVariation;
     bool popBack = false;
 
@@ -70,11 +70,11 @@ public class ObjectSpawnSystem : MonoBehaviour
        
         while (true)
         {
-            if (popBack)
+            if (popBack && flushOnPopBack)
             {
                 elementVariation.phaseSeed += Mathf.PI;
             }
-            if (transform.childCount != 0 || popBack)
+            if (transform.childCount != 0 || (popBack && flushOnPopBack))
             {
                 int nDeleted = 0;
                 int childCount = transform.childCount;
@@ -108,7 +108,11 @@ public class ObjectSpawnSystem : MonoBehaviour
                 }
             }
             ElementVariation oldElementVariation = elementVariation;
-            yield return new WaitUntil(() => popBack || !elementVariation.Equals(oldElementVariation));
+
+            bool popBackCondition = flushOnPopBack ? popBack || !elementVariation.Equals(oldElementVariation) 
+                : !elementVariation.Equals(oldElementVariation);
+
+            yield return new WaitUntil(() => popBackCondition);
         }
     }
 
