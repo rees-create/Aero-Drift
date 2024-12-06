@@ -16,6 +16,8 @@ public class FlightControl : MonoBehaviour
     [SerializeField] float centerOfMassGizmoRadius;
     [SerializeField] float wingArea;
     [SerializeField] Range chord;
+    [Header("Wind Field Interaction")]
+    public Vector2 wind;
     [Header("Other Adjustables")]
     [SerializeField] float airDensity;
     [SerializeField] float liftCoefficientRange;
@@ -171,7 +173,7 @@ public class FlightControl : MonoBehaviour
         float chordSign = acrossChord / Mathf.Abs(acrossChord);
         Vector2 tangentialVelocity = new Vector2(0, rb.angularVelocity * Mathf.Deg2Rad * chordLength * chordSign);
 
-        Vector2 airspeed = rb.velocity - (tangentialVelocity * (1 / 9.8f));
+        Vector2 airspeed = rb.velocity + wind - (tangentialVelocity * (1 / 9.8f));
         if (rb.velocity.magnitude > 0)
         {
             Vector2 localVelocity = transform.InverseTransformDirection(airspeed);

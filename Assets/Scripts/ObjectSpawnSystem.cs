@@ -2,6 +2,7 @@ using Cinemachine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.VisualScripting;
 using Unity.VisualScripting.ReorderableList.Element_Adder_Menu;
 using UnityEngine;
@@ -39,6 +40,9 @@ public class ObjectSpawnSystem : MonoBehaviour
         public float phaseSeed;
         public float randomizationCycleFrequency;
         public Randomizable overwriteProperties;
+        [NonSerialized] public int iterator;
+        [Header("Reference Frame Object?")]
+        public bool inReferenceFrame;
         [Header("Transform Properties")]
         public Vector3 spawnSpacing;
         public Vector3 position;
@@ -46,10 +50,10 @@ public class ObjectSpawnSystem : MonoBehaviour
         public Vector3 scale;
         
 
-        float rand(float seed, float index, float numberOfObjects) 
+        public float rand(float seed, float index, float numberOfObjects) 
         {
             float frequency = randomizationCycleFrequency;
-            float divisor = numberOfObjects != 0 ? numberOfObjects : 1;
+            float divisor = seed != 0 ? seed : 1;
             float waveValue = Mathf.Abs(Mathf.Sin(Mathf.PI * frequency * (index / divisor)) + 
                 Mathf.Sin((Mathf.PI * frequency * index) + seed))
                 % 1;
@@ -81,12 +85,15 @@ public class ObjectSpawnSystem : MonoBehaviour
     //}
 
     [Serializable]
-    public enum OverwriteType { This, Object, Both }
+    public enum OverwriteType { This, Object, Downward, Parent }
     [Serializable]
     struct Randomizable
     {
         
         public OverwriteType type;
+        public bool randomizeChild;
+        public int childIndex;
+        public bool numberOfObjects;
         public bool spawnSpacing;
         public bool color;
         public bool position;
@@ -128,49 +135,100 @@ public class ObjectSpawnSystem : MonoBehaviour
             //spawn objects
             for (int i = 0; i < elementVariation.numberOfObjects; i++)
             {
+
                 //initialize overwrite conditions
-                bool overwriteBoth = elementVariation.overwriteProperties.type == OverwriteType.Both;
-                bool overwriteThis = elementVariation.overwriteProperties.type == OverwriteType.This || overwriteBoth;
-                bool overwriteObject = elementVariation.overwriteProperties.type == OverwriteType.Object || overwriteBoth;
-                //instantiate and get to work
-                GameObject g = Instantiate(element, transform);
+                bool parentOverwrite = elementVariation.overwriteProperties.type == OverwriteType.Parent;
+                bool overwriteDownward = elementVariation.overwriteProperties.type == OverwriteType.Downward;
+                bool overwriteThis = elementVariation.overwriteProperties.type == OverwriteType.This || overwriteDownward;
+                bool overwriteObject = elementVariation.overwriteProperties.type == OverwriteType.Object || overwriteDownward;
+                //set iterator (it gets overwritten if overwrite condition is Parent
+                elementVariation.iterator = i;
                 //check and change overwrite type of object
+                if (parentOverwrite && transform.parent != null) 
+                {
+                    elementVariation.iterator = gameObject.name.Last() - '0';
+                    //print($"iterator value = {elementVariation.iterator}, last of name = {gameObject.name.Last() - '0'}");
+                }
                 if (overwriteObject)
                 {
-                    OverwriteType type = g.GetComponent<ObjectSpawnSystem>().elementVariation.overwriteProperties.type;
-                    if (type == OverwriteType.Object && g.GetComponent<ObjectSpawnSystem>() != null) //make object randomizable
-                    {
-                        g.GetComponent<ObjectSpawnSystem>().elementVariation.overwriteProperties.type = OverwriteType.Both;
-                    }
-                    else if(g.GetComponent<ObjectSpawnSystem>() != null) 
+                    if (element.GetComponent<ObjectSpawnSystem>() == null)
                     {
                         print("Your object doesn't have an ObjectSpawnSystem");
                     }
+                    else
+                    {
+                        OverwriteType type = element.GetComponent<ObjectSpawnSystem>().elementVariation.overwriteProperties.type;
+                        if (type == OverwriteType.Object && element.GetComponent<ObjectSpawnSystem>() != null) //make object randomizable
+                        { //oh no triple nested if.. well it's clear what we're doing here, right?
+                            element.GetComponent<ObjectSpawnSystem>().elementVariation.overwriteProperties.type = OverwriteType.Parent;
+                        }
+                    }
+                    
                 }
-               
+                //if (overwriteDownward) downward is currently unconfigured
+                //{
+                    
+                //}
+                //first decide whether to instantiate
+                
+                bool shouldISpawn = true;
+                GameObject g = element;
+                if (elementVariation.overwriteProperties.numberOfObjects && (overwriteThis || parentOverwrite)) 
+                {
+                    float iterator = elementVariation.phaseSeed != 0 ? elementVariation.iterator / elementVariation.phaseSeed
+                        : elementVariation.iterator;
+                    float decider = elementVariation.rand(elementVariation.phaseSeed, iterator, elementVariation.numberOfObjects);
+                    //print($"decider = {decider} iterator = {elementVariation.iterator}");
+                    if((int) ((decider * 100) % 2) == 0) 
+                    {
+                        shouldISpawn = false;
+                    }
+                }
+                if (shouldISpawn && elementVariation.inReferenceFrame) 
+                {
+                    GameObject parent = new GameObject();
+                    g = Instantiate(parent, transform);
+                    Instantiate(element, g.transform);
+                    DestroyImmediate(parent);
+                }
+                else if (shouldISpawn)
+                {
+                    g = Instantiate(element, transform);
+                }
+                else
+                {
+                    continue;
+                }
                 //set name
                 g.name = gameObject.name + "_" + i;
                 //get scale
                 Vector3 scale = elementVariation.scale;
                 //potentially randomize scale
-                if (elementVariation.overwriteProperties.scale && overwriteThis)
+                if (elementVariation.overwriteProperties.scale && (overwriteThis || parentOverwrite))
                 {
-                    scale = multiplyVectors(elementVariation.scale, elementVariation.RandomVector3(elementVariation.phaseSeed, i, elementVariation.numberOfObjects));
+                    scale = multiplyVectors(elementVariation.scale, elementVariation.RandomVector3(elementVariation.phaseSeed, elementVariation.iterator, elementVariation.numberOfObjects));
                 }
                 //set scale
-                g.transform.localScale = scale;
+                if (elementVariation.inReferenceFrame) 
+                {
+                    g.transform.GetChild(0).localScale = scale;
+                }
+                else 
+                {
+                    g.transform.localScale = scale;
+                }
                 //get position
                 Vector3 position = elementVariation.position;
                 //potentially randomize position
-                if (elementVariation.overwriteProperties.position && overwriteThis)
+                if (elementVariation.overwriteProperties.position && (overwriteThis || parentOverwrite))
                 {
-                    position = multiplyVectors(position, elementVariation.RandomVector3(elementVariation.phaseSeed, i, elementVariation.numberOfObjects));
+                    position = multiplyVectors(position, elementVariation.RandomVector3(elementVariation.phaseSeed, elementVariation.iterator, elementVariation.numberOfObjects));
                 }
                 //potentially randomize spawnSpacing
                 Vector3 spawnSpacing = elementVariation.spawnSpacing;
-                if (elementVariation.overwriteProperties.spawnSpacing && overwriteThis)
+                if (elementVariation.overwriteProperties.spawnSpacing && (overwriteThis || parentOverwrite))
                 {
-                    spawnSpacing = multiplyVectors(spawnSpacing, elementVariation.RandomVector3(elementVariation.phaseSeed, i, elementVariation.numberOfObjects));
+                    spawnSpacing = multiplyVectors(spawnSpacing, elementVariation.RandomVector3(elementVariation.phaseSeed, elementVariation.iterator, elementVariation.numberOfObjects));
                 }
                 //set position
                 g.transform.position = transform.TransformPoint(spawnSpacing * i) + position;
@@ -182,19 +240,30 @@ public class ObjectSpawnSystem : MonoBehaviour
                 //get rotation
                 Vector3 rotation = transform.TransformVector(elementVariation.rotation);
                 //potentially randomize rotation
-                if (elementVariation.overwriteProperties.rotation && overwriteThis)
+                if (elementVariation.overwriteProperties.rotation && (overwriteThis || parentOverwrite))
                 {
-                    rotation += multiplyVectors(rotation, elementVariation.RandomVector3(elementVariation.phaseSeed, i, elementVariation.numberOfObjects));
+                    rotation += multiplyVectors(rotation, elementVariation.RandomVector3(elementVariation.phaseSeed, elementVariation.iterator, elementVariation.numberOfObjects));
                 }
                 //set rotation
                 g.transform.eulerAngles = rotation;
                 
                 //calculate potentially random color
-                Vector4 color = elementVariation.RandomVector4(elementVariation.phaseSeed, i, elementVariation.numberOfObjects);
+                Vector4 color = elementVariation.RandomVector4(elementVariation.phaseSeed, elementVariation.iterator, elementVariation.numberOfObjects);
                 //potentially set random color
-                if (elementVariation.overwriteProperties.color && overwriteThis)
+                if (elementVariation.overwriteProperties.color && (overwriteThis || parentOverwrite))
                 {
-                    g.GetComponent<SpriteRenderer>().color = color;
+                    if (elementVariation.overwriteProperties.randomizeChild && elementVariation.inReferenceFrame) 
+                    {
+                        g.transform.GetChild(0).GetChild(elementVariation.overwriteProperties.childIndex).gameObject.GetComponent<SpriteRenderer>().color = color;
+                    }
+                    else if (elementVariation.overwriteProperties.randomizeChild && (!elementVariation.inReferenceFrame))
+                    {
+                        g.transform.GetChild(elementVariation.overwriteProperties.childIndex).gameObject.GetComponent<SpriteRenderer>().color = color;
+                    }
+                    else
+                    {
+                        g.GetComponent<SpriteRenderer>().color = color;
+                    }
                 }
                 
                 
