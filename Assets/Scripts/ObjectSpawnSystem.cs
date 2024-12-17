@@ -19,13 +19,14 @@ public class ObjectSpawnSystem : MonoBehaviour
 
     [SerializeField] GameObject element;
     [SerializeField] GameObject player;
+    [SerializeField] GameObject popBackController;
     [SerializeField] Vector3 playerInitialPosition;
-    [SerializeField] GameObject virtualCamera;
-    [SerializeField] ElementVariation elementVariation;
-    bool popBack = false;
+    //[SerializeField] GameObject depthController;
+    public ElementVariation elementVariation;
+    [NonSerialized] public bool popBack = false;
 
     [Serializable]
-    struct ElementVariation
+    public struct ElementVariation
     {
         public int numberOfObjects;
         [Header("Pop Back Settings")]
@@ -36,9 +37,11 @@ public class ObjectSpawnSystem : MonoBehaviour
         //public bool animateOnTrigger;
         //public TransformAnimation transformAnimations;
         [NonSerialized] public Vector3 popBackAtLastPosition;
+        [NonSerialized] public Transform popBackTransform;
         [Header("Wave \"Randomization\" Properties")]
         public float phaseSeed;
         public float randomizationCycleFrequency;
+        public float seedJump;
         public Randomizable overwriteProperties;
         [NonSerialized] public int iterator;
         [Header("Reference Frame Object?")]
@@ -78,16 +81,18 @@ public class ObjectSpawnSystem : MonoBehaviour
             return base.GetHashCode();
         }
     }
-    //[Serializable]
-    //public struct TransformAnimation 
+    //private void ResetBlueShift(Color randomColor, ref GameObject gameObject)
     //{
-
+    //    if (gameObject.GetComponent<BlueShift>() != null) 
+    //    {
+    //        gameObject.GetComponent<SpriteRenderer>().color = gameObject.GetComponent<BlueShift>().
+    //    }
     //}
 
     [Serializable]
     public enum OverwriteType { This, Object, Downward, Parent }
     [Serializable]
-    struct Randomizable
+    public struct Randomizable
     {
         
         public OverwriteType type;
@@ -99,6 +104,7 @@ public class ObjectSpawnSystem : MonoBehaviour
         public bool position;
         public bool rotation;
         public bool scale;
+        public bool other; 
     }
     Vector3 multiplyVectors(Vector3 a, Vector3 b)
     {
@@ -116,7 +122,7 @@ public class ObjectSpawnSystem : MonoBehaviour
         {
             if (popBack)
             {
-                elementVariation.phaseSeed += Mathf.PI;
+                elementVariation.phaseSeed += elementVariation.seedJump;
             }
             if (transform.childCount != 0 || popBack)
             {
@@ -201,6 +207,11 @@ public class ObjectSpawnSystem : MonoBehaviour
                 }
                 //set name
                 g.name = gameObject.name + "_" + i;
+                //set depth illusion for blue shift objects
+                if (gameObject.GetComponent<DepthIllusion>() != null && g.GetComponent<BlueShift>() != null) 
+                {
+                    g.GetComponent<BlueShift>().depthController = gameObject;
+                }
                 //get scale
                 Vector3 scale = elementVariation.scale;
                 //potentially randomize scale
@@ -236,6 +247,7 @@ public class ObjectSpawnSystem : MonoBehaviour
                 if (player != null && i == elementVariation.numberOfObjects - elementVariation.popBackAtLast) 
                 {
                     elementVariation.popBackAtLastPosition = g.transform.position;
+                    elementVariation.popBackTransform = g.transform;
                 }
                 //get rotation
                 Vector3 rotation = transform.TransformVector(elementVariation.rotation);
@@ -249,6 +261,8 @@ public class ObjectSpawnSystem : MonoBehaviour
                 
                 //calculate potentially random color
                 Vector4 color = elementVariation.RandomVector4(elementVariation.phaseSeed, elementVariation.iterator, elementVariation.numberOfObjects);
+                //reset blue shift to potential randomized color
+                
                 //potentially set random color
                 if (elementVariation.overwriteProperties.color && (overwriteThis || parentOverwrite))
                 {
@@ -287,17 +301,30 @@ public class ObjectSpawnSystem : MonoBehaviour
     void Update()
     {
         popBack = false;
-        if (player != null && elementVariation.popBackAtLastPosition.x - player.transform.position.x
-            <= elementVariation.popBackProximity) //then pop back
+        if (elementVariation.popBackTransform != null)
         {
-            popBack = true;
-            Vector3 velocity = player.GetComponent<Rigidbody2D>().velocity;
-            player.GetComponent<FlightControl>().enabled = false;
-            Vector3 newPosition = player.transform.position;
-            newPosition.x = playerInitialPosition.x;
-            player.transform.position = newPosition;
-            player.GetComponent<Rigidbody2D>().velocity = velocity;
-            player.GetComponent<FlightControl>().enabled = true;
+            if (player != null && elementVariation.popBackTransform.position.x - player.transform.position.x
+                <= elementVariation.popBackProximity) //then pop back
+            {
+                popBack = true;
+                Vector3 velocity = player.GetComponent<Rigidbody2D>().velocity;
+                player.GetComponent<FlightControl>().enabled = false;
+                Vector3 newPosition = player.transform.position;
+                newPosition.x = playerInitialPosition.x;
+                player.transform.position = newPosition;
+                player.GetComponent<Rigidbody2D>().velocity = velocity;
+                player.GetComponent<FlightControl>().enabled = true;
+            }
+        }
+        //if this system does not issue popBack, check for popBack.
+        bool externalPopBackSetup = player == null && popBackController != null;
+        if (externalPopBackSetup) 
+        {
+            if (popBackController.GetComponent<ObjectSpawnSystem>().popBack) 
+            {
+                popBack = true;
+            }
+            
         }
     }
 }

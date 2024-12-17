@@ -367,7 +367,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6625ecd8af2f23743a47b8df52b79a8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wind: {x: -4, y: 0}
+  wind: {x: -10, y: 0}
 --- !u!1 &4835545514155881514
 GameObject:
   m_ObjectHideFlags: 0
@@ -379,6 +379,7 @@ GameObject:
   - component: {fileID: 4835545514155881515}
   - component: {fileID: 4835545514155881508}
   - component: {fileID: 4835545514155881509}
+  - component: {fileID: 4751555629644513424}
   m_Layer: 0
   m_Name: Test Car
   m_TagString: Untagged
@@ -452,3 +453,18 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 11.668999, y: 7.607815}
   m_EdgeRadius: 0
+--- !u!114 &4751555629644513424
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4835545514155881514}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c661ff44a6a28604e9b2ba729293c282, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 4835545514155881508}
+  multiplier: 3
+  propertyName: speed

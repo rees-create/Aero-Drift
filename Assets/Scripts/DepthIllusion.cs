@@ -5,15 +5,23 @@ using UnityEngine;
 
 public class DepthIllusion : MonoBehaviour
 {
-    public GameObject player;
-    Rigidbody playerRigidbody;
-    public float horizon;
-    public float depth;
-    public float speedFraction;
+    [SerializeField] GameObject player;
+    Rigidbody2D playerRigidbody;
+    Vector3 initialPosition;
+    [SerializeField] GameObject popBackController;
+    [SerializeField] float horizon;
+    [SerializeField] float depth;
+    [SerializeField] float parallaxFraction;
+    [SerializeField] Color absoluteBlue;
 
-    void follow(Vector3 playerVelocity, float speedFraction) 
+    void Follow(Vector3 playerVelocity, float speedFraction) 
     {
         gameObject.transform.position += Time.deltaTime * speedFraction * playerVelocity;
+    }
+    public Vector4 ShiftBlue(Vector4 color) 
+    {
+        
+        return Vector4.Lerp(color, absoluteBlue, parallaxFraction);
     }
 
     // Start is called before the first frame update
@@ -21,13 +29,23 @@ public class DepthIllusion : MonoBehaviour
     {
         float horizonFraction = depth / horizon;
         float deg90 = Mathf.PI / 2;
-        speedFraction = Mathf.Tan(deg90 * horizonFraction);
-        playerRigidbody = player.GetComponent<Rigidbody>();
+        parallaxFraction = Mathf.Tan(deg90 * horizonFraction);
+        playerRigidbody = player.GetComponent<Rigidbody2D>();
+
+        initialPosition = transform.position;
     }
 
     // Update is called once per frame
     void Update()
     {
-        follow(playerRigidbody.velocity, speedFraction);
+        if (!popBackController.GetComponent<ObjectSpawnSystem>().popBack)
+        {
+            Follow(playerRigidbody.velocity, parallaxFraction);
+        }
+        else 
+        {
+            //pop back
+            transform.position = initialPosition;
+        }
     }
 }
