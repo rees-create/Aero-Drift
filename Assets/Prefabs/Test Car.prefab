@@ -466,5 +466,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 4835545514155881508}
-  multiplier: 3
+  speedMultiplier: 3
   propertyName: speed
+  animationClipName: xAcrossScene
+  bounceInfluence: 1

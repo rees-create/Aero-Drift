@@ -1,30 +1,62 @@
 using JetBrains.Annotations;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class AnimationRandomizer : MonoBehaviour
 {
     public Animator animator;
-    public float multiplier;
+    public float animDuration;
+    public float speedMultiplier;
+    public float minSpeed;
     public string propertyName;
+    public string animationClipName;
+    public bool bounceInfluence;
+    [NonSerialized] public float seed;
+    GameObject spawner;
     //ObjectSpawnSystem randomizer;
     // Start is called before the first frame update
-    IEnumerator SpawnLoop(GameObject spawner) 
+    IEnumerator SpawnLoop() 
     {
-        
+        float seedJump = spawner.GetComponent<ObjectSpawnSystem>().elementVariation.seedJump;
+        seed = spawner.GetComponent<ObjectSpawnSystem>().elementVariation.phaseSeed;
+        ObjectSpawnSystem spawnSystem = spawner.GetComponent<ObjectSpawnSystem>();
+      
         while (true) 
         {
-            ObjectSpawnSystem spawnSystem = spawner.GetComponent<ObjectSpawnSystem>();
-            float seed = spawnSystem.elementVariation.phaseSeed;
+             
             float numberOfObjects = spawnSystem.elementVariation.numberOfObjects;
             float index = GetIndex(gameObject);
             float rand = spawnSystem.elementVariation.rand(seed, index, numberOfObjects);
-            animator.SetFloat(propertyName, multiplier * rand);
-            Debug.Log($"{index} speed = {multiplier * rand}");
-            yield return new WaitUntil(() => spawnSystem.popBack || );
+            float speed = speedMultiplier * rand;
+            animator.SetFloat(propertyName, speed);
+            // on cycle refresh we have the new seed yay :))
+            if (bounceInfluence)
+            {
+                spawner.GetComponent<ObjectSpawnSystem>().elementVariation.InitiateSeedJump(this);
+            }
+            animDuration = GetAnimClipDuration(animationClipName) / (speed + minSpeed);
+            Debug.Log($"{index} speed = {speed} animator duration = {animDuration} seed = {spawner.GetComponent<ObjectSpawnSystem>().elementVariation.phaseSeed}");
+            yield return new WaitForSeconds(animDuration);
+            //yield return new WaitUntil(() => spawnSystem.popBack);
+            seed += seedJump;
         }
+    }
+
+    float GetAnimClipDuration(string name) 
+    {
+        AnimationClip[] clips = animator.runtimeAnimatorController.animationClips;
+        foreach (AnimationClip clip in clips) 
+        {
+            if (clip.name == name) 
+            {
+                return clip.length;
+            }
+        }
+        return float.PositiveInfinity; //yea make it basically wait forever
     }
     
     GameObject GetObjectSpawnSystem(GameObject start) 
@@ -72,8 +104,8 @@ public class AnimationRandomizer : MonoBehaviour
     }
     void Start()
     {
-        
-        StartCoroutine(SpawnLoop(GetObjectSpawnSystem(gameObject)));
+        spawner = GetObjectSpawnSystem(gameObject);
+        StartCoroutine(SpawnLoop());
     }
 
     // Update is called once per frame

@@ -24,6 +24,7 @@ public class ObjectSpawnSystem : MonoBehaviour
     //[SerializeField] GameObject depthController;
     public ElementVariation elementVariation;
     [NonSerialized] public bool popBack = false;
+    
 
     [Serializable]
     public struct ElementVariation
@@ -51,8 +52,13 @@ public class ObjectSpawnSystem : MonoBehaviour
         public Vector3 position;
         public Vector3 rotation;
         public Vector3 scale;
-        
+        [NonSerialized] public bool animationRandomizerRequest;
 
+        public void InitiateSeedJump(AnimationRandomizer randomizer) 
+        {
+            //this.phaseSeed = phaseSeed;
+            animationRandomizerRequest = true;
+        }
         public float rand(float seed, float index, float numberOfObjects) 
         {
             float frequency = randomizationCycleFrequency;
@@ -138,10 +144,13 @@ public class ObjectSpawnSystem : MonoBehaviour
                 }
                 
             }
+            AnimationRandomizer minAnim = default;
+            float minAnimDuration = 0;
+            int minAnimDurationIndex = 0;
             //spawn objects
             for (int i = 0; i < elementVariation.numberOfObjects; i++)
             {
-
+                
                 //initialize overwrite conditions
                 bool parentOverwrite = elementVariation.overwriteProperties.type == OverwriteType.Parent;
                 bool overwriteDownward = elementVariation.overwriteProperties.type == OverwriteType.Downward;
@@ -190,6 +199,18 @@ public class ObjectSpawnSystem : MonoBehaviour
                         shouldISpawn = false;
                     }
                 }
+                // Hold on a bit: if intended object has AnimationRandomizer, listen for the shortest duration 
+                if (elementVariation.animationRandomizerRequest)
+                {
+                    if (i == 0 || g.GetComponent<AnimationRandomizer>().animDuration < minAnimDuration)
+                    {
+                        minAnimDuration = g.GetComponent<AnimationRandomizer>().animDuration;
+                        minAnim = g.GetComponent<AnimationRandomizer>();
+                        minAnimDurationIndex = i;
+                    }
+                }
+
+
                 if (shouldISpawn && elementVariation.inReferenceFrame) 
                 {
                     GameObject parent = new GameObject();
@@ -282,6 +303,17 @@ public class ObjectSpawnSystem : MonoBehaviour
                 
                 
             }
+            
+            if (elementVariation.animationRandomizerRequest) 
+            {
+                if (minAnim.seed != elementVariation.phaseSeed) 
+                {
+                    elementVariation.phaseSeed = minAnim.seed;
+                    Debug.Log($"phaseSeed = {elementVariation.phaseSeed}");
+                }  
+            }
+            
+
             ElementVariation oldElementVariation = elementVariation;
             yield return new WaitUntil(() => popBack || !elementVariation.Equals(oldElementVariation));
         }
