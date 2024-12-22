@@ -367,7 +367,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6625ecd8af2f23743a47b8df52b79a8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wind: {x: -10, y: 0}
+  wind: {x: -30, y: 0}
 --- !u!1 &4835545514155881514
 GameObject:
   m_ObjectHideFlags: 0
@@ -466,7 +466,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 4835545514155881508}
+  animDuration: 0
   speedMultiplier: 3
+  minSpeed: 1
   propertyName: speed
   animationClipName: xAcrossScene
   bounceInfluence: 1

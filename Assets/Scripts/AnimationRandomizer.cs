@@ -17,33 +17,34 @@ public class AnimationRandomizer : MonoBehaviour
     public bool bounceInfluence;
     [NonSerialized] public float seed;
     GameObject spawner;
+    //bool coroutineRunning;
     //ObjectSpawnSystem randomizer;
     // Start is called before the first frame update
     IEnumerator SpawnLoop() 
     {
-        float seedJump = spawner.GetComponent<ObjectSpawnSystem>().elementVariation.seedJump;
+        //coroutineRunning = true;
+        //float seedJump = spawner.GetComponent<ObjectSpawnSystem>().elementVariation.seedJump;
         seed = spawner.GetComponent<ObjectSpawnSystem>().elementVariation.phaseSeed;
         ObjectSpawnSystem spawnSystem = spawner.GetComponent<ObjectSpawnSystem>();
-      
+        //seed += seedJump;
+
         while (true) 
         {
-             
+            //coroutineRunning = true;
             float numberOfObjects = spawnSystem.elementVariation.numberOfObjects;
             float index = GetIndex(gameObject);
             float rand = spawnSystem.elementVariation.rand(seed, index, numberOfObjects);
             float speed = speedMultiplier * rand;
             animator.SetFloat(propertyName, speed);
             // on cycle refresh we have the new seed yay :))
-            if (bounceInfluence)
-            {
-                spawner.GetComponent<ObjectSpawnSystem>().elementVariation.InitiateSeedJump(this);
-            }
-            animDuration = GetAnimClipDuration(animationClipName) / (speed + minSpeed);
-            Debug.Log($"{index} speed = {speed} animator duration = {animDuration} seed = {spawner.GetComponent<ObjectSpawnSystem>().elementVariation.phaseSeed}");
+            
+            animDuration = (GetAnimClipDuration(animationClipName) / speed) + minSpeed;
+            //Debug.Log($"{index} speed = {speed} animator duration = {animDuration} seed = {spawner.GetComponent<ObjectSpawnSystem>().elementVariation.phaseSeed}");
             yield return new WaitForSeconds(animDuration);
             //yield return new WaitUntil(() => spawnSystem.popBack);
-            seed += seedJump;
+            //coroutineRunning = false;    
         }
+
     }
 
     float GetAnimClipDuration(string name) 
@@ -111,6 +112,9 @@ public class AnimationRandomizer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        //if (bounceInfluence && !coroutineRunning)
+        //{
+        //    spawner.GetComponent<ObjectSpawnSystem>().CountResetRequest();
+        //}
     }
 }
