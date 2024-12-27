@@ -28,12 +28,13 @@ public class FlightControl : MonoBehaviour
     [SerializeField] float flapInfluence;
     [SerializeField] bool flapsDirectlyIncreaseLift;
     [Header("Impulse")]
-    public float initialThrowImpulse;
+    public Vector2 initialThrowImpulse;
     [Header("Plane Specifications")]
     public TextAsset planeSpecsFile;
     public int planeIndex;
     [Header("Exploding Force Guard")]
     [SerializeField] float maxAllowedDifferential;
+    [SerializeField] float tangentialVelocityDivisor = 9.8f;
 
     [System.Serializable]
     struct Range {
@@ -173,7 +174,7 @@ public class FlightControl : MonoBehaviour
         float chordSign = acrossChord / Mathf.Abs(acrossChord);
         Vector2 tangentialVelocity = new Vector2(0, rb.angularVelocity * Mathf.Deg2Rad * chordLength * chordSign);
 
-        Vector2 airspeed = rb.velocity + wind - (tangentialVelocity * (1 / 9.8f));
+        Vector2 airspeed = rb.velocity + wind - (tangentialVelocity * (1 / tangentialVelocityDivisor));
         if (rb.velocity.magnitude > 0)
         {
             Vector2 localVelocity = transform.InverseTransformDirection(airspeed);
@@ -290,7 +291,7 @@ public class FlightControl : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         plane = ReadPlaneData(planeIndex);
         rb.centerOfMass = centerOfMass;
-        rb.AddForce(transform.TransformDirection(new Vector2(initialThrowImpulse, 0)), ForceMode2D.Impulse);
+        rb.AddForce(initialThrowImpulse, ForceMode2D.Impulse);
 
     }
     private void OnDrawGizmos()
