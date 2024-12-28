@@ -7,20 +7,33 @@ using UnityEngine.UIElements;
 
 public class Thrower : MonoBehaviour
 {
+    [Header("Game Objects")]
     public GameObject plane;
     public GameObject dash;
+    public GameObject bait;
+    [Header("Animation Properties")]
+    public Animator animator;
+    [SerializeField] float minFollowWaitTime;
+    public string animationName;
+    public string triggerName;
+    [Header("Throw Dash Settings")]
     public Vector3 dashScale;
     public float dashQuotient;
     [System.NonSerialized] public GameObject dashes;
+    [Header("Throw Intensity")]
+    public float maxThrowIntensity;
+
     Vector3 pointerPosition;
     Vector3 pointerWorldPosition;
-    public float maxThrowIntensity;
+    
     bool thrown = false;
+    bool follow = false;
     Vector2 throwVector;
     Vector3 initPlaneRotation;
 
     int nDashes = 0;
-
+    Vector3 oldBaitPosition;
+    
     void MakeDashes(float throwLineLength, Vector3 mousePosition) 
     {
         //This is intended to be used in Update, so make sure to do if checks before running things.
@@ -72,7 +85,19 @@ public class Thrower : MonoBehaviour
         //print($"numberOfDashes: {numberOfDashes}, diff = {diff} plane position: {plane.transform.position}");
 
     }
-    
+    void Follow()
+    {
+        //Vector3 plane2Bait = plane.transform.position - bait.transform.position;
+        Vector3 newBaitPosition = transform.TransformPoint(bait.transform.position);
+        if (oldBaitPosition != default)
+        {
+            plane.transform.position += newBaitPosition - oldBaitPosition;
+        }
+        //print($"oldBaitPosition: {oldBaitPosition}, newBaitPosition = {newBaitPosition}, diff = {newBaitPosition - oldBaitPosition}");
+        oldBaitPosition = newBaitPosition;
+        
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -94,17 +119,66 @@ public class Thrower : MonoBehaviour
             throwVector = plane.transform.position - pointerWorldPosition;
             float throwIntensity = throwVector.magnitude;
             //throwVector /= throwVector.magnitude;
-       
             MakeDashes(throwIntensity, pointerWorldPosition);
         }
+        if (follow) 
+        {
+            Follow();
+        }
     }
-
-    private void OnMouseDown()
+    IEnumerator PlayAnimation() 
+    {
+        //get clip duration
+        AnimationClip[] clips = animator.runtimeAnimatorController.animationClips;
+        float duration = 0;
+        for (int i = 0; i < clips.Length; i++) 
+        {
+            AnimationClip cl = clips[i];
+            if (cl.name == animationName) 
+            {
+                duration = cl.length;
+                break;
+            }
+        }
+        //play animation, toggle follow
+        animator.SetTrigger(triggerName);
+        follow = true;
+        yield return new WaitForSeconds(duration);
+        follow = false;
+    }
+    
+    IEnumerator OnMouseDown()
     {
         //Debug.Log($"throwVector: {throwVector}, magnitude: {throwVector.magnitude}");
         thrown = true;
+        //play animation if there is a bait (animated object to follow)
+        if (bait != null && animator != null && animationName != null && triggerName != null) 
+        {
+            //StartCoroutine(PlayAnimation());
+
+            //get clip duration
+            AnimationClip[] clips = animator.runtimeAnimatorController.animationClips;
+            float duration = 0;
+            for (int i = 0; i < clips.Length; i++)
+            {
+                AnimationClip cl = clips[i];
+                if (cl.name == animationName)
+                {
+                    duration = cl.length > minFollowWaitTime ? cl.length : minFollowWaitTime;
+                    break;
+                }
+            }
+            //play animation, toggle follow
+            animator.SetTrigger(triggerName);
+            follow = true;
+            yield return new WaitForSeconds(duration);
+            follow = false;
+        }
+        //launch plane
+        
         plane.GetComponent<Rigidbody2D>().gravityScale = 1;
         plane.GetComponent<FlightControl>().enabled = true;
+        print("ready for launch");
         
         if (throwVector.magnitude < maxThrowIntensity)
         {
