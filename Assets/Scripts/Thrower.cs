@@ -30,9 +30,11 @@ public class Thrower : MonoBehaviour
     bool follow = false;
     Vector2 throwVector;
     Vector3 initPlaneRotation;
+    float throwNormalizedTime;
 
     int nDashes = 0;
     Vector3 oldBaitPosition;
+    
     
     void MakeDashes(float throwLineLength, Vector3 mousePosition) 
     {
@@ -125,6 +127,8 @@ public class Thrower : MonoBehaviour
         {
             Follow();
         }
+        throwNormalizedTime = animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
+        print(throwNormalizedTime);
     }
     IEnumerator PlayAnimation() 
     {
@@ -142,6 +146,7 @@ public class Thrower : MonoBehaviour
         }
         //play animation, toggle follow
         animator.SetTrigger(triggerName);
+        
         follow = true;
         yield return new WaitForSeconds(duration);
         follow = false;
@@ -159,19 +164,23 @@ public class Thrower : MonoBehaviour
             //get clip duration
             AnimationClip[] clips = animator.runtimeAnimatorController.animationClips;
             float duration = 0;
+            //int index = 0;
             for (int i = 0; i < clips.Length; i++)
             {
                 AnimationClip cl = clips[i];
                 if (cl.name == animationName)
                 {
                     duration = cl.length > minFollowWaitTime ? cl.length : minFollowWaitTime;
+                    //index = i;
                     break;
                 }
             }
             //play animation, toggle follow
             animator.SetTrigger(triggerName);
+            
+            //yield return new WaitUntil(()=> animator.GetBool(triggerName) == true);
             follow = true;
-            yield return new WaitForSeconds(duration);
+            yield return new WaitUntil(()=> throwNormalizedTime >= 1);
             follow = false;
         }
         //launch plane
