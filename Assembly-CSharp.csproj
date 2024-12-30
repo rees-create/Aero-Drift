@@ -72,6 +72,7 @@
     <Compile Include="Assets\Scripts\FlightControl.cs" />
     <Compile Include="Assets\Scripts\SceneTransitionControl.cs" />
     <Compile Include="Assets\Scripts\ActionRandomizer.cs" />
+    <Compile Include="Assets\Scripts\Collectible.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

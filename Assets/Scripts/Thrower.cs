@@ -30,8 +30,13 @@ public class Thrower : MonoBehaviour
     bool follow = false;
     Vector2 throwVector;
     Vector3 initPlaneRotation;
-    float throwNormalizedTime;
 
+    float[] throwNormalizedTimes = new float[2];
+    int diffSwitch = 0;
+    bool throwNormalizedTimeReady = false;
+    float throwNormalizedTime;
+    float duration;
+    
     int nDashes = 0;
     Vector3 oldBaitPosition;
     
@@ -49,13 +54,10 @@ public class Thrower : MonoBehaviour
         { //less dashes
             for (int i = 0; i < Mathf.Abs(diff); i++) 
             {
-                //print($"delete at index {i}, childCount: {dashes.transform.childCount}");
                 Destroy(dashes.transform.GetChild(i).gameObject);
                 nDashes--;
                 diff++;
             }
-            //nDashes -= diff;
-            //print($"nDashes = {nDashes}");
         }
         else if (diff > 0 && nDashes < 75) 
         { //more dashes
@@ -63,7 +65,6 @@ public class Thrower : MonoBehaviour
             for (int i = 0; i < diff; i++) 
             {
                 float lerpFraction = numberOfDashes != 0 ? (float) (i + initChildCount) / (float) numberOfDashes : 1f;
-                //print($"lerpFraction: {lerpFraction} diff: {diff} i = {i} numberOfDashes: {numberOfDashes}");
                 GameObject _dash = Instantiate(dash, dashes.transform);
                 _dash.transform.position = Vector2.Lerp(plane.transform.position, mousePosition, lerpFraction);
                 _dash.transform.eulerAngles = currentRotation;
@@ -71,7 +72,6 @@ public class Thrower : MonoBehaviour
                 nDashes++;
                 diff--;
             }
-            //nDashes += diff;
             
         }
         if (nDashes > 0) 
@@ -81,21 +81,17 @@ public class Thrower : MonoBehaviour
                 float lerpFraction = numberOfDashes != 0 ? (float) i / (float) numberOfDashes : 1f;
                 dashes.transform.GetChild(i).position = Vector2.Lerp(plane.transform.position, mousePosition, lerpFraction);
                 dashes.transform.GetChild(i).eulerAngles = currentRotation;
-                //print($"lerpFraction: {lerpFraction} diff: {diff} i = {i} numberOfDashes: {numberOfDashes} position: {dashes.transform.GetChild(i).position}");
             }
         }
-        //print($"numberOfDashes: {numberOfDashes}, diff = {diff} plane position: {plane.transform.position}");
 
     }
     void Follow()
     {
-        //Vector3 plane2Bait = plane.transform.position - bait.transform.position;
         Vector3 newBaitPosition = transform.TransformPoint(bait.transform.position);
         if (oldBaitPosition != default)
         {
             plane.transform.position += newBaitPosition - oldBaitPosition;
         }
-        //print($"oldBaitPosition: {oldBaitPosition}, newBaitPosition = {newBaitPosition}, diff = {newBaitPosition - oldBaitPosition}");
         oldBaitPosition = newBaitPosition;
         
     }
@@ -103,91 +99,72 @@ public class Thrower : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //disable physics, make plane face dashes
         dashes = new GameObject ("Throw Dashes");
         dashes.transform.parent = transform;
         plane.GetComponent<FlightControl>().enabled = false;
         plane.GetComponent<Rigidbody2D>().gravityScale = 0;
         initPlaneRotation = plane.transform.eulerAngles;
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        if (!thrown)
-        {
-            pointerPosition = Input.mousePosition;
-            //float throwLineRotation = Mathf.Atan
-            pointerWorldPosition = Camera.main.ScreenToWorldPoint(pointerPosition);
-            throwVector = plane.transform.position - pointerWorldPosition;
-            float throwIntensity = throwVector.magnitude;
-            //throwVector /= throwVector.magnitude;
-            MakeDashes(throwIntensity, pointerWorldPosition);
-        }
-        if (follow) 
-        {
-            Follow();
-        }
-        throwNormalizedTime = animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
-        print(throwNormalizedTime);
-    }
-    IEnumerator PlayAnimation() 
-    {
         //get clip duration
         AnimationClip[] clips = animator.runtimeAnimatorController.animationClips;
-        float duration = 0;
-        for (int i = 0; i < clips.Length; i++) 
+        for (int i = 0; i < clips.Length; i++)
         {
             AnimationClip cl = clips[i];
-            if (cl.name == animationName) 
+            if (cl.name == animationName)
             {
                 duration = cl.length;
                 break;
             }
         }
-        //play animation, toggle follow
-        animator.SetTrigger(triggerName);
-        
-        follow = true;
-        yield return new WaitForSeconds(duration);
-        follow = false;
     }
+
+    // Update is called once per frame
+    void Update()
+    {
+        diffSwitch = (diffSwitch + 1) % 2;
+        throwNormalizedTimes[diffSwitch] = animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
+        throwNormalizedTime = throwNormalizedTimes[diffSwitch];
+        if (!thrown)
+        {
+            pointerPosition = Input.mousePosition;
+            pointerWorldPosition = Camera.main.ScreenToWorldPoint(pointerPosition);
+            throwVector = plane.transform.position - pointerWorldPosition;
+            float throwIntensity = throwVector.magnitude;
+            MakeDashes(throwIntensity, pointerWorldPosition);
+        }
+        else
+        {
+            if (Mathf.Abs(throwNormalizedTimes[0] - throwNormalizedTimes[1]) * duration > 2.5 * Time.deltaTime)
+            {
+                throwNormalizedTimeReady = true;
+            }
+        }
+        
+        if (follow) 
+        {
+            Follow();
+        }
+        
+    }
+    
     
     IEnumerator OnMouseDown()
     {
-        //Debug.Log($"throwVector: {throwVector}, magnitude: {throwVector.magnitude}");
+        
         thrown = true;
         //play animation if there is a bait (animated object to follow)
-        if (bait != null && animator != null && animationName != null && triggerName != null) 
-        {
-            //StartCoroutine(PlayAnimation());
-
-            //get clip duration
-            AnimationClip[] clips = animator.runtimeAnimatorController.animationClips;
-            float duration = 0;
-            //int index = 0;
-            for (int i = 0; i < clips.Length; i++)
-            {
-                AnimationClip cl = clips[i];
-                if (cl.name == animationName)
-                {
-                    duration = cl.length > minFollowWaitTime ? cl.length : minFollowWaitTime;
-                    //index = i;
-                    break;
-                }
-            }
+        if (bait != null && animator != null && animationName != null && triggerName != null)
+        { 
             //play animation, toggle follow
             animator.SetTrigger(triggerName);
-            
-            //yield return new WaitUntil(()=> animator.GetBool(triggerName) == true);
             follow = true;
-            yield return new WaitUntil(()=> throwNormalizedTime >= 1);
+            yield return new WaitUntil(()=> throwNormalizedTimeReady && throwNormalizedTime >= 1);
             follow = false;
         }
         //launch plane
-        
         plane.GetComponent<Rigidbody2D>().gravityScale = 1;
         plane.GetComponent<FlightControl>().enabled = true;
-        print("ready for launch");
         
         if (throwVector.magnitude < maxThrowIntensity)
         {
@@ -199,6 +176,7 @@ public class Thrower : MonoBehaviour
             Vector2 throwDirection = throwVector / throwIntensity;
             plane.GetComponent<FlightControl>().initialThrowImpulse = -maxThrowIntensity * throwDirection;
         }
+
         Destroy(dashes);
     }
 }
