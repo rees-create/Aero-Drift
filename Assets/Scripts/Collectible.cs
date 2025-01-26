@@ -11,6 +11,7 @@ public class Collectible : MonoBehaviour
     // Start is called before the first frame update
     //TODO: Sync your recent commit when you get home.
     public string triggerName;
+    public bool inReferenceFrame;
     public string animationName;
     [System.NonSerialized] GameObject plane;
     [SerializeField] float followSpeed;
@@ -46,7 +47,14 @@ public class Collectible : MonoBehaviour
         Vector3 newBaitPosition = plane.transform.position;
         if (oldBaitPosition != default)
         {
-            transform.position += (newBaitPosition - oldBaitPosition) * followSpeed;
+            if (inReferenceFrame)
+            {
+                transform.parent.position += (newBaitPosition - oldBaitPosition) * followSpeed;
+            }
+            else 
+            { 
+                transform.position += (newBaitPosition - oldBaitPosition) * followSpeed;
+            }
         }
         oldBaitPosition = newBaitPosition;
 
@@ -60,7 +68,14 @@ public class Collectible : MonoBehaviour
             follow = true;
             yield return new WaitUntil(()=> animationReady && animationTime >= 1);
             follow = false;
-            Destroy(gameObject);
+            if (inReferenceFrame)
+            {
+                Destroy(gameObject.transform.parent.gameObject);
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
         }
     }
     

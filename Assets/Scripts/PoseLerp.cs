@@ -1,0 +1,226 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEditor.ShaderGraph.Internal;
+using UnityEngine;
+using UnityEngine.Rendering;
+using static PoseLerp;
+
+[ExecuteInEditMode]
+public class PoseLerp : MonoBehaviour
+{
+    //public List<bool> listenTo = new List<bool>();
+    public PoseSequenceManager poseSequenceManager;
+    public float lerpValue; // Other scripts should set this value as they see fit e.g Thrower can set 
+    //lerpValue = throwIntensity * lerpValueRange
+    public float lerpValueRange; //change to regular variable and use in update
+
+    //private int currentCount = 0;
+    [Serializable]
+    public class Pose
+    {
+        public Vector3 position;
+        public Vector3 rotation;
+        public Vector3 scale;
+        //[NonSerialized] public GameObject gameObject;
+        public bool active = false;
+        //[NonSerialized] bool recording;
+        public Pose() 
+        {
+            
+        }
+        //public bool GetRecording() 
+        //{
+        //    return recording;
+        //}
+        //public void SetRecording(bool state) 
+        //{
+        //    recording = state;
+        //}
+        IEnumerator ListenForActive(float seconds, GameObject gameObject) 
+        {
+            while (true) { 
+                yield return new WaitUntil(()=> active);
+                this.position = gameObject.transform.position;
+                this.rotation = gameObject.transform.rotation.eulerAngles;
+                this.scale = gameObject.transform.localScale;
+                yield return new WaitForSeconds(seconds);
+            }
+        }
+        public Pose(Vector3 position, Vector3 rotation, Vector3 scale)
+        {
+            this.position = position;
+            this.rotation = rotation;
+            this.scale = scale;
+        }
+        public Pose(GameObject gameObject) 
+        {
+            this.position = gameObject.transform.position;
+            this.rotation = gameObject.transform.rotation.eulerAngles;
+            this.scale = gameObject.transform.localScale;
+        }
+        //Difference is that Record does not make a new GameObject, rather modifies current one.
+        public void Record(GameObject gameObject)
+        {
+            //StartCoroutine(ListenForActive(0.5f));
+            this.position = gameObject.transform.position;
+            this.rotation = gameObject.transform.rotation.eulerAngles;
+            this.scale = gameObject.transform.localScale;
+        }
+        public void Assign(GameObject gameObject)
+        {
+            gameObject.transform.position = this.position;
+            gameObject.transform.rotation = Quaternion.Euler(this.rotation);
+            gameObject.transform.localScale = this.scale;
+        }
+
+    }
+
+    public Pose LerpPose(Pose pose1, Pose pose2, float t)
+    {
+        Pose resultPose = new Pose();
+        resultPose.position = Vector3.Lerp(pose1.position, pose2.position, t);
+        resultPose.scale = Vector3.Lerp(pose1.scale, pose2.scale, t);
+        resultPose.rotation = new Vector3(Mathf.LerpAngle(pose1.rotation.x, pose2.rotation.x, t),
+                                          Mathf.LerpAngle(pose1.rotation.y, pose2.rotation.y, t),
+                                          Mathf.LerpAngle(pose1.rotation.z, pose2.rotation.z, t)
+        );
+        return resultPose;
+    }
+    [Serializable]
+    public class PoseSequence
+    {
+        public List<Pose> poses;
+        public GameObject gameObject;
+        public bool recording;
+        //public float recording;
+        public int AddPose() 
+        {
+            poses.Add(new Pose(gameObject));
+            return poses.Count;
+        }
+        public int RemovePose(Pose pose) 
+        {
+            poses.Remove(pose);
+            return poses.Count;
+        }
+        
+        public PoseSequence() { }
+        public PoseSequence(List<Pose> poses, GameObject gameObject)
+        {
+            this.poses = poses;
+            this.gameObject = gameObject;
+        }
+    }
+    [Serializable]
+    public class PoseSequenceManager
+    {
+        //public int numPoses; // this is for number of animation lerp steps.
+        //public int numPoseSequences; // this is for number of game objects that have pose sequences
+        public List<PoseSequence> poseSequences;
+        
+        public float AddPoseSequence(PoseSequence poseSequence)
+        {
+            poseSequences.Add(poseSequence);
+            return poseSequences.Count;
+        }
+        public float RemovePoseSequence(PoseSequence poseSequence)
+        {
+            poseSequences.Remove(poseSequence);
+
+            return poseSequences.Count;
+        }
+        public void BalancePoses() 
+        {
+            foreach (PoseSequence poseSequence in poseSequences) 
+            {
+                //poseSequence.poses.
+            }
+        }
+        public PoseSequenceManager(int numPoses, int numPoseSequences)
+        {
+            poseSequences = new List<PoseSequence>(numPoseSequences);
+            foreach (PoseSequence poseSequence in poseSequences)
+            {
+                for (int i = 0; i < numPoses; i++)
+                {
+                    poseSequences.Add(new PoseSequence());
+                }
+            }
+            
+        }
+    }
+
+    //IEnumerator RecordPoses() 
+    //{
+
+    //    foreach (PoseSequence poseSequence in poseSequenceManager.poseSequences)
+    //    {
+    //        for (int poseIdx = 0; poseIdx < poseSequence.poses.Count; poseIdx++)
+    //        {
+
+    //            if (poseSequence.poses[poseIdx].active)
+    //            {//if user tries editing, reset to previous state
+    //                poseSequence.poses[poseIdx] = new Pose(poseSequence.gameObject);
+    //            }
+    //        }
+    //    }
+    //}
+
+    // Start is called before the first frame update
+    void Start()
+    {
+
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        //if (currentCount != listenTo.Count) 
+        //{}
+        int notRecording = 0;
+        foreach (PoseSequence poseSequence in poseSequenceManager.poseSequences)
+        {
+            for (int poseIdx = 0; poseIdx < poseSequence.poses.Count; poseIdx++)
+            {
+
+                if (poseSequence.poses[poseIdx].active)
+                {
+                    //record pose
+                    poseSequence.recording = true;
+                    poseSequence.poses[poseIdx].Record(poseSequence.gameObject);
+                }
+                else 
+                {
+                    notRecording++;
+                }
+                
+            }
+
+            if (notRecording == poseSequence.poses.Count) { poseSequence.recording = false; }
+
+            if (!poseSequence.recording)
+            {
+                //set current transform property to pose lerp value
+                int lerpIdx = (int)Mathf.Floor(lerpValue);
+                float t = lerpValue - lerpIdx;
+                if (lerpValue < lerpValueRange) // if lerp value not at end of anim
+                {
+                    Pose pose = LerpPose(poseSequence.poses[lerpIdx], poseSequence.poses[lerpIdx + 1], t);
+                    pose.Assign(poseSequence.gameObject);
+                }
+                else if (lerpValue == lerpValueRange)
+                {
+                    Pose pose = poseSequence.poses[lerpIdx];
+                    pose.Assign(poseSequence.gameObject);
+                }
+            }
+        }
+
+        
+
+        // ensure lerp value range is number of poses.
+        lerpValueRange = poseSequenceManager.poseSequences[0].poses.Count - 1;
+    }
+}

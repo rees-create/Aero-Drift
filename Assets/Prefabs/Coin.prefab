@@ -29,7 +29,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2403379910876090659}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -158.71242, y: -9.825084, z: -10.048081}
+  m_LocalPosition: {x: -158.71242, y: -9.825084, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -101,8 +101,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   triggerName: start
+  inReferenceFrame: 1
   animationName: CoinAnimation
-  followSpeed: 0.9
+  followSpeed: 0.6
 --- !u!95 &4851035409312636517
 Animator:
   serializedVersion: 5
