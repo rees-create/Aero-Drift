@@ -11,6 +11,7 @@ public class Thrower : MonoBehaviour
     public GameObject plane;
     public GameObject dash;
     public GameObject bait;
+    public GameObject player; //for control over PoseLerp
     [Header("Animation Properties")]
     public Animator animator;
     [SerializeField] float minFollowWaitTime;
@@ -39,6 +40,7 @@ public class Thrower : MonoBehaviour
     
     int nDashes = 0;
     Vector3 oldBaitPosition;
+    PoseLerp throwFlex;
     
     
     void MakeDashes(float throwLineLength, Vector3 mousePosition) 
@@ -105,7 +107,7 @@ public class Thrower : MonoBehaviour
         plane.GetComponent<FlightControl>().enabled = false;
         plane.GetComponent<Rigidbody2D>().gravityScale = 0;
         initPlaneRotation = plane.transform.eulerAngles;
-
+        throwFlex = player.GetComponent<PoseLerp>();
         //get clip duration
         AnimationClip[] clips = animator.runtimeAnimatorController.animationClips;
         for (int i = 0; i < clips.Length; i++)
@@ -132,6 +134,8 @@ public class Thrower : MonoBehaviour
             throwVector = plane.transform.position - pointerWorldPosition;
             float throwIntensity = throwVector.magnitude;
             MakeDashes(throwIntensity, pointerWorldPosition);
+            //animate PoseLerp using throw intensity
+            player.GetComponent<PoseLerp>().lerpValue = (throwIntensity * throwFlex.lerpValueRange) / maxThrowIntensity;
         }
         else
         {
