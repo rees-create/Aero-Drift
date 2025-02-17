@@ -28,7 +28,7 @@ public class Thrower : MonoBehaviour
     Vector3 pointerWorldPosition;
     
     bool thrown = false;
-    bool follow = false;
+    bool follow = true;
     Vector2 throwVector;
     Vector3 initPlaneRotation;
 
@@ -40,8 +40,8 @@ public class Thrower : MonoBehaviour
     
     int nDashes = 0;
     Vector3 oldBaitPosition;
-    PoseLerp throwFlex;
-    
+    //PoseLerp throwFlex;
+    Vector3[] baitPosDiffs = new Vector3[2];
     
     void MakeDashes(float throwLineLength, Vector3 mousePosition) 
     {
@@ -107,7 +107,7 @@ public class Thrower : MonoBehaviour
         plane.GetComponent<FlightControl>().enabled = false;
         plane.GetComponent<Rigidbody2D>().gravityScale = 0;
         initPlaneRotation = plane.transform.eulerAngles;
-        throwFlex = player.GetComponent<PoseLerp>();
+        //throwFlex = player.GetComponent<PoseLerp>();
         //get clip duration
         AnimationClip[] clips = animator.runtimeAnimatorController.animationClips;
         for (int i = 0; i < clips.Length; i++)
@@ -129,30 +129,41 @@ public class Thrower : MonoBehaviour
         throwNormalizedTime = throwNormalizedTimes[diffSwitch];
         if (!thrown)
         {
+            animator.enabled = false;
             pointerPosition = Input.mousePosition;
             pointerWorldPosition = Camera.main.ScreenToWorldPoint(pointerPosition);
             throwVector = plane.transform.position - pointerWorldPosition;
             float throwIntensity = throwVector.magnitude;
             MakeDashes(throwIntensity, pointerWorldPosition);
             //animate PoseLerp using throw intensity
-            player.GetComponent<PoseLerp>().lerpValue = (throwIntensity * throwFlex.lerpValueRange) / maxThrowIntensity;
+            player.GetComponent<PoseLerp>().lerpValue = throwIntensity / maxThrowIntensity;
         }
         else
         {
+            animator.enabled = true;
+            //baitPosDiffs[diffSwitch] = bait.transform.position;
+            //print($"bait pos diff: {baitPosDiffs[1] - baitPosDiffs[0]}");
             if (Mathf.Abs(throwNormalizedTimes[0] - throwNormalizedTimes[1]) * duration > 2.5 * Time.deltaTime)
             {
                 throwNormalizedTimeReady = true;
             }
         }
         
-        if (follow) 
+        if (follow && !throwNormalizedTimeReady) 
         {
             Follow();
         }
         
     }
-    
-    
+    private void LateUpdate()
+    {
+        if (follow)
+        {
+            Follow();
+        }
+    }
+
+
     IEnumerator OnMouseDown()
     {
         
@@ -165,6 +176,7 @@ public class Thrower : MonoBehaviour
             follow = true;
             yield return new WaitUntil(()=> throwNormalizedTimeReady && throwNormalizedTime >= 1);
             follow = false;
+            
         }
         //launch plane
         plane.GetComponent<Rigidbody2D>().gravityScale = 1;

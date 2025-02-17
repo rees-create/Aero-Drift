@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,9 +13,10 @@ public class PoseLerp : MonoBehaviour
 {
     //public List<bool> listenTo = new List<bool>();
     public PoseSequenceManager poseSequenceManager;
+    [Range(0, 1)]
     public float lerpValue; // Other scripts should set this value as they see fit e.g Thrower can set 
-    //lerpValue = throwIntensity * lerpValueRange
-    public float lerpValueRange; //change to regular variable and use in update
+    //lerpValue = throwIntensity //* lerpValueRange
+    //public float lerpValueRange; //change to regular variable and use in update
 
     //private int currentCount = 0;
     [Serializable]
@@ -64,15 +66,16 @@ public class PoseLerp : MonoBehaviour
         public void Record(GameObject gameObject)
         {
             //StartCoroutine(ListenForActive(0.5f));
-            this.position = gameObject.transform.position;
-            this.rotation = gameObject.transform.rotation.eulerAngles;
+            this.position = gameObject.transform.localPosition;
+            this.rotation = gameObject.transform.localRotation.eulerAngles;
             this.scale = gameObject.transform.localScale;
         }
-        public void Assign(GameObject gameObject)
+        public void Assign(ref GameObject gameObject)
         {
-            gameObject.transform.position = this.position;
-            gameObject.transform.rotation = Quaternion.Euler(this.rotation);
+            gameObject.transform.localPosition = this.position;
+            gameObject.transform.localRotation = Quaternion.Euler(this.rotation);
             gameObject.transform.localScale = this.scale;
+            //print($"GameObject {gameObject.name} assigned; new rotation = {gameObject.transform.localRotation.eulerAngles}");
         }
 
     }
@@ -94,13 +97,13 @@ public class PoseLerp : MonoBehaviour
         public List<Pose> poses;
         public GameObject gameObject;
         public bool recording;
-        [SerializeField] bool setInitPose = true;
+        [SerializeField] bool setInitPose;
         int setInitPoseAcc = 0;
         public Pose initPose;
 
-        public bool GetInitPose() 
+        public bool InitPoseOn() 
         { 
-            if (setInitPoseAcc > 0) { setInitPose = false ; }
+            //if (setInitPoseAcc > 0) { setInitPose = false ; }
             return setInitPose; 
         }
         public void SetInitPose() 
@@ -111,8 +114,9 @@ public class PoseLerp : MonoBehaviour
         
         public PoseSequence() 
         {
-            this.setInitPose = true;
+            //this.setInitPose = true;
             this.setInitPoseAcc = 0;
+            //print(setInitPose); true. Good. If you want to automatically set init pose, add a switch to the pose sequence manager.
             //Debug.Log("created");
         }
         public PoseSequence(List<Pose> poses, GameObject gameObject)
@@ -120,12 +124,12 @@ public class PoseLerp : MonoBehaviour
             this.poses = poses;
             this.gameObject = gameObject;
 
-            this.setInitPose = true;
+            //this.setInitPose = true;
             this.setInitPoseAcc = 0;
         }
         ~PoseSequence()
         {
-            initPose.Assign(gameObject); //assign the init pose to the game object on delete;
+            initPose.Assign(ref gameObject); //assign the init pose to the game object on delete;
             Debug.Log("deleted");
         }
     }
@@ -137,7 +141,6 @@ public class PoseLerp : MonoBehaviour
         public List<PoseSequence> poseSequences = new List<PoseSequence>();
         public bool play;
         public bool resetToInitPose;
-        
         //public void SetInitPose(PoseSequence ps) 
         //{
         //    if (ps.setInitPose)
@@ -154,7 +157,7 @@ public class PoseLerp : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        
     }
 
     // Update is called once per frame
@@ -162,24 +165,23 @@ public class PoseLerp : MonoBehaviour
     {
         //if (currentCount != listenTo.Count) 
         //{}
-        int notRecording = 0;
+       
+        
+        
         foreach (PoseSequence poseSequence in poseSequenceManager.poseSequences)
         {
-            if (poseSequence.GetInitPose())
+            if (poseSequence.InitPoseOn())
             {
                 poseSequence.initPose.Record(poseSequence.gameObject);
             }
-            else
-            {
-                poseSequence.SetInitPose(); // sorry you can only set initPose once
-            }
-            
 
             if (poseSequenceManager.resetToInitPose) 
             {
                 lerpValue = 0;
-                poseSequence.initPose.Assign(poseSequence.gameObject);
+                poseSequence.initPose.Assign(ref poseSequence.gameObject);
+                poseSequenceManager.play = false;
             }
+            int notRecording = 0;
             for (int poseIdx = 0; poseIdx < poseSequence.poses.Count; poseIdx++)
             {
                 if (poseSequence.poses[poseIdx].active)
@@ -197,7 +199,7 @@ public class PoseLerp : MonoBehaviour
 
             if (notRecording == poseSequence.poses.Count) { poseSequence.recording = false; }
 
-            if (poseSequence.GetInitPose() && poseSequence.recording)
+            if (poseSequence.InitPoseOn() && poseSequence.recording)
             {
                 Debug.Log("Highly unrecommended to record poses when Set Init Pose is on");
                 throw new Exception("Highly unrecommended to record poses when Set Init Pose is on");
@@ -205,19 +207,21 @@ public class PoseLerp : MonoBehaviour
 
             if (!(poseSequence.recording || poseSequence.gameObject == null))
             {
-                //set current transform property to pose lerp value
-                
-                    int lerpIdx = lerpValue <= lerpValueRange && lerpValue >= 0 ? (int) Mathf.Floor(lerpValue): 0;
-                    float t = lerpValue <= lerpValueRange && lerpValue >= 0 ? lerpValue - lerpIdx : 0;
-                if (lerpValue < lerpValueRange && poseSequenceManager.play && !poseSequence.GetInitPose()) // if lerp value not at end of anim
+                //set current transform property to pose lerp value - uh uh - <pose lerp value> * <num poses> / <lerp value range>
+                float poseLerpValue = lerpValue * (poseSequence.poses.Count - 1);
+                int lerpIdx = lerpValue <= 1 && lerpValue >= 0 ? (int) Mathf.Floor(poseLerpValue): 0;
+                    float t = lerpValue <= 1 && lerpValue >= 0 ? poseLerpValue - lerpIdx : 0;
+                if (lerpValue < 1 && poseSequenceManager.play && !poseSequence.InitPoseOn()) // if lerp value not at end of anim
                 {
                     Pose pose = LerpPose(poseSequence.poses[lerpIdx], poseSequence.poses[lerpIdx + 1], t);
-                    pose.Assign(poseSequence.gameObject);
+                    pose.Assign(ref poseSequence.gameObject);
+                    
                 }
-                else if (lerpValue == lerpValueRange && poseSequenceManager.play && !poseSequence.GetInitPose())
+                else if (lerpValue == 1 && poseSequenceManager.play && !poseSequence.InitPoseOn())
                 {
+                    
                     Pose pose = poseSequence.poses[lerpIdx];
-                    pose.Assign(poseSequence.gameObject);
+                    pose.Assign(ref poseSequence.gameObject);
                 }
                 
             }
@@ -226,9 +230,9 @@ public class PoseLerp : MonoBehaviour
 
 
         // ensure lerp value range is number of poses.
-        if (poseSequenceManager.poseSequences.Count > 0)
-        {
-            lerpValueRange = poseSequenceManager.poseSequences[0].poses.Count - 1;
-        }
+        //if (poseSequenceManager.poseSequences.Count > 0)
+        //{
+        //    lerpValueRange = poseSequenceManager.poseSequences[0].poses.Count - 1;
+        //}
     }
 }
