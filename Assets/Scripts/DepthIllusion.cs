@@ -11,7 +11,7 @@ public class DepthIllusion : MonoBehaviour
     [SerializeField] GameObject popBackController;
     [SerializeField] float horizon;
     [SerializeField] float depth;
-    [SerializeField] float parallaxFraction;
+    float parallaxFraction;
     [SerializeField] Color absoluteBlue;
 
     void Follow(Vector3 playerVelocity, float speedFraction) 
