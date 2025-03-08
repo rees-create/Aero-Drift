@@ -103,13 +103,23 @@ public class ObjectSpawnSystem : MonoBehaviour
     [Serializable]
     public enum OverwriteType { This, Object, Downward, Parent }
     [Serializable]
+    public enum NumberOfObjectsType {Random, Limiting}
+    [Serializable] public struct NumberOfObjectsSelector 
+    {
+        public bool on;
+        public NumberOfObjectsType type;
+        public float limitingDecider;
+    }
+    [Serializable]  
+    public enum ColorSelector {Random, RandomChannel, RandomTone }
+    [Serializable]
     public struct Randomizable
     {
         
         public OverwriteType type;
         public bool randomizeChild;
         public int childIndex;
-        public bool numberOfObjects;
+        public NumberOfObjectsSelector numberOfObjects;
         public bool spawnSpacing;
         public bool color;
         public bool position;
@@ -193,15 +203,28 @@ public class ObjectSpawnSystem : MonoBehaviour
                 
                 bool shouldISpawn = true;
                 GameObject g = element;
-                if (elementVariation.overwriteProperties.numberOfObjects && (overwriteThis || parentOverwrite)) 
+                if (elementVariation.overwriteProperties.numberOfObjects.on && (overwriteThis || parentOverwrite)) 
                 {
+                    
                     float iterator = elementVariation.phaseSeed != 0 ? elementVariation.iterator / elementVariation.phaseSeed
                         : elementVariation.iterator;
                     float decider = elementVariation.rand(elementVariation.phaseSeed, iterator, elementVariation.numberOfObjects);
                     //print($"decider = {decider} iterator = {elementVariation.iterator}");
-                    if((int) ((decider * 100) % 2) == 0) 
+                    if (elementVariation.overwriteProperties.numberOfObjects.type == NumberOfObjectsType.Random)
                     {
-                        shouldISpawn = false;
+                        if ((int)((decider * 100) % 2) == 0)
+                        {
+                            shouldISpawn = false;
+                        }
+                    }
+                    else if (elementVariation.overwriteProperties.numberOfObjects.type == NumberOfObjectsType.Limiting)
+                    {
+                        if (i == 0) elementVariation.overwriteProperties.numberOfObjects.limitingDecider = decider;
+                        float limitingDecider = elementVariation.overwriteProperties.numberOfObjects.limitingDecider;
+                        print(Math.Ceiling(limitingDecider * elementVariation.numberOfObjects));
+                        if (i >= Math.Ceiling(limitingDecider * elementVariation.numberOfObjects)) {
+                            shouldISpawn = false;
+                        }
                     }
                 }
                 // Hold on a bit: if intended object has AnimationRandomizer, listen for the shortest duration 
