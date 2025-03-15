@@ -221,7 +221,7 @@ public class ObjectSpawnSystem : MonoBehaviour
                     {
                         if (i == 0) elementVariation.overwriteProperties.numberOfObjects.limitingDecider = decider;
                         float limitingDecider = elementVariation.overwriteProperties.numberOfObjects.limitingDecider;
-                        print(Math.Ceiling(limitingDecider * elementVariation.numberOfObjects));
+                        
                         if (i >= Math.Ceiling(limitingDecider * elementVariation.numberOfObjects)) {
                             shouldISpawn = false;
                         }
