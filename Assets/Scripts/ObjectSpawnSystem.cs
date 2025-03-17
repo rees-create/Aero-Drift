@@ -270,6 +270,11 @@ public class ObjectSpawnSystem : MonoBehaviour
                 {
                     g.GetComponent<BlueShift>().depthController = gameObject;
                 }
+                //set depth illusion player for children with depth illusion
+                if (gameObject.GetComponent<DepthIllusion>() != null && g.GetComponent<DepthIllusion>() != null) 
+                {
+                    g.GetComponent<DepthIllusion>().player = gameObject.GetComponent<DepthIllusion>().player;
+                }
                 //get scale
                 Vector3 scale = elementVariation.scale;
                 //potentially randomize scale
