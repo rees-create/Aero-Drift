@@ -57,13 +57,21 @@ public class ObjectSpawnSystem : MonoBehaviour
         [NonSerialized] public int iterator;
         [Header("Reference Frame Object?")]
         public bool inReferenceFrame;
+        [Header("Layer Position")]
+        public int layerPosition;
         [Header("Transform Properties")]
         public Vector3 spawnSpacing;
         public Vector3 position;
         public Vector3 rotation;
         public Vector3 scale;
 
-        
+        /// <summary>
+        /// Object Spawn System randomization function. Based on a combination of 2 sine waves, it returns a value between 0 and 1.
+        /// </summary>
+        /// <param name="seed">seed from elementVariation</param>
+        /// <param name="index">index of object being randomized</param>
+        /// <param name="numberOfObjects"> useless param. gotta get rid of it but im too lazy to</param>
+        /// <returns></returns>
         public float rand(float seed, float index, float numberOfObjects) 
         {
             float frequency = randomizationCycleFrequency;
@@ -125,6 +133,7 @@ public class ObjectSpawnSystem : MonoBehaviour
         public bool position;
         public bool rotation;
         public bool scale;
+        public bool layerPosition;
         public bool other; 
     }
     Vector3 multiplyVectors(Vector3 a, Vector3 b)
@@ -307,7 +316,16 @@ public class ObjectSpawnSystem : MonoBehaviour
                 }
                 //set rotation
                 g.transform.eulerAngles = rotation;
-                
+                //calculate potentially random layer position
+                int layerPosition = elementVariation.layerPosition;
+                if (elementVariation.overwriteProperties.layerPosition && (overwriteThis || parentOverwrite)) 
+                {
+                    layerPosition = (int)(elementVariation.layerPosition * elementVariation.rand(elementVariation.phaseSeed, elementVariation.iterator, elementVariation.numberOfObjects));
+                }
+                //Layer position is for SpriteRenderers, so we have to check if g has a sprite renderer.
+                if (g.GetComponent<SpriteRenderer>()) {
+                    g.GetComponent<SpriteRenderer>().sortingOrder = layerPosition;
+                }
                 //calculate potentially random color
                 Vector4 color = elementVariation.RandomVector4(elementVariation.phaseSeed, elementVariation.iterator, elementVariation.numberOfObjects);
                 //reset blue shift to potential randomized color

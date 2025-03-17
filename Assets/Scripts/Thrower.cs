@@ -106,6 +106,7 @@ public class Thrower : MonoBehaviour
         dashes.transform.parent = transform;
         plane.GetComponent<FlightControl>().enabled = false;
         plane.GetComponent<Rigidbody2D>().gravityScale = 0;
+        plane.GetComponent<PolygonCollider2D>().enabled = false;
         initPlaneRotation = plane.transform.eulerAngles;
         //throwFlex = player.GetComponent<PoseLerp>();
         //get clip duration
@@ -181,6 +182,7 @@ public class Thrower : MonoBehaviour
         //launch plane
         plane.GetComponent<Rigidbody2D>().gravityScale = 1;
         plane.GetComponent<FlightControl>().enabled = true;
+        plane.GetComponent<PolygonCollider2D>().enabled = true;
         
         if (throwVector.magnitude < maxThrowIntensity)
         {
