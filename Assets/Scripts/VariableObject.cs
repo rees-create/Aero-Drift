@@ -3,20 +3,23 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
+[ExecuteInEditMode]
 public class VariableObject : MonoBehaviour
 {
     [SerializeField] List<GameObject> objects;
     
     bool unparentAndSelfDestruct;
-    float decision;
+    [SerializeField] float decision;
     // Start is called before the first frame update
+
+    
     void Start()
     {
-        StartCoroutine(pickObject());
+        StartCoroutine(PickObject());
     }
 
     // Update is called once per frame
-    IEnumerator pickObject()
+    IEnumerator PickObject()
     {
         //choose object to instantiate
         ObjectSpawnSystem objectSpawnSystem = gameObject.GetComponentInParent<ObjectSpawnSystem>();
@@ -28,7 +31,7 @@ public class VariableObject : MonoBehaviour
         {
             decision = Random.Range(0f, 1f);
         }
-        int objectIndex = (int) decision * objects.Length;
+        int objectIndex = (int) (decision * objects.Count);
         //Instantiate object
         Instantiate(objects[objectIndex], transform);
 

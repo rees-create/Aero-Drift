@@ -62,6 +62,7 @@
     <Compile Include="Assets\Scripts\ObjectSpawnSystem.cs" />
     <Compile Include="Assets\Scripts\CloudAnimationRandomizer.cs" />
     <Compile Include="Assets\Scripts\Collectible.cs" />
+    <Compile Include="Assets\Scripts\VariableObject.cs" />
     <Compile Include="Assets\Scripts\Thrower.cs" />
     <Compile Include="Assets\Scripts\GalleryView.cs" />
     <Compile Include="Assets\Scripts\WindField.cs" />
@@ -75,7 +76,6 @@
     <Compile Include="Assets\Scripts\FlightControl.cs" />
     <Compile Include="Assets\Scripts\SceneTransitionControl.cs" />
     <Compile Include="Assets\Scripts\ActionRandomizer.cs" />
-    <Compile Include="Assets\Scripts\VariableObject.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
