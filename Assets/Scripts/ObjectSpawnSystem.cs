@@ -274,6 +274,7 @@ public class ObjectSpawnSystem : MonoBehaviour
                 if (gameObject.GetComponent<DepthIllusion>() != null && g.GetComponent<DepthIllusion>() != null) 
                 {
                     g.GetComponent<DepthIllusion>().player = gameObject.GetComponent<DepthIllusion>().player;
+                    g.GetComponent<DepthIllusion>().popBackController = gameObject.GetComponent<DepthIllusion>().popBackController;
                 }
                 //get scale
                 Vector3 scale = elementVariation.scale;

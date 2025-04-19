@@ -8,25 +8,21 @@ public class DepthIllusion : MonoBehaviour
     public GameObject player;
     Rigidbody2D playerRigidbody;
     Vector3 initialPosition;
-    [SerializeField] GameObject popBackController;
+    public GameObject popBackController;
     /// <summary>
     /// Set horizon to 0 to set the DepthIllusion to abstract and disable it.
     /// </summary>
     [SerializeField] float horizon;
     [SerializeField] float depth;
-    float parallaxFraction;
-    [SerializeField] Color absoluteBlue;
+    public float parallaxFraction;
+    public Color absoluteBlue;
 
     void Follow(Vector3 playerVelocity, float speedFraction) 
     {
         //print($"follow params of {gameObject.name}: {Time.deltaTime}, {speedFraction}, {playerVelocity}");
         gameObject.transform.position += Time.deltaTime * speedFraction * playerVelocity;
     }
-    public Vector4 ShiftBlue(Vector4 color) 
-    {
-        
-        return Vector4.Lerp(color, absoluteBlue, parallaxFraction);
-    }
+    
 
     // Start is called before the first frame update
     void Start()
@@ -51,7 +47,8 @@ public class DepthIllusion : MonoBehaviour
             //print(playerRigidbody);
             if (!popBackController.GetComponent<ObjectSpawnSystem>().popBack)
             {
-                Follow(playerRigidbody.velocity, parallaxFraction);
+                Follow(player.GetComponent<Rigidbody2D>().velocity, parallaxFraction);
+                //print($"rigidbody velocity: {playerRigidbody.velocity}, parallaxFraction {parallaxFraction}, product = {player.GetComponent<Rigidbody2D>().velocity * parallaxFraction}");
             }
             else
             {

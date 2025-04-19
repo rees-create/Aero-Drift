@@ -6,18 +6,30 @@ using UnityEngine;
 [ExecuteInEditMode]
 public class VariableObject : MonoBehaviour
 {
-    [SerializeField] List<GameObject> objects;
-    
+    [SerializeField] List<GameObject> objects;    
     bool unparentAndSelfDestruct;
     [SerializeField] float decision;
     // Start is called before the first frame update
-
+    
     
     void Start()
     {
         StartCoroutine(PickObject());
     }
-
+    void ApplyBlueShift(GameObject g, DepthIllusion illusion)
+    {
+        for (int i = 0; i < g.transform.childCount; i++)
+        {
+            if (g.transform.GetChild(i).GetComponent<BlueShift>() != null)
+            {
+                g.transform.GetChild(i).GetComponent<BlueShift>().depthController = gameObject;
+            }
+            else //recursively search children till you find blue shift
+            {
+                ApplyBlueShift(g.transform.GetChild(i).gameObject, illusion);
+            }
+        }
+    }
     // Update is called once per frame
     IEnumerator PickObject()
     {
@@ -34,6 +46,14 @@ public class VariableObject : MonoBehaviour
         int objectIndex = (int) (decision * objects.Count);
         //Instantiate object
         Instantiate(objects[objectIndex], transform);
+        //Set BlueShift and DepthIllusion properties if applicable.
+        
+        if (GetComponent<DepthIllusion>() != null && transform.parent.gameObject.GetComponent<DepthIllusion>() != null)
+        {
+            
+            DepthIllusion illusion = gameObject.GetComponent<DepthIllusion>();
+            ApplyBlueShift(gameObject, illusion);
+        }
 
         float oldDecision = decision;
         yield return new WaitUntil(()=> oldDecision != decision);

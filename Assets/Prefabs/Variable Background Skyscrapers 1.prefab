@@ -1,0 +1,72 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &7508068040345126701
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5339529200377909079}
+  - component: {fileID: 8120861572688542918}
+  - component: {fileID: 6498332243240781962}
+  m_Layer: 0
+  m_Name: Variable Background Skyscrapers 1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5339529200377909079
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7508068040345126701}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8120861572688542918
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7508068040345126701}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e90182c9c5729e4b8dabe921462193b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  objects:
+  - {fileID: 4295376746732992543, guid: fed91d1daee07374f900e7cf9322c705, type: 3}
+  - {fileID: 8927355370323415431, guid: 0589548edbac3d64984e49aecc48f449, type: 3}
+  - {fileID: 6328034558278833479, guid: 6aae7dd865f550342b5b219ee5b54c26, type: 3}
+  - {fileID: 5498643825318254919, guid: de31e0f23a7839645afdc14be834c961, type: 3}
+  - {fileID: 1615051111701038559, guid: bce1e0186dc73b849912a3ac60705455, type: 3}
+  decision: 0.3116179
+--- !u!114 &6498332243240781962
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7508068040345126701}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3d40d1ff0762394ea33b83468432260, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 0}
+  popBackController: {fileID: 0}
+  horizon: 500
+  depth: 360
+  parallaxFraction: 0
+  absoluteBlue: {r: 0.56078434, g: 0.9294118, b: 0.95294124, a: 1}
