@@ -266,15 +266,20 @@ public class ObjectSpawnSystem : MonoBehaviour
                 //set name
                 g.name = gameObject.name + "_" + i;
                 //set depth illusion for blue shift objects
-                if (gameObject.GetComponent<DepthIllusion>() != null && g.GetComponent<BlueShift>() != null) 
-                {
+                if (gameObject.GetComponent<DepthIllusion>() != null && g.GetComponent<BlueShift>() != null)
+                { 
                     g.GetComponent<BlueShift>().depthController = gameObject;
                 }
-                //set depth illusion player for children with depth illusion
+                //set depth illusion player for children with depth illusion (like VariableObjects or other ObjectSpawnSystems)
                 if (gameObject.GetComponent<DepthIllusion>() != null && g.GetComponent<DepthIllusion>() != null) 
                 {
                     g.GetComponent<DepthIllusion>().player = gameObject.GetComponent<DepthIllusion>().player;
                     g.GetComponent<DepthIllusion>().popBackController = gameObject.GetComponent<DepthIllusion>().popBackController;
+                }
+                //set blue shift for reference frame objects
+                if (elementVariation.inReferenceFrame && gameObject.GetComponent<DepthIllusion>() != null)
+                {
+                    g.transform.GetChild(0).GetComponent<BlueShift>().depthController = gameObject;
                 }
                 //get scale
                 Vector3 scale = elementVariation.scale;

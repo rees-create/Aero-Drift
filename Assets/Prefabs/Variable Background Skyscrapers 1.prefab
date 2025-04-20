@@ -67,6 +67,6 @@ MonoBehaviour:
   player: {fileID: 0}
   popBackController: {fileID: 0}
   horizon: 500
-  depth: 360
+  depth: 410
   parallaxFraction: 0
   absoluteBlue: {r: 0.56078434, g: 0.9294118, b: 0.95294124, a: 1}

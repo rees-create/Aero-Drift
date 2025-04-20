@@ -49,12 +49,14 @@ public class DepthIllusion : MonoBehaviour
             {
                 Follow(player.GetComponent<Rigidbody2D>().velocity, parallaxFraction);
                 //print($"rigidbody velocity: {playerRigidbody.velocity}, parallaxFraction {parallaxFraction}, product = {player.GetComponent<Rigidbody2D>().velocity * parallaxFraction}");
+                
             }
             else
             {
                 //pop back
                 transform.position = initialPosition;
             }
+            
         }
     }
 }
