@@ -39,18 +39,12 @@ public class VariableObject : MonoBehaviour
             return FindComponentInParent<T>(g.transform.parent.gameObject);
         }
     }
-    int HighSiblingIndex<T>(GameObject g, bool diagnose = false)
+    int HighSiblingIndex<T>(GameObject g)
     {
         if (g.transform.parent.GetComponent<T>() == null)
         {
-            if (diagnose) print("hello?");
             return HighSiblingIndex<T>(g.transform.parent.gameObject);
         }
-        else 
-        {
-            if (diagnose) print($"component: {g.name} sibling index = {g.transform.GetSiblingIndex()}");
-        }
-        
         return g.transform.GetSiblingIndex();
     }
     // Update is called once per frame
@@ -61,11 +55,7 @@ public class VariableObject : MonoBehaviour
         //print(objectSpawnSystem.elementVariation.phaseSeed);
         if (objectSpawnSystem != null)
         {
-            decision = objectSpawnSystem.elementVariation.rand(objectSpawnSystem.elementVariation.phaseSeed, HighSiblingIndex<ObjectSpawnSystem>(gameObject)/*gameObject.transform.GetSiblingIndex()*/, 0);
-            if (gameObject.name == "windows") 
-            {
-                print(HighSiblingIndex<ObjectSpawnSystem>(gameObject, diagnose: true));
-            }
+            decision = objectSpawnSystem.elementVariation.rand(objectSpawnSystem.elementVariation.phaseSeed, HighSiblingIndex<ObjectSpawnSystem>(gameObject), 0);
         }
         else
         {
