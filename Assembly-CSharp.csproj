@@ -58,23 +58,23 @@
     <Analyzer Include="C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\Microsoft\Visual Studio Tools for Unity\Analyzers\Microsoft.Unity.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\PoseLerp.cs" />
-    <Compile Include="Assets\Scripts\ObjectSpawnSystem.cs" />
     <Compile Include="Assets\Scripts\CloudAnimationRandomizer.cs" />
-    <Compile Include="Assets\Scripts\Collectible.cs" />
     <Compile Include="Assets\Scripts\VariableObject.cs" />
-    <Compile Include="Assets\Scripts\Thrower.cs" />
-    <Compile Include="Assets\Scripts\GalleryView.cs" />
     <Compile Include="Assets\Scripts\WindField.cs" />
     <Compile Include="Assets\Scripts\Plane.cs" />
-    <Compile Include="Assets\Scripts\DepthIllusion.cs" />
     <Compile Include="Assets\Scripts\AnimationRandomizer.cs" />
+    <Compile Include="Assets\Scripts\SceneTransitionControl.cs" />
+    <Compile Include="Assets\Scripts\PoseLerp.cs" />
+    <Compile Include="Assets\Scripts\ObjectSpawnSystem.cs" />
+    <Compile Include="Assets\Scripts\Collectible.cs" />
+    <Compile Include="Assets\Scripts\Thrower.cs" />
+    <Compile Include="Assets\Scripts\GalleryView.cs" />
+    <Compile Include="Assets\Scripts\DepthIllusion.cs" />
     <Compile Include="Assets\Scripts\RandomizeSpeed.cs" />
     <Compile Include="Assets\Scripts\BlueShift.cs" />
     <Compile Include="Assets\Scripts\Planes.cs" />
     <Compile Include="Assets\Scripts\CollectibleHandler.cs" />
     <Compile Include="Assets\Scripts\FlightControl.cs" />
-    <Compile Include="Assets\Scripts\SceneTransitionControl.cs" />
     <Compile Include="Assets\Scripts\ActionRandomizer.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -921,6 +921,10 @@
       <HintPath>C:\Program Files\Unity\Hub\Editor\2021.3.38f1\Editor\Data\NetStandard\compat\2.1.0\shims\netfx\System.Xml.Serialization.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Unity.Recorder.Editor">
+      <HintPath>Library\ScriptAssemblies\Unity.Recorder.Editor.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Unity.InternalAPIEngineBridge.001">
       <HintPath>Library\ScriptAssemblies\Unity.InternalAPIEngineBridge.001.dll</HintPath>
       <Private>False</Private>
@@ -1013,6 +1017,10 @@
       <HintPath>Library\ScriptAssemblies\Unity.2D.Common.Editor.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Unity.Recorder">
+      <HintPath>Library\ScriptAssemblies\Unity.Recorder.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Unity.VisualScripting.Flow.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.VisualScripting.Flow.Editor.dll</HintPath>
       <Private>False</Private>
@@ -1027,6 +1035,10 @@
     </Reference>
     <Reference Include="Unity.2D.Tilemap.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.2D.Tilemap.Editor.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.Recorder.Base">
+      <HintPath>Library\ScriptAssemblies\Unity.Recorder.Base.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.RenderPipelines.Universal.Runtime">

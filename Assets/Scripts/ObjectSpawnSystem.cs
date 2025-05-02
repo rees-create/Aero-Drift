@@ -387,7 +387,7 @@ public class ObjectSpawnSystem : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         popBack = false;
         if (elementVariation.popBackTransform != null)

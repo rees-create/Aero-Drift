@@ -36,6 +36,10 @@ public class DepthIllusion : MonoBehaviour
             parallaxFraction = Mathf.Sin(deg90 * horizonFraction);
             playerRigidbody = player.GetComponent<Rigidbody2D>();
             initialPosition = transform.position;
+            //if (gameObject.GetComponent<ObjectSpawnSystem>().elementVariation.inReferenceFrame) 
+            //{
+            //    initialPosition = 
+            //}
         }
     }
 
