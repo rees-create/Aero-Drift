@@ -35,6 +35,27 @@ public class ObjectSpawnSystem : MonoBehaviour
         print($"numAnimResetRequests: {numAnimResetRequests}");
         numAnimResetRequests++;
     }
+    public void SetSortingOrder(GameObject g, int desiredSortingOrder)
+    {
+        if (g.GetComponent<SpriteRenderer>())
+        {
+            g.transform.GetComponent<SpriteRenderer>().sortingOrder = desiredSortingOrder;
+
+            //Debug.Log(g.name + " sorting order: " + g.GetComponent<SpriteRenderer>().sortingOrder);
+        }
+        else if (g.transform.childCount > 0)
+        {
+            //Debug.Log("Descending hierarchy: " + g.name + " desired sorting order: " + desiredSortingOrder);
+            for (int i = 0; i < g.transform.childCount; i++)
+            {
+                SetSortingOrder(g.transform.GetChild(i).gameObject, desiredSortingOrder + i);
+            }
+        }
+        if (g.GetComponent<VariableObject>()) 
+        {
+            g.GetComponent<VariableObject>().sortingOrder = desiredSortingOrder;
+        }
+    }
 
     [Serializable]
     public struct ElementVariation
@@ -334,9 +355,10 @@ public class ObjectSpawnSystem : MonoBehaviour
                     layerPosition = (int)(elementVariation.layerPosition * elementVariation.rand(elementVariation.phaseSeed, elementVariation.iterator, elementVariation.numberOfObjects));
                 }
                 //Layer position is for SpriteRenderers, so we have to check if g has a sprite renderer.
-                if (g.GetComponent<SpriteRenderer>()) {
-                    g.GetComponent<SpriteRenderer>().sortingOrder = layerPosition;
-                }
+                SetSortingOrder(g, layerPosition);
+                //if (g.GetComponent<SpriteRenderer>()) {
+                    //g.GetComponent<SpriteRenderer>().sortingOrder = layerPosition;
+                //}
                 //calculate potentially random color
                 Vector4 color = elementVariation.RandomVector4(elementVariation.phaseSeed, elementVariation.iterator, elementVariation.numberOfObjects);
                 //reset blue shift to potential randomized color

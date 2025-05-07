@@ -73,8 +73,10 @@
     <Compile Include="Assets\Scripts\RandomizeSpeed.cs" />
     <Compile Include="Assets\Scripts\BlueShift.cs" />
     <Compile Include="Assets\Scripts\Planes.cs" />
+    <Compile Include="Assets\Scripts\LayerCatalog.cs" />
     <Compile Include="Assets\Scripts\CollectibleHandler.cs" />
     <Compile Include="Assets\Scripts\FlightControl.cs" />
+    <Compile Include="Assets\Scripts\FloorControl.cs" />
     <Compile Include="Assets\Scripts\ActionRandomizer.cs" />
   </ItemGroup>
   <ItemGroup>

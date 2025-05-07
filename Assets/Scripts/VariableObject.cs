@@ -10,10 +10,31 @@ public class VariableObject : MonoBehaviour
     [SerializeField] List<GameObject> objects;    
     bool unparentAndSelfDestruct;
     [SerializeField] float decision;
-    [SerializeField] int hierarchyDepth;
+    public int sortingOrder;
     // Start is called before the first frame update
 
-    
+    public void SetSortingOrder(GameObject g, int desiredSortingOrder)
+    {
+        if (g.GetComponent<SpriteRenderer>())
+        {
+            g.transform.GetComponent<SpriteRenderer>().sortingOrder = desiredSortingOrder;
+
+            //Debug.Log(g.name + " sorting order: " + g.GetComponent<SpriteRenderer>().sortingOrder);
+        }
+        else if (g.transform.childCount > 0)
+        {
+            //Debug.Log("Descending hierarchy: " + g.name + " desired sorting order: " + desiredSortingOrder);
+            for (int i = 0; i < g.transform.childCount; i++)
+            {
+                SetSortingOrder(g.transform.GetChild(i).gameObject, desiredSortingOrder + i);
+            }
+        }
+        if (g.GetComponent<VariableObject>())
+        {
+            g.GetComponent<VariableObject>().sortingOrder = desiredSortingOrder;
+        }
+    }
+
     void ApplyBlueShift(GameObject g, DepthIllusion illusion)
     {
         for (int i = 0; i < g.transform.childCount; i++)
@@ -70,6 +91,7 @@ public class VariableObject : MonoBehaviour
             if (objects[i] != null) nullCount--;
         }
         yield return new WaitUntil(() => objects.Count > 0 && nullCount == 0);
+        SetSortingOrder(objects[objectIndex], sortingOrder);
         //Instantiate object
         Instantiate(objects[objectIndex], transform);
         //Set BlueShift and DepthIllusion properties if applicable.
