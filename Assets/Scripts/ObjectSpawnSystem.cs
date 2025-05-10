@@ -21,6 +21,7 @@ public class ObjectSpawnSystem : MonoBehaviour
     [SerializeField] GameObject player;
     [SerializeField] GameObject popBackController;
     [SerializeField] Vector3 playerInitialPosition;
+    
     int numAnimResetRequests = 0;
     //[SerializeField] GameObject depthController;
     public ElementVariation elementVariation;
@@ -56,6 +57,15 @@ public class ObjectSpawnSystem : MonoBehaviour
             g.GetComponent<VariableObject>().sortingOrder = desiredSortingOrder;
         }
     }
+
+    [Serializable]
+    public struct LayerCollider
+    {
+        public bool on; 
+        public Vector2 size;
+        public Vector2 offset;
+    }
+    [SerializeField] LayerCollider layerCollider;
 
     [Serializable]
     public struct ElementVariation
@@ -301,6 +311,14 @@ public class ObjectSpawnSystem : MonoBehaviour
                 if (elementVariation.inReferenceFrame && gameObject.GetComponent<DepthIllusion>() != null)
                 {
                     g.transform.GetChild(0).GetComponent<BlueShift>().depthController = gameObject;
+                }
+                //add layer collider
+                if (layerCollider.on) 
+                {
+                    BoxCollider2D bc = g.AddComponent<BoxCollider2D>();
+                    bc.size = layerCollider.size;
+                    bc.offset = layerCollider.offset;
+                    bc.isTrigger = true;
                 }
                 //get scale
                 Vector3 scale = elementVariation.scale;

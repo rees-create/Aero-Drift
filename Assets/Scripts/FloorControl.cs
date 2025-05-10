@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class FloorControl : MonoBehaviour
 {
+    [System.Serializable]
     public struct LayerInfo { 
         public string levelName;
         public int layerLevel;
@@ -12,25 +13,6 @@ public class FloorControl : MonoBehaviour
     }
 
     public List<LayerInfo> layers;
-    public int FloorLevel
-    {
-        get { return layerLevel; }
-        set { layerLevel = value; }
-    }
-    
-    public float FloorDepth
-    {
-        get { return floorY; }
-        set { floorY = value; }
-    }
-    
-    public int NumberOfFloors
-    {
-        get { return numberOfFloors; }
-        set { numberOfFloors = value; }
-    }
-
-
 
     // Start is called before the first frame update
     void Start()
@@ -39,8 +21,16 @@ public class FloorControl : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
-        
+        if (Input.GetKey(KeyCode.W)) //move floor up, prime current layer colliders for sorting order reassignment
+        {
+
+        }
+        if (Input.GetKey(KeyCode.S)) //move floor down, prime lower layer colliders for sorting order reassignment
+        {
+
+        }
+        //when ready reassign sorting order
     }
 }
