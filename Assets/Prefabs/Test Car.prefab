@@ -380,6 +380,7 @@ GameObject:
   - component: {fileID: 4835545514155881508}
   - component: {fileID: 4835545514155881509}
   - component: {fileID: 4751555629644513424}
+  - component: {fileID: 2804362078043172856}
   m_Layer: 0
   m_Name: Test Car
   m_TagString: Untagged
@@ -472,3 +473,19 @@ MonoBehaviour:
   propertyName: speed
   animationClipName: xAcrossScene
   bounceInfluence: 1
+--- !u!114 &2804362078043172856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4835545514155881514}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d82db47c642a5a4cb3b46f20ea7cf18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colliders:
+  - on: 1
+    size: {x: 11.72, y: 7.77}
+    position: {x: -0.26, y: -0.39}

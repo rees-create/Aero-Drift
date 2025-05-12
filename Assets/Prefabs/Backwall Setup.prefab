@@ -47,8 +47,8 @@ MonoBehaviour:
   objects:
   - {fileID: 3514964614246602388, guid: 361ca3814fe4e244bb8035314bacf891, type: 3}
   - {fileID: 4024032104116503516, guid: ff657df6797cfcc45a9ad91d96e859f5, type: 3}
-  decision: 0.55600804
-  hierarchyDepth: 0
+  decision: 0.2003231
+  sortingOrder: 0
 --- !u!1 &5595143572441883048
 GameObject:
   m_ObjectHideFlags: 0
@@ -92,6 +92,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4356113031559738875}
   - component: {fileID: 397487698998174722}
+  - component: {fileID: 316530038645074541}
   m_Layer: 0
   m_Name: backwall
   m_TagString: Untagged
@@ -166,3 +167,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &316530038645074541
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6298221120356159561}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d82db47c642a5a4cb3b46f20ea7cf18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colliders:
+  - on: 1
+    size: {x: 1.1, y: 0.69}
+    position: {x: 0, y: 0}

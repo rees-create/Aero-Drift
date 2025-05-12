@@ -1,5 +1,7 @@
+using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [ExecuteInEditMode]
@@ -9,6 +11,8 @@ public class LayerColliderMap : MonoBehaviour
     public List<LayerCollider> colliders;
     [SerializeField] bool useAbsolutePosition;
     public bool clearTarget;
+    public ObjectSpawnSystem popBackController;
+
     [System.Serializable]
     public class LayerCollider
     {
@@ -41,29 +45,90 @@ public class LayerColliderMap : MonoBehaviour
             }
         }
     }
-    
-    // Start is called before the first frame update
-    void Start()
+    IEnumerator ColliderMapResetCycle() 
     {
-        
-    }
-    void OnDrawGizmos() 
-    {
-        //draw colliders
-        for (int i = 0; i < colliders.Count; i++)
+        while (true)
         {
-            if (colliders[i] != null)
+            yield return new WaitUntil(() => popBackController.popBack || colliders.Count == 0);
+            //This loop assumes that the LayerColliderMap is the first child of the parent object.
+            for (int i = 1; i < gameObject.transform.parent.childCount; i++)
             {
-                if (useAbsolutePosition)
+                SearchForLayerColliders(gameObject.transform.parent.GetChild(i).gameObject);
+            }
+        }
+    }
+    public void SearchForLayerColliders(GameObject g, Vector2 scaleMultiplier = default, Vector2 positionAddon = default)
+    {
+        //TODO: Scale multiplier and position addon
+        for (int i = 0; i < g.transform.childCount; i++)
+        {
+            LayerColliderGroup layerColliderGroup = g.transform.GetChild(i).GetComponent<LayerColliderGroup>();
+            //if (g.name.Contains("Apartment")) print("Hello?? Apartment?");
+            if (layerColliderGroup != null)
+            {
+                if (g.name.Contains("Apartment")) print("Hello?? you have a LayerColliderGroup");
+                for (int j = 0; j < layerColliderGroup.colliders.Count; j++)
                 {
-                    colliders[i].DrawCollider();
+                    if (layerColliderGroup.colliders[j].on)
+                    {
+                        //print($"Found active LayerCollider on {g.name}");
+                        LayerCollider layerCollider = layerColliderGroup.colliders[j];
+                        LayerCollider layerColliderCopy = new LayerCollider();
+                        positionAddon = layerColliderGroup.gameObject.transform.position;
+                        layerCollider.position += (Vector2) positionAddon;
+                        layerCollider.size *= scaleMultiplier;
+                        colliders.Add(layerColliderGroup.colliders[j]);
+                        print("Hello??");
+                    }
+                }
+            }
+            else 
+            {
+                if (g.transform.GetComponent<ObjectSpawnSystem>())
+                {
+                    scaleMultiplier = (Vector2) g.transform.GetComponent<ObjectSpawnSystem>().elementVariation.scale;
+                    //print($"ObjectSpawnSystem for {g.name} has scale {scaleMultiplier}");
+                }
+                if (g.transform.childCount > 0)
+                {
+                    //print($"Next step in tree: {g.transform.GetChild(i).gameObject.name}");
+                    SearchForLayerColliders(g.transform.GetChild(i).gameObject, scaleMultiplier, positionAddon);
                 }
                 else
                 {
-                    colliders[i].DrawCollider((Vector2) transform.position);
-                }       
+                    print($"dump recursion here {g.name} transform.childCount = {transform.childCount}");
+                }
             }
         }
+    }
+    // Start is called before the first frame update
+    void Start()
+    {
+        //This loop assumes that the LayerColliderMap is the first child of the parent object.
+        //for (int i = 1; i < gameObject.transform.parent.childCount; i++)
+        //{
+        //    SearchForLayerColliders(gameObject.transform.parent.GetChild(i).gameObject);
+        //}
+        StartCoroutine(ColliderMapResetCycle());
+    }
+    void OnDrawGizmos() 
+    {
+        if (colliders != null)
+            //draw colliders
+            for (int i = 0; i < colliders.Count; i++)
+            {
+                if (colliders[i] != null)
+                {
+                    if (useAbsolutePosition)
+                    {
+                        colliders[i].DrawCollider();
+                    }
+                    else
+                    {
+                        colliders[i].DrawCollider((Vector2) transform.position);
+                    }       
+                }
+            }   
     }
     // Update is called once per frame
     void FixedUpdate()

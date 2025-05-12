@@ -59,13 +59,15 @@ public class ObjectSpawnSystem : MonoBehaviour
     }
 
     [Serializable]
-    public struct LayerCollider
+    public struct LayerColliderSettings
     {
-        public bool on; 
+        public List<LayerColliderMap.LayerCollider> colliders;
+        public bool on;
         public Vector2 size;
-        public Vector2 offset;
+        public Vector2 position;
+        
     }
-    [SerializeField] LayerCollider layerCollider;
+    //[SerializeField] LayerColliderSettings layerColliderSettings;
 
     [Serializable]
     public struct ElementVariation
@@ -313,13 +315,10 @@ public class ObjectSpawnSystem : MonoBehaviour
                     g.transform.GetChild(0).GetComponent<BlueShift>().depthController = gameObject;
                 }
                 //add layer collider
-                if (layerCollider.on) 
-                {
-                    BoxCollider2D bc = g.AddComponent<BoxCollider2D>();
-                    bc.size = layerCollider.size;
-                    bc.offset = layerCollider.offset;
-                    bc.isTrigger = true;
-                }
+                //if (layerColliderSettings.on) 
+                //{
+                    
+                //}
                 //get scale
                 Vector3 scale = elementVariation.scale;
                 //potentially randomize scale

@@ -69,16 +69,17 @@
     <Compile Include="Assets\Scripts\Collectible.cs" />
     <Compile Include="Assets\Scripts\Thrower.cs" />
     <Compile Include="Assets\Scripts\GalleryView.cs" />
+    <Compile Include="Assets\Scripts\LayerColliderMap.cs" />
     <Compile Include="Assets\Scripts\DepthIllusion.cs" />
     <Compile Include="Assets\Scripts\RandomizeSpeed.cs" />
     <Compile Include="Assets\Scripts\BlueShift.cs" />
+    <Compile Include="Assets\Scripts\LayerColliderGroup.cs" />
     <Compile Include="Assets\Scripts\Planes.cs" />
     <Compile Include="Assets\Scripts\LayerCatalog.cs" />
     <Compile Include="Assets\Scripts\CollectibleHandler.cs" />
     <Compile Include="Assets\Scripts\FlightControl.cs" />
     <Compile Include="Assets\Scripts\FloorControl.cs" />
     <Compile Include="Assets\Scripts\ActionRandomizer.cs" />
-    <Compile Include="Assets\Scripts\LayerColliderMap.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

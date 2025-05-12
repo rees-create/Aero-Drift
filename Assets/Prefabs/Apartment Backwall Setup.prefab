@@ -43,6 +43,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9025332601962467672}
   - component: {fileID: 2787578880675328471}
+  - component: {fileID: 404403593368146765}
   m_Layer: 0
   m_Name: apartment building
   m_TagString: Untagged
@@ -117,6 +118,22 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &404403593368146765
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6125234415530351037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d82db47c642a5a4cb3b46f20ea7cf18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colliders:
+  - on: 1
+    size: {x: 1.35, y: 1.68}
+    position: {x: 0.05, y: 0}
 --- !u!1 &8528279885131199411
 GameObject:
   m_ObjectHideFlags: 0
@@ -164,5 +181,5 @@ MonoBehaviour:
   objects:
   - {fileID: 3514964614246602388, guid: 0d3f77d9084b1c448a49aca8bf82ab89, type: 3}
   - {fileID: 2603513139066910148, guid: f17b82019c92da34a99c3ef00fe2ed62, type: 3}
-  decision: 0.8721
-  hierarchyDepth: 0
+  decision: 0.4028111
+  sortingOrder: 0
