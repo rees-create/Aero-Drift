@@ -1,5 +1,55 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2187685816551204127
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1801799594300448183}
+  - component: {fileID: 5614428307216289684}
+  m_Layer: 0
+  m_Name: door
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1801799594300448183
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2187685816551204127}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.582, y: -0.176, z: 0.0034507816}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8858170830675360676}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5614428307216289684
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2187685816551204127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e90182c9c5729e4b8dabe921462193b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  objects:
+  - {fileID: 7124709218452112629, guid: fbc588692ea678942ad444e9159d625c, type: 3}
+  - {fileID: 3311179069486494503, guid: 442ff4a928e8a8541bd47edbd81e64d9, type: 3}
+  - {fileID: 6107792850987410535, guid: 6b8d44c7b32b9284c9641abbe302afad, type: 3}
+  decision: 0.5243502
+  sortingOrder: 0
 --- !u!1 &8858170830675360675
 GameObject:
   m_ObjectHideFlags: 0
@@ -31,6 +81,7 @@ Transform:
   - {fileID: 8858170830950221447}
   - {fileID: 8858170832320707052}
   - {fileID: 8858170831512899051}
+  - {fileID: 1801799594300448183}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -267,5 +318,5 @@ MonoBehaviour:
   objects:
   - {fileID: 8702064405427835680, guid: 54aadcd3ddbcbee43b41a121bcf3330f, type: 3}
   - {fileID: 572772200214722344, guid: 160d3fe15c518d84abb2fd8c1de4aa94, type: 3}
-  decision: 0.2703145
+  decision: 0.2091378
   sortingOrder: 0

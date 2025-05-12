@@ -19,7 +19,12 @@ public class LayerColliderMap : MonoBehaviour
         public bool on;
         public Vector2 size;
         public Vector2 position;
-
+        public LayerCollider(Vector2 size, Vector2 position, bool on)
+        {
+            this.size = size;
+            this.position = position;
+            this.on = on;
+        }
         public void DrawCollider(Vector2 worldPosition)
         { 
             Gizmos.color = on ? Color.green : Color.red;
@@ -50,6 +55,8 @@ public class LayerColliderMap : MonoBehaviour
         while (true)
         {
             yield return new WaitUntil(() => popBackController.popBack || colliders.Count == 0);
+            //reset colliders
+            colliders = new List<LayerCollider>();
             //This loop assumes that the LayerColliderMap is the first child of the parent object.
             for (int i = 1; i < gameObject.transform.parent.childCount; i++)
             {
@@ -66,19 +73,24 @@ public class LayerColliderMap : MonoBehaviour
             //if (g.name.Contains("Apartment")) print("Hello?? Apartment?");
             if (layerColliderGroup != null)
             {
-                if (g.name.Contains("Apartment")) print("Hello?? you have a LayerColliderGroup");
+                //if (g.name.Contains("Apartment")) print("Hello?? you have a LayerColliderGroup");
                 for (int j = 0; j < layerColliderGroup.colliders.Count; j++)
                 {
                     if (layerColliderGroup.colliders[j].on)
                     {
                         //print($"Found active LayerCollider on {g.name}");
                         LayerCollider layerCollider = layerColliderGroup.colliders[j];
-                        LayerCollider layerColliderCopy = new LayerCollider();
                         positionAddon = layerColliderGroup.gameObject.transform.position;
-                        layerCollider.position += (Vector2) positionAddon;
-                        layerCollider.size *= scaleMultiplier;
-                        colliders.Add(layerColliderGroup.colliders[j]);
-                        print("Hello??");
+                        LayerCollider layerColliderCopy = new LayerCollider(
+                            layerCollider.size * scaleMultiplier,
+                            layerCollider.position + positionAddon,
+                            layerCollider.on
+                        );
+                        
+                        //layerColliderCopy.position = layerCollider.position + positionAddon;
+                        //layerColliderCopy.size *= scaleMultiplier;
+                        colliders.Add(layerColliderCopy);
+                        //print("Hello??");
                     }
                 }
             }
@@ -94,10 +106,10 @@ public class LayerColliderMap : MonoBehaviour
                     //print($"Next step in tree: {g.transform.GetChild(i).gameObject.name}");
                     SearchForLayerColliders(g.transform.GetChild(i).gameObject, scaleMultiplier, positionAddon);
                 }
-                else
-                {
-                    print($"dump recursion here {g.name} transform.childCount = {transform.childCount}");
-                }
+                //else
+                //{
+                //    print($"dump recursion here {g.name} transform.childCount = {transform.childCount}");
+                //}
             }
         }
     }
