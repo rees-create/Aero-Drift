@@ -59,7 +59,7 @@ public class EscalatorAnim : MonoBehaviour
         {
             float stairPosFraction = (float)i / (float)stairs.Count;
             //Vector2 stairInitPosition = new Vector2(stairPosFraction * path.x, stairPosFraction * path.y);
-            float localAnimProgress = stairPosFraction * frames + fullCycleProgress; // if this is complete pop back stair... there's still more to do
+            float localAnimProgress = stairPosFraction * (1/frames) + fullCycleProgress; // if this is complete pop back stair... there's still more to do
             if (localAnimProgress >= 1)
             {
                 //swap stair to beginning of list
@@ -74,8 +74,8 @@ public class EscalatorAnim : MonoBehaviour
                 resetFrameCounter = true; // reset full cycle progress
             }
             Vector2 updatedPosition = Vector2.Lerp(Vector2.zero, path, localAnimProgress);
-            print($"updated position = {updatedPosition}; stair {i} height = {stairPosFraction * path}");
-            stairs[i].transform.localPosition =  (stairPosFraction * path + updatedPosition) / (Vector2)stairs[i].transform.localScale;
+            print($"localAnimProgress = {localAnimProgress}; stair {i} height = {stairPosFraction * path}");
+            stairs[i].transform.localPosition = stairPosFraction * path + ((updatedPosition) / (Vector2)stairs[i].transform.localScale);
             
         }
         frameCounter++;
