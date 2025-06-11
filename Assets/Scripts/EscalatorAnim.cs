@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Profiling;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 //[ExecuteInEditMode]
 public class EscalatorAnim : MonoBehaviour
@@ -16,22 +18,22 @@ public class EscalatorAnim : MonoBehaviour
 
     class FrameCounter 
     {
-        int count;
+        float count;
         int index;
         public FrameCounter(int index) 
         {
             this.index = index;
         }
-        public int Count
+        public float Count
         {
             get { return count; }
             set { count = value; }
         }
-        public void Increment()
+        public void Increment(float frameCount, float speed)
         {
-            count++;
+            count = (count + speed) % frameCount;
         }
-        public int CalculateFrameCount(float frames, int numberOfObjects, float squishFactor)
+        public float CalculateFrameCount(float frames, int numberOfObjects, float squishFactor)
         {
             return count + index * (int) (frames / (numberOfObjects * squishFactor));
         }
@@ -92,45 +94,18 @@ public class EscalatorAnim : MonoBehaviour
         // Move each stair to end of path vector then pop back to beginning
         
         if (playAnimation)
-        { 
+        {
             float FPS = 1 / Time.deltaTime;
-            float frames = FPS / speed;
-            
-            
-            for (int i = 0; i < stairs.Count; i++)
+            float frames = FPS / speed; // Calculate frames based on speed and FPS
+            for (int i = 0; i < numberOfObjects; i++) 
             {
-                
-                float fullCycleProgress = frameCounters[i].CalculateFrameCount(frames, numberOfObjects, squishFactor)/frames;
-                
-                float stairPosFraction = (float)i / (float)stairs.Count;
-                
-                print($"Stair {i+1}: fullCycleProgress = {fullCycleProgress}");
-                if (fullCycleProgress >= 1f)
-                {
-                    print("exceeded 1");
-                    //swap stair to beginning of list
-                    for (int j = stairs.Count; j < 1; j--)
-                    {
-                        GameObject temp = stairs[j];
-                        stairs[j] = stairs[j - 1];
-                        stairs[j - 1] = temp;
-                        DestroyImmediate(temp); //don't litter the hierarchy
-                        //swap frame counters too
-                        FrameCounter tempCounter = frameCounters[j];
-                        frameCounters[j] = frameCounters[j - 1];
-                        frameCounters[j - 1] = tempCounter;
-                    }
-                    stairs[0].transform.localPosition = Vector2.zero; // reset stair to start position
-                    
-                    frameCounters[i].Reset(); // reset frame counter for this stair
-                }
-                Vector2 updatedPosition = Vector2.Lerp(Vector2.zero, path, fullCycleProgress);
-                
-                stairs[i].transform.localPosition = (stairPosFraction/squishFactor) * path + ((updatedPosition) / (Vector2)stairs[i].transform.localScale);
-                
-                //move frame counter forward
-                frameCounters[i].Increment();
-            }           
+                float currentStairFrameCount = frameCounters[i].CalculateFrameCount(frames, numberOfObjects, squishFactor) % frames;
+                float cycleProgress = currentStairFrameCount / frames; // currentStairFrameCount normalized
+                Vector2 cycleValue = Vector2.Lerp(Vector2.zero, path, cycleProgress);
+                stairs[i].transform.localPosition = cycleValue;
+                frameCounters[i].Increment(frames, speed);
+            }
+            
         }
         
     }
