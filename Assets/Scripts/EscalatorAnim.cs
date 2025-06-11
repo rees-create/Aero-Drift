@@ -12,7 +12,7 @@ public class EscalatorAnim : MonoBehaviour
     [SerializeField] float speed;
     [SerializeField] bool playAnimation;
     List<GameObject> stairs;
-    List<FrameCounter> frameCounter;
+    List<FrameCounter> frameCounters;
 
     class FrameCounter 
     {
@@ -33,7 +33,7 @@ public class EscalatorAnim : MonoBehaviour
         }
         public int CalculateFrameCount(float frames, int numberOfObjects, float squishFactor)
         {
-            return count + index * (int)((frames / numberOfObjects) / squishFactor);
+            return count + index * (int) (frames / (numberOfObjects * squishFactor));
         }
         public void Reset()
         {
@@ -66,9 +66,9 @@ public class EscalatorAnim : MonoBehaviour
         while (true)
         {
             yield return new WaitForSeconds(1f); // Print every second
-            for (int i = 0; i < frameCounter.Count; i++)
+            for (int i = 0; i < frameCounters.Count; i++)
             {
-                Debug.Log($"Stair {i + 1} Frame Counter: {frameCounter[i]}");
+                Debug.Log($"Stair {i + 1} Frame Counter: {frameCounters[i]}");
             }
         }
     }
@@ -76,10 +76,10 @@ public class EscalatorAnim : MonoBehaviour
     void Start()
     {
         stairs = new List<GameObject>();
-        frameCounter = new List<FrameCounter>();
+        frameCounters = new List<FrameCounter>();
         for (int i = 0; i < numberOfObjects; i++)
         {
-            frameCounter.Add(new FrameCounter(i)); // Initialize frame counters for each stair
+            frameCounters.Add(new FrameCounter(i)); // Initialize frame counters for each stair
         }
         StartCoroutine(StairSpawnLoop());
         //StartCoroutine(PrintFrameCounter());
@@ -90,21 +90,20 @@ public class EscalatorAnim : MonoBehaviour
     {
 
         // Move each stair to end of path vector then pop back to beginning
-        //print("hello?");
+        
         if (playAnimation)
         { 
             float FPS = 1 / Time.deltaTime;
             float frames = FPS / speed;
             
-            //bool resetFrameCounter = false;
+            
             for (int i = 0; i < stairs.Count; i++)
             {
-                //frameCounter[i] = i * (int) ((frames / numberOfObjects) / squishFactor);
-                float fullCycleProgress = frameCounter[i].CalculateFrameCount(frames, numberOfObjects, squishFactor)/frames;
+                
+                float fullCycleProgress = frameCounters[i].CalculateFrameCount(frames, numberOfObjects, squishFactor)/frames;
                 
                 float stairPosFraction = (float)i / (float)stairs.Count;
-                //Vector2 stairInitPosition = new Vector2(stairPosFraction * path.x, stairPosFraction * path.y);
-                float localAnimProgress = stairPosFraction * (1/frames) + fullCycleProgress; // if this is complete pop back stair... there's still more to do
+                
                 print($"Stair {i+1}: fullCycleProgress = {fullCycleProgress}");
                 if (fullCycleProgress >= 1f)
                 {
@@ -116,24 +115,22 @@ public class EscalatorAnim : MonoBehaviour
                         stairs[j] = stairs[j - 1];
                         stairs[j - 1] = temp;
                         DestroyImmediate(temp); //don't litter the hierarchy
+                        //swap frame counters too
+                        FrameCounter tempCounter = frameCounters[j];
+                        frameCounters[j] = frameCounters[j - 1];
+                        frameCounters[j - 1] = tempCounter;
                     }
                     stairs[0].transform.localPosition = Vector2.zero; // reset stair to start position
-                    //resetFrameCounter = true; // reset full cycle progress
-                    frameCounter[i].Reset(); // reset frame counter for this stair
+                    
+                    frameCounters[i].Reset(); // reset frame counter for this stair
                 }
                 Vector2 updatedPosition = Vector2.Lerp(Vector2.zero, path, fullCycleProgress);
-                //print($"localAnimProgress = {localAnimProgress}; stair {i} height = {stairPosFraction * path}");
-                stairs[i].transform.localPosition = stairPosFraction * path + ((updatedPosition) / (Vector2)stairs[i].transform.localScale);
+                
+                stairs[i].transform.localPosition = (stairPosFraction/squishFactor) * path + ((updatedPosition) / (Vector2)stairs[i].transform.localScale);
                 
                 //move frame counter forward
-                frameCounter[i].Increment();
-            }
-            
-            // Reset frame counter if it exceeds the number of frames
-            //if (resetFrameCounter)
-            //{
-            //    frameCounter[] = 0;
-            //}
+                frameCounters[i].Increment();
+            }           
         }
         
     }
