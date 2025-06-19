@@ -9,7 +9,6 @@ public class EscalatorAnim : MonoBehaviour
 {
     [SerializeField] Vector2 path;
     [SerializeField] int numberOfObjects;
-    [SerializeField] float squishFactor;
     [SerializeField] GameObject stair;
     [SerializeField] float speed;
     [SerializeField] bool playAnimation;
@@ -33,13 +32,9 @@ public class EscalatorAnim : MonoBehaviour
         {
             count = (count + speed) % frameCount;
         }
-        public float CalculateFrameCount(float frames, int numberOfObjects, float squishFactor)
+        public float CalculateFrameCount(float frames, int numberOfObjects)
         {
-            return count + index * (int) (frames / (numberOfObjects * squishFactor));
-        }
-        public void Reset()
-        {
-            count = 0;
+            return count + index * (frames / numberOfObjects);
         }
 
     }
@@ -47,6 +42,7 @@ public class EscalatorAnim : MonoBehaviour
     {
         while (true)
         {
+            
             for (int i = 0; i < numberOfObjects; i++)
             {
                 GameObject newStair = Instantiate(stair);
@@ -57,23 +53,23 @@ public class EscalatorAnim : MonoBehaviour
                 
                 stairs.Add(newStair);
             }
-
+            playAnimation = true;
+            // the code below does not work properly. fuck it. there are more important things in this game than being able
+            // to change the number of escalator stairs in real time.
             int oldNumberOfObjects = numberOfObjects;
             yield return new WaitUntil(() => numberOfObjects != oldNumberOfObjects); // Delay before next cycle
-            //TODO: if going to next cycle destroy clones then recreate.
-        }
-    }
-    IEnumerator PrintFrameCounter() 
-    {
-        while (true)
-        {
-            yield return new WaitForSeconds(1f); // Print every second
-            for (int i = 0; i < frameCounters.Count; i++)
+
+            playAnimation = false; // Stop animation while destroying old stairs
+            for (int i = 0; i < oldNumberOfObjects; i++) 
             {
-                Debug.Log($"Stair {i + 1} Frame Counter: {frameCounters[i]}");
+                Destroy(stairs[i]);
             }
+            stairs = new List<GameObject>();
+            
+            //end of useless code.. well not really useless pls don't remove it
         }
     }
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -84,7 +80,7 @@ public class EscalatorAnim : MonoBehaviour
             frameCounters.Add(new FrameCounter(i)); // Initialize frame counters for each stair
         }
         StartCoroutine(StairSpawnLoop());
-        //StartCoroutine(PrintFrameCounter());
+        
     }
 
     // Update is called once per frame
@@ -99,7 +95,7 @@ public class EscalatorAnim : MonoBehaviour
             float frames = FPS / speed; // Calculate frames based on speed and FPS
             for (int i = 0; i < numberOfObjects; i++) 
             {
-                float currentStairFrameCount = frameCounters[i].CalculateFrameCount(frames, numberOfObjects, squishFactor) % frames;
+                float currentStairFrameCount = frameCounters[i].CalculateFrameCount(frames, numberOfObjects) % frames;
                 float cycleProgress = currentStairFrameCount / frames; // currentStairFrameCount normalized
                 Vector2 cycleValue = Vector2.Lerp(Vector2.zero, path, cycleProgress);
                 stairs[i].transform.localPosition = cycleValue;
