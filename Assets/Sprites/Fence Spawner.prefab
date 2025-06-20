@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &7404813377460400591
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2396866829872792488}
+  - component: {fileID: 4554478708736447585}
+  m_Layer: 0
+  m_Name: Fence Spawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2396866829872792488
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7404813377460400591}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -46.092663, y: -25.172798, z: 0.54702586}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4554478708736447585
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7404813377460400591}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8475ba0265bd17a4890a1e9a2e58645d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  element: {fileID: 67028222280809168, guid: f1324fd5d918dfc4f8a04f74acaac03a, type: 3}
+  player: {fileID: 0}
+  playerInitialPosition: {x: 0, y: 0, z: 0}
+  virtualCamera: {fileID: 0}
+  elementVariation:
+    numberOfObjects: 1
+    popBackProximity: 0
+    popBackAtLast: 0
+    phaseSeed: 0
+    randomizationCycleFrequency: 2
+    overwriteProperties:
+      type: 3
+      numberOfObjects: 1
+      spawnSpacing: 0
+      color: 0
+      position: 0
+      rotation: 0
+      scale: 0
+    spawnSpacing: {x: 0, y: 0, z: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 0}
