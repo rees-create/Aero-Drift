@@ -7,9 +7,9 @@ public class Pusher : MonoBehaviour
     
     public Animator animator;
     public string animationName;
-    public float pushSpeed;
     public Vector2 target;
-    public float slowDownAt;
+    public float pushSpeed;
+    public float slowDownProximity;
     public float slowDownDamping;
 
     // Start is called before the first frame update
@@ -25,8 +25,8 @@ public class Pusher : MonoBehaviour
             while (animator.GetCurrentAnimatorStateInfo(0).IsName(animationName))
             {
                 float time = animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
-                Push(time, initialPosition, target, slowDownAt, slowDownDamping);
-                yield return new WaitForEndOfFrame();
+                Push(time * pushSpeed, initialPosition, target, slowDownProximity, slowDownDamping);
+                yield return new WaitForFixedUpdate();
             }
             yield return new WaitUntil(() => animator.GetCurrentAnimatorStateInfo(0).IsName(animationName));
         }
@@ -44,8 +44,8 @@ public class Pusher : MonoBehaviour
         {
             //slow down as you approach destination
             Vector2 slowDownPoint = Vector2.Lerp(initialPosition, target, fullSpeedPercent);
-            Vector2 movingStartPoint = Vector2.Lerp(target - slowDownPoint, (Vector2)transform.position, 1 - slowDownDamping);
-            transform.position = Vector2.Lerp(transform.position, target, time);
+            Vector2 movingStartPoint = Vector2.Lerp(slowDownPoint, (Vector2)transform.position, 1 - slowDownDamping);
+            transform.position = Vector2.Lerp(movingStartPoint, target, time - fullSpeedPercent);
         }
     }
 
@@ -57,6 +57,6 @@ public class Pusher : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.blue;
-        Gizmos.DrawSphere(target, 0.1f);
+        Gizmos.DrawSphere(target, 0.8f);
     }
 }
