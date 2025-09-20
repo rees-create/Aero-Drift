@@ -179,8 +179,7 @@ public class ObjectSpawnSystem : MonoBehaviour
     }
 
     IEnumerator SpawnObjects()
-    {
-       
+    { 
         while (true)
         {
             if (popBack)
@@ -411,6 +410,7 @@ public class ObjectSpawnSystem : MonoBehaviour
             
 
             ElementVariation oldElementVariation = elementVariation;
+            yield return new WaitForFixedUpdate();
             yield return new WaitUntil(() => popBack || !elementVariation.Equals(oldElementVariation) || numAnimResetRequests == elementVariation.numberOfObjects);
         }
     }
@@ -429,7 +429,9 @@ public class ObjectSpawnSystem : MonoBehaviour
     void FixedUpdate()
     {
         popBack = false;
-        if (elementVariation.popBackTransform != null)
+        bool externalPopBackSetup = player == null && popBackController != null;
+
+        if (elementVariation.popBackTransform != null && !externalPopBackSetup)
         {
             if (player != null && elementVariation.popBackTransform.position.x - player.transform.position.x
                 <= elementVariation.popBackProximity) //then pop back
@@ -445,7 +447,7 @@ public class ObjectSpawnSystem : MonoBehaviour
             }
         }
         //if this system does not issue popBack, check for popBack.
-        bool externalPopBackSetup = player == null && popBackController != null;
+        
         if (externalPopBackSetup) 
         {
             if (popBackController.GetComponent<ObjectSpawnSystem>().popBack) 
@@ -453,6 +455,15 @@ public class ObjectSpawnSystem : MonoBehaviour
                 popBack = true;
             }
             
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.cyan;
+        if (elementVariation.popBackTransform != null) { 
+            Gizmos.DrawSphere(((Vector2) elementVariation.popBackTransform.position - (elementVariation.popBackProximity * Vector2.right)), 1f);
+            //Debug.Log("hello");
         }
     }
 }
