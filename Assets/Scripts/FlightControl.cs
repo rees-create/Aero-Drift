@@ -27,8 +27,9 @@ public class FlightControl : MonoBehaviour
     [SerializeField] float flapSpeed;
     [SerializeField] float flapInfluence;
     [SerializeField] bool flapsDirectlyIncreaseLift;
-    [Header("Impulse")]
+    [Header("Impetus Force")]
     public Vector2 initialThrowImpulse;
+    public float maxThrust;
     [Header("Plane Specifications")]
     public TextAsset planeSpecsFile;
     public int planeIndex;
@@ -160,7 +161,7 @@ public class FlightControl : MonoBehaviour
 
         return coefs;
     }
-    List<Vector2> AeroUpdate(Plane plane, float length) 
+    List<Vector2> AeroUpdate(Plane plane, float length, float thrustScalar) 
     {
         
         //AoA calculation from dot product of velocity and orientation
@@ -203,12 +204,12 @@ public class FlightControl : MonoBehaviour
         Vector2 liftDir = Vector3.Cross(downwind, Vector3.forward);
         Vector2 liftForce = liftDir * lift;
         Vector2 dragForce = downwind * drag;
-
+        Vector2 thrustForce = - downwind * thrustScalar;
         float torque = AeroForce(airDensity, airspeed, wingArea, Cm, momentCoefficientRange) * chordLength;
         //KeyValuePair<Vector2, float> flapImpetus = KeyboardFlapControl(dragForce, liftForce, torque, Cd, Cl);
         //torque += flapImpetus.Value;
 
-        Vector2 totalForce = liftForce + dragForce; //+ flapImpetus.Key;
+        Vector2 totalForce = liftForce + dragForce + thrustForce; //+ flapImpetus.Key;
 
 
         
@@ -253,6 +254,22 @@ public class FlightControl : MonoBehaviour
         }
         float flapFraction = flapAngle / (Mathf.PI / 2);
         return flapFraction * influence;
+    }
+
+    float thrust = 0;
+    float ApplyThrust(float maxThrust) 
+    {
+        
+        float increment = 0.01f;
+        if (Input.GetKey(KeyCode.RightArrow) && thrust <= maxThrust)
+        {
+            thrust += increment;
+        }
+        if (Input.GetKey(KeyCode.LeftArrow) && thrust >= 0)
+        {
+            thrust -= increment;
+        }
+        return thrust;
     }
 
     KeyValuePair<Vector2, float> KeyboardFlapControl(Vector2 drag, Vector2 lift, float torque, float Cd, float Cl) 
@@ -320,7 +337,7 @@ public class FlightControl : MonoBehaviour
     void FixedUpdate()
     {
         
-        forces = AeroUpdate(plane, length);
+        forces = AeroUpdate(plane, length, ApplyThrust(maxThrust));
        
     }
 }

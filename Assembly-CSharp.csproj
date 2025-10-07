@@ -81,8 +81,9 @@
     <Compile Include="Assets\Scripts\Pusher.cs" />
     <Compile Include="Assets\Scripts\FloorControl.cs" />
     <Compile Include="Assets\Scripts\EscalatorAnim.cs" />
-    <Compile Include="Assets\Scripts\ActionRandomizer.cs" />
     <Compile Include="Assets\Scripts\PopBackSync.cs" />
+    <Compile Include="Assets\Scripts\ActionRandomizer.cs" />
+    <Compile Include="Assets\Scripts\NPCMarkovBrain.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
