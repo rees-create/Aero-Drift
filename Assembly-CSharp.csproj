@@ -75,6 +75,7 @@
     <Compile Include="Assets\Scripts\BlueShift.cs" />
     <Compile Include="Assets\Scripts\LayerColliderGroup.cs" />
     <Compile Include="Assets\Scripts\Planes.cs" />
+    <Compile Include="Assets\Scripts\NPCMarkovBrain.cs" />
     <Compile Include="Assets\Scripts\LayerCatalog.cs" />
     <Compile Include="Assets\Scripts\CollectibleHandler.cs" />
     <Compile Include="Assets\Scripts\FlightControl.cs" />
@@ -83,7 +84,6 @@
     <Compile Include="Assets\Scripts\EscalatorAnim.cs" />
     <Compile Include="Assets\Scripts\PopBackSync.cs" />
     <Compile Include="Assets\Scripts\ActionRandomizer.cs" />
-    <Compile Include="Assets\Scripts\NPCMarkovBrain.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

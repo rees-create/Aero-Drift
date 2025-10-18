@@ -1,0 +1,13 @@
+{
+    "HumanNPC": 
+    {
+        "ProbabilityTransitionMatrix": 
+        [
+            ["E", "E", 0, "PA", "PA", "PA"],
+            ["E", "E", "E PA", "PA", "PA", "PA"],
+            ["PA", "PA", "E PA", 0, 0, 0],
+            ["PA", "E PA", "E PA", "PA", 0, "PA"],
+            ["PA", "PA", "E PA", 0, 0, 0]
+        ]
+    }
+}
