@@ -7,6 +7,8 @@ using UnityEngine.UIElements;
 
 public class Thrower : MonoBehaviour
 {
+    [Header("Activation")]
+    public bool active;
     [Header("Game Objects")]
     public GameObject plane;
     public GameObject dash;

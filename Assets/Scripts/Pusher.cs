@@ -1,16 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using UnityEngine;
 
 public class Pusher : MonoBehaviour
 {
-    
+    public bool active;
     public Animator animator;
     public string animationName;
     public Vector2 target;
     public float pushSpeed;
     public float slowDownProximity;
     public float slowDownDamping;
+    public GameObject popBackController;
 
     // Start is called before the first frame update
     void Start()
@@ -47,6 +49,27 @@ public class Pusher : MonoBehaviour
             Vector2 movingStartPoint = Vector2.Lerp(slowDownPoint, (Vector2)transform.position, 1 - slowDownDamping);
             transform.position = Vector2.Lerp(movingStartPoint, target, time - fullSpeedPercent);
         }
+    }
+    public Vector2 DistanceToTarget(float explorativity, float maxTargetDistance) {
+        //target position is chosen as the distance to a random block (out of main blocks/pop back controller)
+        Vector2 mainBlockPosition = popBackController.transform.position;
+        Vector2 spawnSpacing = popBackController.GetComponent<ObjectSpawnSystem>().elementVariation.spawnSpacing;
+        float blockRange = Mathf.Floor(maxTargetDistance * explorativity / spawnSpacing.magnitude);
+        float blockOffset = (mainBlockPosition.x - transform.position.x) / spawnSpacing.magnitude;
+        Vector2 targetPosition = transform.position;
+        //based on block offset set target position
+        if (blockOffset >= 0) //positive offset
+        {
+            //add offset to maximum range
+            targetPosition = blockOffset * spawnSpacing + blockRange * spawnSpacing;
+        }
+        else //negative offset
+        {
+            //effectiveOffset flips negative fractional offset to put start point at next main block.
+            float effectiveOffset = (1 - (Mathf.Abs(blockOffset) % 1));
+            targetPosition = effectiveOffset * spawnSpacing + blockRange * spawnSpacing;
+        }
+        return targetPosition;
     }
 
     // Update is called once per frame

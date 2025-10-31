@@ -1,12 +1,23 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Numerics;
+using System.Reflection;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class NPCMarkovBrain : MonoBehaviour
 {
-    enum NPCState { 
+    public struct NPCParams {
+        [Header("Behavioral Parameters")]
+        public float planeAffinity;
+        public float explorativity;
+        [Header("Extra control")]
+        public float maxTargetDistance;
+        public float decisionVolatility;
+    }
+    public NPCParams NPCParameters;
+    public enum NPCState
+    {
         Standing,
         Moving,
         SwitchingLayer,
@@ -14,8 +25,106 @@ public class NPCMarkovBrain : MonoBehaviour
         CatchingPlane,
         DestroyingPlane
     }
+    public NPCState initState;
+    void SelectAction(NPCState state) {
+        switch (state) {
+            case NPCState.Standing:
+                //call standing action
+                break;
+            case NPCState.Moving:
+                gameObject.GetComponent<Pusher>().active = true;
+                break;
+            case NPCState.SwitchingLayer:
+                //call switching layer action
+                break;
+            case NPCState.ThrowingPlane:
+                gameObject.GetComponent<Thrower>().active = true;
+                break;
+            case NPCState.CatchingPlane:
+                //call catching plane action
+                break;
+            case NPCState.DestroyingPlane:
+                //call destroying plane action
+                break;
+        }
+    }
+    bool NoState()
+    {
+        if (
+            gameObject.GetComponent<Pusher>().active == false &&
+            gameObject.GetComponent<Thrower>().active == false
+           )
+            return true;
+        else
+            return false;
+    }
+
+    public GameObject plane;
+    public GameObject popBackController;
+
+    void FisherYatesShuffle<T>(T[] array)
+    {
+        System.Random random = new System.Random();
+        int n = array.Length;
+
+        for (int i = n - 1; i > 0; i--)
+        {
+            int j = random.Next(0, i + 1);
+
+            T temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
+        }
+    }
+    //Express stationary distribution (NPCState-enumerated) as a function of NPC control parameters:
+    /**
+     * - targetDistance
+     * - planeDistance
+     * 
+     * - planeAffinity
+     * - explorativity
+     */
+    double[] distributeBias(double bias, int size, int sign) {
+        int actualSize = size + (size % 2);
+        double[] distribution = new double[actualSize];
+        for (int i = 0; i < actualSize; i++)
+        {
+            distribution[i] = bias * sign * ((i % 2) * 2 - 1);
+        }
+        return distribution;
+    }
+    
+    /**
+     * <summary>
+     * Converts NPC control parameters to a stationary distribution over NPC states.
+     * Probably unnecessarily compact.
+     * </summary>
+     */
+    double[] ParamsToStatDist(float targetDistance, float planeDistance, float planeAffinity, float explorativity, float maxBias)
+    {
+        // Placeholder function: implement the actual mapping logic
+        double[] stationaryDistribution = new double[6];
+        //Plane Affinity affects Throwing/Catching/Destroying, and motion based on planeDistance
+        stationaryDistribution[(int)NPCState.ThrowingPlane] = 0;
+        for (int i = 0; i < 3; i++) {
+            //mod switch
+            int modSwitch = (i % 2) * 2 - 1;
+            //create bias lists with alternating signs. 
+            double[] biases = distributeBias(UnityEngine.Random.Range(0, maxBias), 3, modSwitch);
+            //create bias lists with alternating signs
+            double planeIX = planeDistance * (0.5 + biases[0])
+                + targetDistance * (0.25 + biases[1]) + planeAffinity * (0.25 + biases[2]) + biases[3];
+            double motionIX = planeDistance * (0.4 + biases[0]) + targetDistance * (0.3 + biases[1])
+                + explorativity * (0.3 + biases[2]) + biases[3];
+
+            stationaryDistribution[i] = planeIX;
+            stationaryDistribution[i + 3] = motionIX;
+        }
+        
+        return stationaryDistribution;
+    }
     /// <summary>
-    /// TODO: AI-generated function, validate that everything works as intended
+    /// AI-generated function, tested and everything works as intended
     /// 
     /// 
     /// Generates a transition matrix for a Markov chain with the given stationary distribution.
@@ -133,17 +242,55 @@ public class NPCMarkovBrain : MonoBehaviour
 
         return transitionMatrix;
     }
-    //then make the probability transition matrix
-    float[,] transitionMatrix = new float[6, 6];
-    void MapState(NPCState state, float[] mapping) {
-        int i = (int) state;
-        for (int j = 0; j < mapping.Length; j++)
+    
+    IEnumerator NPCBehaviorRoutine()
+    {
+        while (true)
         {
-            transitionMatrix[i, j] = mapping[j];
+            Vector2 targetPosition = gameObject.GetComponent<Pusher>().DistanceToTarget(
+                NPCParameters.explorativity,
+                NPCParameters.maxTargetDistance
+            );
+
+            float targetDistance = Vector3.Distance(transform.position, targetPosition);
+            float planeDistance = Vector3.Distance(transform.position, plane.transform.position);
+            double[] statDist = ParamsToStatDist(
+                targetDistance,
+                planeDistance,
+                NPCParameters.planeAffinity,
+                NPCParameters.explorativity,
+                0.5f
+            );
+            double[,] transitionMatrix = GenerateTransitionMatrix(statDist);
+            // From initial state, make choice and call appropriate state action class
+            double[] probabilityRow = new double[6];
+            for (int i = 0; i < statDist.Length; i++) {
+                probabilityRow[i] = transitionMatrix[(int)initState, i];
+            }
+            FisherYatesShuffle(probabilityRow);
+            double randValue = UnityEngine.Random.Range(0f, 1f);
+            double accumulatedProb = 0;
+            NPCState decision = 0;
+            for (int i = 0; i < statDist.Length; i++)
+            {
+                if (accumulatedProb < randValue)
+                {
+                    accumulatedProb += probabilityRow[i];
+                }
+                else
+                {
+                    decision = (NPCState) i;
+                    break;
+                }
+            }
+            if (NoState() || UnityEngine.Random.Range(0f, 1f) < NPCParameters.decisionVolatility)
+            {
+                SelectAction(decision);
+            }
+            yield return new WaitForSeconds(0.2f); // approx human reaction time
         }
     }
-    //Now handle stationary distribution. This is the transition matrix/left eigenvalue
-    
+
     // Start is called before the first frame update
     void Start()
     {
