@@ -44,6 +44,8 @@ public class Thrower : MonoBehaviour
     Vector3 oldBaitPosition;
     //PoseLerp throwFlex;
     Vector3[] baitPosDiffs = new Vector3[2];
+
+    int thrownSwitch = 0;
     
     void MakeDashes(float throwLineLength, Vector3 mousePosition) 
     {
@@ -132,6 +134,7 @@ public class Thrower : MonoBehaviour
         throwNormalizedTime = throwNormalizedTimes[diffSwitch];
         if (!thrown)
         {
+            thrownSwitch = 0;
             animator.enabled = false;
             pointerPosition = Input.mousePosition;
             pointerWorldPosition = Camera.main.ScreenToWorldPoint(pointerPosition);
@@ -171,6 +174,7 @@ public class Thrower : MonoBehaviour
     {
         
         thrown = true;
+        thrownSwitch++;
         //play animation if there is a bait (animated object to follow)
         if (bait != null && animator != null && animationName != null && triggerName != null)
         { 
@@ -181,11 +185,14 @@ public class Thrower : MonoBehaviour
             follow = false;
             
         }
-        //launch plane
-        plane.GetComponent<Rigidbody2D>().gravityScale = 1;
-        plane.GetComponent<FlightControl>().enabled = true;
-        plane.GetComponent<PolygonCollider2D>().enabled = true;
-        
+        if (thrownSwitch < 2)
+        {
+            //launch plane
+            plane.GetComponent<Rigidbody2D>().gravityScale = 1;
+            plane.GetComponent<FlightControl>().enabled = true;
+            plane.GetComponent<PolygonCollider2D>().enabled = true;
+        }
+
         if (throwVector.magnitude < maxThrowIntensity)
         {
             plane.GetComponent<FlightControl>().initialThrowImpulse = -throwVector;
