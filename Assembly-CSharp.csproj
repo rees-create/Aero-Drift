@@ -61,6 +61,7 @@
     <Compile Include="Assets\Scripts\CloudAnimationRandomizer.cs" />
     <Compile Include="Assets\Scripts\VariableObject.cs" />
     <Compile Include="Assets\Scripts\CatchPlane.cs" />
+    <Compile Include="Assets\Scripts\Stand.cs" />
     <Compile Include="Assets\Scripts\WindField.cs" />
     <Compile Include="Assets\Scripts\Plane.cs" />
     <Compile Include="Assets\Scripts\AnimationRandomizer.cs" />
