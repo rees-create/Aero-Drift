@@ -76,7 +76,7 @@ public class CatchPlane : MonoBehaviour
                     // Move player to catch spot
 
                     player.transform.position = (Vector3) Vector2.Lerp(incomingPosition, localCatchSpot, (float) animTime / (float) animFrameCount);
-                    print($"where i want it: {Vector2.Lerp(incomingPosition, catchSpot, animTime / animFrameCount)}, where it is: {player.transform.position}, animFraction: {(float)animTime / (float)animFrameCount}");
+                    //print($"where i want it: {Vector2.Lerp(incomingPosition, catchSpot, animTime / animFrameCount)}, where it is: {player.transform.position}, animFraction: {(float)animTime / (float)animFrameCount}");
                     if (animTime == animFrameCount - 1)
                     {
                         // Reached catch radius, stop following
