@@ -9,33 +9,119 @@ public class Stand : MonoBehaviour
 {
     public bool active;
     public bool recordingStance;
+
+    public UnwrapObject beforeStance;
+    public UnwrapObject stance;
+    public List<UnwrapObject> afterStances;
+
+
+    [System.Serializable]
+    public class TransformKVP {
+        public GameObject key;
+        public Vector3 value;
+        public TransformKVP(GameObject key, Vector3 value)
+        {
+            this.key = key;
+            this.value = value;
+        }
+
+        public static bool KVPListContains(List<TransformKVP> list, GameObject key)
+        {
+            foreach (TransformKVP kvp in list)
+            {
+                if (kvp.key.Equals(key))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public static void KVPListModify(ref List<TransformKVP> list, GameObject key, TransformKVP newValue)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i].key.Equals(key))
+                {
+                    list[i] = newValue;
+                    break;
+                }
+            }
+        }
+        public static TransformKVP KVPListGet(List<TransformKVP> list, GameObject newKey)
+        {
+            print($"List count: {list.Count}");
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i].key.Equals(newKey))
+                {
+                    return list[i];
+                }
+            }
+            return null;
+        }
+    }
     [System.Serializable]
     public class UnwrapObject
     {
         public bool setStance;
         //Recursively scan through all child objects for position, rotation and scale
-        public Dictionary<GameObject, Vector3> position = new Dictionary<GameObject, Vector3>();
-        public Dictionary<GameObject, Vector3> rotation = new Dictionary<GameObject, Vector3>();
-        public Dictionary<GameObject, Vector3> scale = new Dictionary<GameObject, Vector3>();
+        [SerializeField] public List<TransformKVP> position = new List<TransformKVP>();
+        public List<TransformKVP> rotation = new List<TransformKVP>();
+        public List<TransformKVP> scale = new List<TransformKVP>();
         
 
         public UnwrapObject interpolatedUnwrap;
+
+        bool KVPListContains<T, U>(List<KeyValuePair<T, U>> list, T key)
+        {
+            foreach (KeyValuePair<T, U> kvp in list)
+            {
+                if (kvp.Key.Equals(key))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public void KVPListModify<T, U>(ref List<KeyValuePair<T, U>> list, T key, KeyValuePair<T, U> newValue)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i].Key.Equals(key))
+                {
+                    list[i] = newValue;
+                    break;
+                }
+            }
+        }
+        public KeyValuePair<T, U> KVPListGet<T, U>(List<KeyValuePair<T, U>> list, T key) 
+        {
+            print($"List count: {list.Count}");
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i].Key.Equals(key))
+                {
+                    return list[i];
+                }
+            }
+            return new KeyValuePair<T, U>();
+        }
 
         public void SetTransforms(Transform parent)
         {
             for (int i = 0; i < parent.childCount; i++)
             {
-                if (!position.ContainsKey(parent.GetChild(i).gameObject))
+                if (!TransformKVP.KVPListContains(position, parent.GetChild(i).gameObject))
                 {
-                    position.Add(parent.GetChild(i).gameObject, parent.GetChild(i).localPosition);
+                    position.Add(new TransformKVP(parent.GetChild(i).gameObject, parent.GetChild(i).localPosition));
                 }
-                if (!rotation.ContainsKey(parent.GetChild(i).gameObject))
+                if (!TransformKVP.KVPListContains(rotation, parent.GetChild(i).gameObject))
                 { 
-                    rotation.Add(parent.GetChild(i).gameObject, parent.GetChild(i).localEulerAngles);
+                    rotation.Add(new TransformKVP(parent.GetChild(i).gameObject, parent.GetChild(i).localEulerAngles));
                 }
-                if (!scale.ContainsKey(parent.GetChild(i).gameObject))
+                if (!TransformKVP.KVPListContains(scale, parent.GetChild(i).gameObject))
                 {
-                    scale.Add(parent.GetChild(i).gameObject, parent.GetChild(i).localScale);
+                    scale.Add(new TransformKVP(parent.GetChild(i).gameObject, parent.GetChild(i).localScale));
                 }
                 // Recursively scan children
                 if (parent.GetChild(i).childCount > 0)
@@ -55,22 +141,33 @@ public class Stand : MonoBehaviour
             //scan the object
             //test code
             string list = "";
-            foreach (GameObject g in position.Keys)
+            foreach (TransformKVP pair in position)
             {
-                list += g.name + ", ";
+                list += pair.key.name + ", ";
             }
             string that_list = "";
-            foreach (GameObject g in that.position.Keys)
+            foreach (TransformKVP pair in that.position)
             {
-                list += g.name + ", ";
+                that_list += pair.key.name + ", ";
             }
             print($"{parent.gameObject.name} position dict keys: {list}, that position dict keys: {that_list}");
             //end test code
             foreach (Transform child in parent)
             {
-                interpolatedUnwrap.position[child.gameObject] = Vector3.Lerp(this.position[child.gameObject], that.position[child.gameObject], t);
-                interpolatedUnwrap.rotation[child.gameObject] = Vector3.Lerp(this.rotation[child.gameObject], that.rotation[child.gameObject], t);
-                interpolatedUnwrap.scale[child.gameObject] = Vector3.Lerp(this.scale[child.gameObject], that.scale[child.gameObject], t);
+                Vector3 localPosition = TransformKVP.KVPListGet(this.position, child.gameObject).value;
+                Vector3 thatPosition = TransformKVP.KVPListGet(that.position, child.gameObject).value;
+                TransformKVP positionPair = new TransformKVP(child.gameObject, Vector3.Lerp(localPosition, thatPosition, t)); 
+                TransformKVP.KVPListModify(ref interpolatedUnwrap.position, child.gameObject, positionPair);
+
+                Vector3 localRotation = TransformKVP.KVPListGet(this.rotation, child.gameObject).value;
+                Vector3 thatRotation = TransformKVP.KVPListGet(that.rotation, child.gameObject).value;
+                TransformKVP rotationPair = new TransformKVP(child.gameObject, Vector3.Lerp(localRotation, thatRotation, t));
+                TransformKVP.KVPListModify(ref interpolatedUnwrap.rotation, child.gameObject, rotationPair); 
+
+                Vector3 localScale = TransformKVP.KVPListGet(this.rotation, child.gameObject).value;
+                Vector3 thatScale = TransformKVP.KVPListGet(that.rotation, child.gameObject).value;
+                TransformKVP scalePair = new TransformKVP(child.gameObject, Vector3.Lerp(localScale, thatScale, t));
+                TransformKVP.KVPListModify(ref interpolatedUnwrap.scale, child.gameObject, scalePair);
                 // Recursively scan children
                 if (child.childCount > 0)
                     ThisToThat(child, that, t);
@@ -78,9 +175,7 @@ public class Stand : MonoBehaviour
         }
 
     }
-    public UnwrapObject beforeStance;
-    public UnwrapObject stance;
-    public List<UnwrapObject> afterStances;
+    
     IEnumerator SetStances()
     {
         while (recordingStance) 
@@ -127,14 +222,14 @@ public class Stand : MonoBehaviour
 
                 //test code
                 string list = "";
-                foreach (GameObject g in beforeStance.position.Keys)
+                foreach (TransformKVP pair in beforeStance.position)
                 {
-                    list += g.name + ", ";
+                    list += pair.key.name + ", ";
                 }
                 string that_list = "";
-                foreach (GameObject g in beforeStance.position.Keys)
+                foreach (TransformKVP pair in stance.position)
                 {
-                    list += g.name + ", ";
+                    that_list += pair.key.name + ", ";
                 }
                 print($"position dict keys: {list}, that position dict keys: {that_list}");
                 //end test code
