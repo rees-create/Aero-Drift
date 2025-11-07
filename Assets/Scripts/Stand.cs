@@ -13,6 +13,7 @@ public class Stand : MonoBehaviour
     public UnwrapObject beforeStance;
     public UnwrapObject stance;
     public List<UnwrapObject> afterStances;
+    public float animationSeconds;
 
 
     [System.Serializable]
@@ -49,7 +50,6 @@ public class Stand : MonoBehaviour
         }
         public static TransformKVP KVPListGet(List<TransformKVP> list, GameObject newKey)
         {
-            print($"List count: {list.Count}");
             for (int i = 0; i < list.Count; i++)
             {
                 if (list[i].key.Equals(newKey))
@@ -68,43 +68,16 @@ public class Stand : MonoBehaviour
         [SerializeField] public List<TransformKVP> position = new List<TransformKVP>();
         public List<TransformKVP> rotation = new List<TransformKVP>();
         public List<TransformKVP> scale = new List<TransformKVP>();
-        
 
         public UnwrapObject interpolatedUnwrap;
 
-        bool KVPListContains<T, U>(List<KeyValuePair<T, U>> list, T key)
+        Vector3 LerpAngle(Vector3 a, Vector3 b, float t) 
         {
-            foreach (KeyValuePair<T, U> kvp in list)
-            {
-                if (kvp.Key.Equals(key))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-        public void KVPListModify<T, U>(ref List<KeyValuePair<T, U>> list, T key, KeyValuePair<T, U> newValue)
-        {
-            for (int i = 0; i < list.Count; i++)
-            {
-                if (list[i].Key.Equals(key))
-                {
-                    list[i] = newValue;
-                    break;
-                }
-            }
-        }
-        public KeyValuePair<T, U> KVPListGet<T, U>(List<KeyValuePair<T, U>> list, T key) 
-        {
-            print($"List count: {list.Count}");
-            for (int i = 0; i < list.Count; i++)
-            {
-                if (list[i].Key.Equals(key))
-                {
-                    return list[i];
-                }
-            }
-            return new KeyValuePair<T, U>();
+            return new Vector3(
+                Mathf.LerpAngle(a.x, b.x, t),
+                Mathf.LerpAngle(a.y, b.y, t),
+                Mathf.LerpAngle(a.z, b.z, t)
+            );
         }
 
         public void SetTransforms(Transform parent)
@@ -139,39 +112,34 @@ public class Stand : MonoBehaviour
             interpolatedUnwrap = new UnwrapObject();
             interpolatedUnwrap.SetTransforms(parent);
             //scan the object
-            //test code
-            string list = "";
-            foreach (TransformKVP pair in position)
-            {
-                list += pair.key.name + ", ";
-            }
-            string that_list = "";
-            foreach (TransformKVP pair in that.position)
-            {
-                that_list += pair.key.name + ", ";
-            }
-            print($"{parent.gameObject.name} position dict keys: {list}, that position dict keys: {that_list}");
-            //end test code
+            
             foreach (Transform child in parent)
             {
                 Vector3 localPosition = TransformKVP.KVPListGet(this.position, child.gameObject).value;
                 Vector3 thatPosition = TransformKVP.KVPListGet(that.position, child.gameObject).value;
                 TransformKVP positionPair = new TransformKVP(child.gameObject, Vector3.Lerp(localPosition, thatPosition, t)); 
                 TransformKVP.KVPListModify(ref interpolatedUnwrap.position, child.gameObject, positionPair);
+                child.gameObject.transform.localPosition = positionPair.value; //apply interpolated position
 
                 Vector3 localRotation = TransformKVP.KVPListGet(this.rotation, child.gameObject).value;
                 Vector3 thatRotation = TransformKVP.KVPListGet(that.rotation, child.gameObject).value;
-                TransformKVP rotationPair = new TransformKVP(child.gameObject, Vector3.Lerp(localRotation, thatRotation, t));
-                TransformKVP.KVPListModify(ref interpolatedUnwrap.rotation, child.gameObject, rotationPair); 
+                TransformKVP rotationPair = new TransformKVP(child.gameObject, LerpAngle(localRotation, thatRotation, t));
+                TransformKVP.KVPListModify(ref interpolatedUnwrap.rotation, child.gameObject, rotationPair);
+                child.gameObject.transform.localEulerAngles = rotationPair.value; //apply interpolated rotation
 
-                Vector3 localScale = TransformKVP.KVPListGet(this.rotation, child.gameObject).value;
-                Vector3 thatScale = TransformKVP.KVPListGet(that.rotation, child.gameObject).value;
+                Vector3 localScale = TransformKVP.KVPListGet(this.scale, child.gameObject).value;
+                Vector3 thatScale = TransformKVP.KVPListGet(that.scale, child.gameObject).value;
                 TransformKVP scalePair = new TransformKVP(child.gameObject, Vector3.Lerp(localScale, thatScale, t));
                 TransformKVP.KVPListModify(ref interpolatedUnwrap.scale, child.gameObject, scalePair);
+                print($"scalePairValue: {scalePair.value}, orig scale: {localScale}, final scale: {thatScale}");
+                child.gameObject.transform.localScale = scalePair.value; //apply interpolated scale
+
                 // Recursively scan children
                 if (child.childCount > 0)
                     ThisToThat(child, that, t);
             }
+            print($"t = {t}, {parent.gameObject.name} position = {parent.position}");
+            
         }
 
     }
@@ -187,7 +155,7 @@ public class Stand : MonoBehaviour
             }
             if (stance.setStance)
             {
-                print("after stance set");
+                print("stance set");
                 stance.SetTransforms(gameObject.transform);
             }
             for (int i = 0; i < afterStances.Count; i++)
@@ -206,7 +174,7 @@ public class Stand : MonoBehaviour
         while (animTime <= 1)
         {
             stance1.ThisToThat(gameObject.transform, stance2, animTime);
-            animTime += (Time.deltaTime / 1f); //1 second transition time
+            animTime += (Time.deltaTime / animationSeconds); //1 second transition time
             yield return new WaitForEndOfFrame();
         }
     }
@@ -219,21 +187,6 @@ public class Stand : MonoBehaviour
             {
                 print("recording stance");
                 StartCoroutine(SetStances());
-
-                //test code
-                string list = "";
-                foreach (TransformKVP pair in beforeStance.position)
-                {
-                    list += pair.key.name + ", ";
-                }
-                string that_list = "";
-                foreach (TransformKVP pair in stance.position)
-                {
-                    that_list += pair.key.name + ", ";
-                }
-                print($"position dict keys: {list}, that position dict keys: {that_list}");
-                //end test code
-
             }
             yield return new WaitUntil(()=> active == true);
             if (state == TransitionState.In)

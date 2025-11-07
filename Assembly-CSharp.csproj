@@ -86,6 +86,7 @@
     <Compile Include="Assets\Scripts\EscalatorAnim.cs" />
     <Compile Include="Assets\Scripts\PopBackSync.cs" />
     <Compile Include="Assets\Scripts\ActionRandomizer.cs" />
+    <Compile Include="Assets\Scripts\DestroyPlane.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
