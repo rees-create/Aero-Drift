@@ -11,15 +11,19 @@ public class DestroyPlane : MonoBehaviour
     // activate CatchPlane in Destroy mode.
 
     //If none are active within a time limit, deactivate DestroyPlane.
-    bool active;
+    [Header("IX Control")]
+    public bool active;
     float destroyTimeLimit;
-    AnimationClip planeCrumple;
-    AnimationClip handCrumple;
-    GameObject plane;
-    GameObject foot;
+    [Header("Animations")]
+    public AnimationClip planeCrumple;
+    public AnimationClip handCrumple;
+    public AnimationClip stomp;
+    public GameObject plane;
+    public GameObject hand;
+    public GameObject foot;
 
-    float catchRadius;
-    float stompRadius;
+    public float catchRadius;
+    public float stompRadius;
     
     // Start is called before the first frame update
     void Start()
@@ -27,23 +31,36 @@ public class DestroyPlane : MonoBehaviour
         
     }
 
-    IEnumerator CatchAndWait() 
+    IEnumerator CatchAndDestroy(CrumpleType crumpleType) 
     {
         GetComponent<CatchPlane>().catchRadius += 3.5f; //hahaha
         GetComponent<CatchPlane>().active = true;
-        yield return new WaitUntil(()=>GetComponent<CatchPlane>().active == false); //until plane is caught
+        yield return new WaitUntil(()=>GetComponent<CatchPlane>().active == false); // until plane is caught
+        StartCoroutine(Crumple(crumpleType));
+        plane.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic; //let it fall;
     }
-    IEnumerator PlaneCrumple() 
+
+    enum CrumpleType { Hand, Foot }
+    IEnumerator Crumple(CrumpleType type) 
     {
         float t = 0;
         while (t < 1) 
         {
             planeCrumple.SampleAnimation(plane, t);
+            if (type == CrumpleType.Hand)
+            {
+                handCrumple.SampleAnimation(hand, t);
+            }
+            else if (type == CrumpleType.Foot)
+            { 
+                stomp.SampleAnimation(foot, t);
+            }
             t++;
             yield return new WaitForEndOfFrame();
         }
-        StopCoroutine(PlaneCrumple());
+        StopCoroutine(Crumple(type));
     }
+    
     // Update is called once per frame
     void Update()
     {
@@ -53,14 +70,13 @@ public class DestroyPlane : MonoBehaviour
             //catch and destroy plane
             if (GetComponent<CatchPlane>()) 
             {
-                StartCoroutine(CatchAndWait());
-
-
+                StartCoroutine(CatchAndDestroy(CrumpleType.Hand));
             }
         }
         if (withinStompRadius)
         {
             //stomp on plane to destroy
+            StartCoroutine(Crumple(CrumpleType.Foot));
         }
     }
 }
