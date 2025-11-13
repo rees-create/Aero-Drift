@@ -28,16 +28,22 @@ public class DestroyPlane : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        StartCoroutine(ActionLoop());
     }
 
     IEnumerator CatchAndDestroy(CrumpleType crumpleType) 
     {
-        GetComponent<CatchPlane>().catchRadius += 3.5f; //hahaha
+        print("catch and destroy started");
+        //GetComponent<CatchPlane>().catchRadius += 3.5f; //hahaha
         GetComponent<CatchPlane>().active = true;
         yield return new WaitUntil(()=>GetComponent<CatchPlane>().active == false); // until plane is caught
+        print("catch plane deactivated");
         StartCoroutine(Crumple(crumpleType));
-        plane.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic; //let it fall;
+        //let it fall;
+        plane.GetComponent<PolygonCollider2D>().enabled = true;
+        plane.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
+        plane.GetComponent<Rigidbody2D>().gravityScale = 1;
+        StopCoroutine(CatchAndDestroy(crumpleType));
     }
 
     enum CrumpleType { Hand, Foot }
@@ -55,28 +61,48 @@ public class DestroyPlane : MonoBehaviour
             { 
                 stomp.SampleAnimation(foot, t);
             }
-            t++;
+            t += Time.deltaTime / 0.3f; //crumple in 0.3 seconds
             yield return new WaitForEndOfFrame();
         }
+        print("plane crumpled");
         StopCoroutine(Crumple(type));
     }
-    
+
     // Update is called once per frame
-    void Update()
+    IEnumerator ActionLoop()
     {
-        bool withinCatchRadius = Vector3.Distance(plane.transform.position, gameObject.transform.position) < catchRadius;
-        bool withinStompRadius = Vector3.Distance(foot.transform.position, gameObject.transform.position) < stompRadius;
-        if (withinCatchRadius) {
-            //catch and destroy plane
-            if (GetComponent<CatchPlane>()) 
+        while (true)
+        { //game loop
+            while (active)
             {
-                StartCoroutine(CatchAndDestroy(CrumpleType.Hand));
+                
+                bool withinCatchRadius = Vector3.Distance(plane.transform.position, transform.position) < catchRadius;
+                bool withinStompRadius = Vector3.Distance(foot.transform.position, plane.transform.position) < stompRadius;
+
+                //yield return new WaitUntil(() => withinCatchRadius || withinStompRadius);
+                
+                if (withinCatchRadius)
+                {
+                    print("within catch range");
+                    //catch and destroy plane
+                    if (GetComponent<CatchPlane>())
+                    {
+                        StartCoroutine(CatchAndDestroy(CrumpleType.Hand));
+                        active = false;
+                    }
+                }
+                if (withinStompRadius)
+                {
+                    //stomp on plane to destroy
+                    print("within stomp range");
+                    StartCoroutine(Crumple(CrumpleType.Foot));
+                    active = false;
+                }
+                yield return new WaitForEndOfFrame();
             }
-        }
-        if (withinStompRadius)
-        {
-            //stomp on plane to destroy
-            StartCoroutine(Crumple(CrumpleType.Foot));
+            yield return new WaitUntil(() => active);
         }
     }
+
+
 }
