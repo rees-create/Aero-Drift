@@ -33,7 +33,8 @@ public class CatchPlane : MonoBehaviour
     //Follow plane until plane is in catch radius while playing walking animation
     public IEnumerator PlayCatchFollow(float speedFraction)
     {
-        
+        // TODO: Instead of waiting for catch radius trigger, have a wider read radius to monitor local catch spot and
+        // prevent teleportation.
         while (true) { 
             //Initializations
             int animTime = 0;
@@ -47,7 +48,7 @@ public class CatchPlane : MonoBehaviour
 
                 // Check distance to player
                 float distanceToPlayer = Vector3.Distance(transform.position, player.transform.position);
-                if (Mathf.Abs(distanceToPlayer - catchRadius) < 2)
+                if (Mathf.Abs(distanceToPlayer - catchRadius) < 2) // fulfil above TODO here. ?
                 {
                     print("about at radius");
                     //disable physics
