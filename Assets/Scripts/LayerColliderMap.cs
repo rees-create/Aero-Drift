@@ -19,6 +19,9 @@ public class LayerColliderMap : MonoBehaviour
         public bool on;
         public Vector2 size;
         public Vector2 position;
+        [Range(-1, 1)]
+        public int directionToLayer;
+
         public LayerCollider(Vector2 size, Vector2 position, bool on)
         {
             this.size = size;

@@ -8,6 +8,7 @@ public class Pusher : MonoBehaviour
     public bool active;
     public Animator animator;
     public string animationName;
+    public AnimationClip walkAnimation;
     public Vector2 target;
     public float pushSpeed;
     public float slowDownProximity;
@@ -24,13 +25,24 @@ public class Pusher : MonoBehaviour
         while (true) //in the grand scheme use a game over condition.
         {
             Vector2 initialPosition = transform.position;
-            while (animator.GetCurrentAnimatorStateInfo(0).IsName(animationName))
+            float localTime = 0;
+            while (animator.GetCurrentAnimatorStateInfo(0).IsName(animationName) && active && walkAnimation == null)
             {
                 float time = animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
                 Push(time * pushSpeed, initialPosition, target, slowDownProximity, slowDownDamping);
-                yield return new WaitForFixedUpdate();
+                yield return new WaitForEndOfFrame();
             }
-            yield return new WaitUntil(() => animator.GetCurrentAnimatorStateInfo(0).IsName(animationName));
+            while (active && walkAnimation != null && localTime <= 1) 
+            {
+                localTime += Time.fixedDeltaTime;
+                walkAnimation.SampleAnimation(gameObject, localTime);
+                Push(localTime * pushSpeed, initialPosition, target, slowDownProximity, slowDownDamping);
+                yield return new WaitForEndOfFrame();
+            }
+            if (animator.GetCurrentAnimatorStateInfo(0).IsName(animationName)) {
+                active = false;
+            }
+            yield return new WaitUntil(() => animator.GetCurrentAnimatorStateInfo(0).IsName(animationName) || active);
         }
     }
     

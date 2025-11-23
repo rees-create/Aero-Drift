@@ -64,6 +64,7 @@
     <Compile Include="Assets\Scripts\Stand.cs" />
     <Compile Include="Assets\Scripts\WindField.cs" />
     <Compile Include="Assets\Scripts\Plane.cs" />
+    <Compile Include="Assets\Scripts\NPCSwitchLayer.cs" />
     <Compile Include="Assets\Scripts\AnimationRandomizer.cs" />
     <Compile Include="Assets\Scripts\SceneTransitionControl.cs" />
     <Compile Include="Assets\Scripts\PoseLerp.cs" />
