@@ -235,4 +235,5 @@ MonoBehaviour:
   - on: 1
     size: {x: 57.5, y: 35.1}
     position: {x: 6.5, y: 5.7}
+    directionToLayer: -1
   DrawGizmos: 1

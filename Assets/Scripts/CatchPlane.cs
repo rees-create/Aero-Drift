@@ -50,21 +50,21 @@ public class CatchPlane : MonoBehaviour
                 float distanceToPlayer = Vector3.Distance(transform.position, player.transform.position);
                 if (Mathf.Abs(distanceToPlayer - catchRadius) < 2) // fulfil above TODO here. ?
                 {
-                    print("about at radius");
+                    //print("about at radius");
                     //disable physics
                     incomingSpeed = player.GetComponent<Rigidbody2D>().velocity.magnitude;
                     incomingPosition = player.transform.position;
-                    player.GetComponent<PolygonCollider2D>().enabled = false;
-                    player.GetComponent<Rigidbody2D>().gravityScale = 0;
+                    //player.GetComponent<PolygonCollider2D>().enabled = false;
+                    //player.GetComponent<Rigidbody2D>().gravityScale = 0;
                     //player.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
-                    player.GetComponent<FlightControl>().enabled = false;
+                    //player.GetComponent<FlightControl>().enabled = false;
                     localCatchSpot = (Vector2) transform.position + catchSpot;
                     
                 }
 
                 if (distanceToPlayer <= catchRadius)
                 {
-                    print("inside radius");
+                    //print("inside radius");
                     //follow, catch plane and walk animations
                     Follow(player.GetComponent<Rigidbody2D>().velocity, speedFraction);
                     leftUpperCatch.SampleAnimation(gameObject, (leftUpperCatch.length / animFrameCount) * animTime);

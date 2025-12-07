@@ -53,7 +53,8 @@ public class FloorControl : MonoBehaviour
         currentLayer = (nextLayer >= 0 && nextLayer < layers.Count) ? nextLayer : currentLayer;
         //print(currentLayer);
         gameObject.transform.position = new Vector3(gameObject.transform.position.x, layers[currentLayer].floorY, gameObject.transform.position.z);
-        player.GetComponent<SpriteRenderer>().sortingOrder = layers[currentLayer].sortingOrder;
+        
+        player.GetComponent<SpriteRenderer>().sortingOrder = layers[currentLayer].sortingOrder;// instead, recurse through player hierarchy when applicable
     }
     // Update is called once per frame
     void FixedUpdate()

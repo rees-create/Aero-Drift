@@ -2,6 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// NOTE: This script scrapes values from other behaviors in the scene, including: FloorControl, LayerColliderMap
+/// for functionality.
+/// </summary>
+
 public class NPCSwitchLayer : MonoBehaviour
 {
     //NPC Switch Layer Action Script
@@ -11,12 +16,12 @@ public class NPCSwitchLayer : MonoBehaviour
     // 3. Switch layers. Floor Control has the layer sorting orders listed.
     // 4. Perform any after-switch actions (e.g. shutting door)
     // Start is called before the first frame update
-    bool active;
+    public bool active;
     public int currentLayer;
     public FloorControl floorController;
     public LayerColliderMap NPCLayerColliderMap;
-    public AnimationClip layerSwitchAnimationBefore;
-    public AnimationClip layerSwitchAnimationAfter;
+    public AnimationClip beforeSwitchAnim;
+    public AnimationClip afterSwitchAnim;
     
 
     IEnumerator SwitchLayerSequence() 
@@ -24,35 +29,36 @@ public class NPCSwitchLayer : MonoBehaviour
         while (true) 
         {
             yield return new WaitUntil(() => active);
-
+            
             if (gameObject.GetComponent<Pusher>())
             {
                 //1
                 KeyValuePair<Vector2, int> targetColliderInfo = FindClosestLayerCollider(NPCLayerColliderMap);
                 gameObject.GetComponent<Pusher>().target = targetColliderInfo.Key;
+                //print("Target: escalator");
                 gameObject.GetComponent<Pusher>().active = true;
                 yield return new WaitUntil(() => !gameObject.GetComponent<Pusher>().active); //wait for pusher to finish
                 //2
-                if (layerSwitchAnimationBefore != null && layerSwitchAnimationBefore.length > 0)
+                if (beforeSwitchAnim != null && beforeSwitchAnim.length > 0)
                 {
                     float localTime = 0;
-                    while (localTime < layerSwitchAnimationBefore.length)
+                    while (localTime < beforeSwitchAnim.length)
                     {
                         localTime += Time.fixedDeltaTime;
-                        layerSwitchAnimationBefore.SampleAnimation(gameObject, localTime);
+                        beforeSwitchAnim.SampleAnimation(gameObject, localTime);
                         yield return new WaitForFixedUpdate();
                     }
                 }
                 //3
                 SwitchLayer(targetColliderInfo.Value);
                 //4
-                if (layerSwitchAnimationAfter != null && layerSwitchAnimationAfter.length > 0)
+                if (afterSwitchAnim != null && afterSwitchAnim.length > 0)
                 {
                     float localTime = 0;
-                    while (localTime < layerSwitchAnimationAfter.length)
+                    while (localTime < afterSwitchAnim.length)
                     {
                         localTime += Time.fixedDeltaTime;
-                        layerSwitchAnimationAfter.SampleAnimation(gameObject, localTime);
+                        afterSwitchAnim.SampleAnimation(gameObject, localTime);
                         yield return new WaitForFixedUpdate();
                     }
                 }
@@ -67,9 +73,33 @@ public class NPCSwitchLayer : MonoBehaviour
         bool nextLayerInBounds = nextLayer > 0 && nextLayer < floorController.layers.Count;
         
         currentLayer = (nextLayer >= 0 && nextLayer < floorController.layers.Count) ? nextLayer : currentLayer;
-        gameObject.GetComponent<SpriteRenderer>().sortingOrder = floorController.layers[currentLayer].sortingOrder;
+        //gameObject.GetComponent<SpriteRenderer>().sortingOrder = floorController.layers[currentLayer].sortingOrder; // instead, recurse through player hierarchy when applicable
+        SwitchHierarchyLayer(gameObject,currentLayer);
+        //Also change layer collider map.
+        NPCLayerColliderMap = floorController.layers[currentLayer].colliderMap;
     }
-
+    void SwitchHierarchyLayer(GameObject g, int layer) {
+        if (g.GetComponent<SpriteRenderer>())
+        {
+            g.GetComponent<SpriteRenderer>().sortingOrder = layer;
+        }
+        for (int index = 0; index < g.transform.childCount; index++) {
+            GameObject child = g.transform.GetChild(index).gameObject;
+            if (child.GetComponent<SpriteRenderer>())
+            {
+                //assign layer
+                int layerDifference = layer - child.GetComponent<SpriteRenderer>().sortingOrder; //?? g.GetComponent<SpriteRenderer>().sortingOrder;
+                layer += layerDifference;
+                child.GetComponent<SpriteRenderer>().sortingOrder = layer;
+                layer -= layerDifference;
+            }
+            if (child.transform.childCount > 0)
+            {
+                //recursively search child
+                SwitchHierarchyLayer(child, layer);
+            }
+        }
+    }    
     KeyValuePair<Vector2, int> FindClosestLayerCollider(LayerColliderMap layerColliderMap) 
     {
         Vector2 closest = layerColliderMap.colliders[0].position;
@@ -91,7 +121,7 @@ public class NPCSwitchLayer : MonoBehaviour
 
     void Start()
     {
-        
+        StartCoroutine(SwitchLayerSequence());
     }
 
     // Update is called once per frame

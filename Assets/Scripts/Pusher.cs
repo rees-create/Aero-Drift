@@ -26,27 +26,28 @@ public class Pusher : MonoBehaviour
         {
             Vector2 initialPosition = transform.position;
             float localTime = 0;
-            while (animator.GetCurrentAnimatorStateInfo(0).IsName(animationName) && active && walkAnimation == null)
+            float progress = 0;
+            while (animator.GetCurrentAnimatorStateInfo(0).IsName(animationName) && progress < 1 && active && walkAnimation == null)
             {
                 float time = animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
-                Push(time * pushSpeed, initialPosition, target, slowDownProximity, slowDownDamping);
-                yield return new WaitForEndOfFrame();
+                progress = Push(time * pushSpeed, initialPosition, target, slowDownProximity, slowDownDamping);
+                yield return new WaitForFixedUpdate();
             }
-            while (active && walkAnimation != null && localTime <= 1) 
+            while (active && progress < 1 && walkAnimation != null && localTime <= 1) 
             {
                 localTime += Time.fixedDeltaTime;
                 walkAnimation.SampleAnimation(gameObject, localTime);
                 Push(localTime * pushSpeed, initialPosition, target, slowDownProximity, slowDownDamping);
-                yield return new WaitForEndOfFrame();
+                yield return new WaitForFixedUpdate();
             }
-            if (animator.GetCurrentAnimatorStateInfo(0).IsName(animationName)) {
+            if (Vector2.Distance(transform.position, target) < 0.02f) {
                 active = false;
             }
             yield return new WaitUntil(() => animator.GetCurrentAnimatorStateInfo(0).IsName(animationName) || active);
         }
     }
     
-    void Push(float time, Vector2 initialPosition, Vector2 target, float slowDownProximityPercent, float slowDownDamping)
+    float Push(float time, Vector2 initialPosition, Vector2 target, float slowDownProximityPercent, float slowDownDamping)
     { 
         float fullSpeedPercent = 1 - slowDownProximityPercent;
         if (time < fullSpeedPercent)
@@ -61,6 +62,8 @@ public class Pusher : MonoBehaviour
             Vector2 movingStartPoint = Vector2.Lerp(slowDownPoint, (Vector2)transform.position, 1 - slowDownDamping);
             transform.position = Vector2.Lerp(movingStartPoint, target, time - fullSpeedPercent);
         }
+        float progress = Vector2.Distance(initialPosition, transform.position) / Vector2.Distance(initialPosition, target);
+        return progress;
     }
     public Vector2 DistanceToTarget(float explorativity, float maxTargetDistance) {
         //target position is chosen as the distance to a random block (out of main blocks/pop back controller)
