@@ -18,6 +18,7 @@ public class NPCSwitchLayer : MonoBehaviour
     // Start is called before the first frame update
     public bool active;
     public int currentLayer;
+    //public int sortingOrder;
     public FloorControl floorController;
     public LayerColliderMap NPCLayerColliderMap;
     public AnimationClip beforeSwitchAnim;
@@ -51,6 +52,7 @@ public class NPCSwitchLayer : MonoBehaviour
                 }
                 //3
                 SwitchLayer(targetColliderInfo.Value);
+                
                 //4
                 if (afterSwitchAnim != null && afterSwitchAnim.length > 0)
                 {
@@ -74,30 +76,29 @@ public class NPCSwitchLayer : MonoBehaviour
         
         currentLayer = (nextLayer >= 0 && nextLayer < floorController.layers.Count) ? nextLayer : currentLayer;
         //gameObject.GetComponent<SpriteRenderer>().sortingOrder = floorController.layers[currentLayer].sortingOrder; // instead, recurse through player hierarchy when applicable
-        SwitchHierarchyLayer(gameObject,currentLayer);
+        SwitchHierarchyLayer(gameObject, floorController.layers[currentLayer].sortingOrder);
         //Also change layer collider map.
         NPCLayerColliderMap = floorController.layers[currentLayer].colliderMap;
     }
-    void SwitchHierarchyLayer(GameObject g, int layer) {
+    void SwitchHierarchyLayer(GameObject g, int layer, int upperSortingOrder = -1) {
+        int layerDifference = 0;
         if (g.GetComponent<SpriteRenderer>())
         {
+            layerDifference = layer - g.GetComponent<SpriteRenderer>().sortingOrder;
+            upperSortingOrder = g.GetComponent<SpriteRenderer>().sortingOrder;
             g.GetComponent<SpriteRenderer>().sortingOrder = layer;
+            print($"{g.name} new layer = {layer}");
         }
         for (int index = 0; index < g.transform.childCount; index++) {
             GameObject child = g.transform.GetChild(index).gameObject;
-            if (child.GetComponent<SpriteRenderer>())
+            int layerVariation = 0;
+            if (child.GetComponent<SpriteRenderer>() && upperSortingOrder != -1) //check for most recent g sprite renderer in tree 
             {
-                //assign layer
-                int layerDifference = layer - child.GetComponent<SpriteRenderer>().sortingOrder; //?? g.GetComponent<SpriteRenderer>().sortingOrder;
-                layer += layerDifference;
-                child.GetComponent<SpriteRenderer>().sortingOrder = layer;
-                layer -= layerDifference;
+                layerVariation = upperSortingOrder - child.GetComponent<SpriteRenderer>().sortingOrder;
+                //print($"layerVariation for child {child} = {layerVariation}, upper sorting order = {upperSortingOrder}, child order {child.GetComponent<SpriteRenderer>().sortingOrder}");
             }
-            if (child.transform.childCount > 0)
-            {
-                //recursively search child
-                SwitchHierarchyLayer(child, layer);
-            }
+            //recursively search children
+            SwitchHierarchyLayer(child, layer - layerVariation, upperSortingOrder);
         }
     }    
     KeyValuePair<Vector2, int> FindClosestLayerCollider(LayerColliderMap layerColliderMap) 
