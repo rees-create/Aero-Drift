@@ -24,6 +24,12 @@ public class Pusher : MonoBehaviour
     IEnumerator Play() {
         while (true) //in the grand scheme use a game over condition.
         {
+            //Check for blocking action scripts
+            //1. Thrower
+           
+            yield return new WaitUntil(()=> !gameObject.GetComponent<Thrower>().active);
+
+            print("block bypassed");
             Vector2 initialPosition = transform.position;
             float localTime = 0;
             float progress = 0;
@@ -33,17 +39,19 @@ public class Pusher : MonoBehaviour
                 progress = Push(time * pushSpeed, initialPosition, target, slowDownProximity, slowDownDamping);
                 yield return new WaitForFixedUpdate();
             }
-            while (active && progress < 1 && walkAnimation != null && localTime <= 1) 
+            while (active && progress < 1 && walkAnimation != null && localTime <= 1)
             {
                 localTime += Time.fixedDeltaTime;
                 walkAnimation.SampleAnimation(gameObject, localTime);
                 Push(localTime * pushSpeed, initialPosition, target, slowDownProximity, slowDownDamping);
                 yield return new WaitForFixedUpdate();
             }
-            if (Vector2.Distance(transform.position, target) < 0.02f) {
+            if (Vector2.Distance(transform.position, target) < 0.02f)
+            {
                 active = false;
             }
-            yield return new WaitUntil(() => animator.GetCurrentAnimatorStateInfo(0).IsName(animationName) || active);
+            yield return new WaitUntil(() => (animator.GetCurrentAnimatorStateInfo(0).IsName(animationName) || active));
+            
         }
     }
     

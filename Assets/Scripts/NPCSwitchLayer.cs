@@ -22,13 +22,20 @@ public class NPCSwitchLayer : MonoBehaviour
     public FloorControl floorController;
     public LayerColliderMap NPCLayerColliderMap;
     public AnimationClip beforeSwitchAnim;
+    public Vector2 beforeSwitchTranslation;
     public AnimationClip afterSwitchAnim;
+    public Vector2 afterSwitchTranslation;
     
 
     IEnumerator SwitchLayerSequence() 
     {
         while (true) 
         {
+            // Detect and handle action scripts that can cause conflicts
+            //1. Thrower:
+            
+            yield return new WaitWhile(() => gameObject.GetComponent<Thrower>().active);
+            
             yield return new WaitUntil(() => active);
             
             if (gameObject.GetComponent<Pusher>())
@@ -36,9 +43,10 @@ public class NPCSwitchLayer : MonoBehaviour
                 //1
                 KeyValuePair<Vector2, int> targetColliderInfo = FindClosestLayerCollider(NPCLayerColliderMap);
                 gameObject.GetComponent<Pusher>().target = targetColliderInfo.Key;
-                //print("Target: escalator");
+                print("Target: escalator");
                 gameObject.GetComponent<Pusher>().active = true;
                 yield return new WaitUntil(() => !gameObject.GetComponent<Pusher>().active); //wait for pusher to finish
+                print("to 2");
                 //2
                 if (beforeSwitchAnim != null && beforeSwitchAnim.length > 0)
                 {
@@ -49,6 +57,15 @@ public class NPCSwitchLayer : MonoBehaviour
                         beforeSwitchAnim.SampleAnimation(gameObject, localTime);
                         yield return new WaitForFixedUpdate();
                     }
+                }
+                //if beforeSwitch has translation use pusher
+                if (beforeSwitchTranslation != default) { 
+                    gameObject.GetComponent<Pusher>().target = (Vector2) transform.position + beforeSwitchTranslation;
+                    gameObject.GetComponent<Pusher>().active = true;
+                    print("translating before switch..");
+                    yield return new WaitForSeconds(2);
+                    yield return new WaitUntil(() => !gameObject.GetComponent<Pusher>().active); //wait for pusher to finish
+                    print("switch layer");
                 }
                 //3
                 SwitchLayer(targetColliderInfo.Value);
@@ -64,7 +81,14 @@ public class NPCSwitchLayer : MonoBehaviour
                         yield return new WaitForFixedUpdate();
                     }
                 }
+                if (afterSwitchTranslation != default)
+                {
+                    gameObject.GetComponent<Pusher>().target = (Vector2)transform.position + afterSwitchTranslation;
+                    gameObject.GetComponent<Pusher>().active = true;
+                    yield return new WaitUntil(() => !gameObject.GetComponent<Pusher>().active); //wait for pusher to finish
+                }
             }
+            active = false;
         }
     }
 
@@ -87,7 +111,7 @@ public class NPCSwitchLayer : MonoBehaviour
             layerDifference = layer - g.GetComponent<SpriteRenderer>().sortingOrder;
             upperSortingOrder = g.GetComponent<SpriteRenderer>().sortingOrder;
             g.GetComponent<SpriteRenderer>().sortingOrder = layer;
-            print($"{g.name} new layer = {layer}");
+            //print($"{g.name} new layer = {layer}");
         }
         for (int index = 0; index < g.transform.childCount; index++) {
             GameObject child = g.transform.GetChild(index).gameObject;

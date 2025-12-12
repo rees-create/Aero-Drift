@@ -233,7 +233,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   colliders:
   - on: 1
-    size: {x: 57.5, y: 35.1}
-    position: {x: 6.5, y: 5.7}
+    size: {x: 16.7, y: 14.4}
+    position: {x: -10.4, y: -8.12}
     directionToLayer: -1
   DrawGizmos: 1
