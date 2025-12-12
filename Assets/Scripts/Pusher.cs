@@ -28,8 +28,7 @@ public class Pusher : MonoBehaviour
             //1. Thrower
            
             yield return new WaitUntil(()=> !gameObject.GetComponent<Thrower>().active);
-
-            print("block bypassed");
+            
             Vector2 initialPosition = transform.position;
             float localTime = 0;
             float progress = 0;
