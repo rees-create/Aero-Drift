@@ -102,12 +102,14 @@ public class Thrower : MonoBehaviour
         oldBaitPosition = newBaitPosition;
         
     }
-    
-    void InitThrower() {
-        //if (active)
-        print("InitThrower");
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        if (active)
+
         //disable physics, make plane face dashes
-        dashes = new GameObject("Throw Dashes");
+        dashes = new GameObject ("Throw Dashes");
         dashes.transform.parent = transform;
         plane.GetComponent<FlightControl>().enabled = false;
         plane.GetComponent<Rigidbody2D>().gravityScale = 0;
@@ -125,43 +127,13 @@ public class Thrower : MonoBehaviour
                 break;
             }
         }
-        print($"follow = {follow}");
-    }
-    //IEnumerator TauntThrow() 
-    //{
-    //    while (true)
-    //    {
-    //        //if (active)
-    //        //print($"follow = {follow}");
-    //        //diffSwitch = (diffSwitch + 1) % 2;
-    //        //throwNormalizedTimes[diffSwitch] = animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
-    //        //throwNormalizedTime = throwNormalizedTimes[diffSwitch];
-            
-    //}
-
-    IEnumerator ControlLoop() 
-    {
-        while (true) {
-            thrown = false;
-            InitThrower();
-            yield return new WaitUntil(() => active && thrown && !throwNormalizedTimeReady);
-            //follow = true; // maybe set to false here (or don't touch here) AND set to true above wait.
-            //StartCoroutine(TauntThrow());
-        }
-    }
-    
-    // Start is called before the first frame update
-    void Start()
-    {
-        //InitThrower code here initially
-        StartCoroutine(ControlLoop());
     }
 
     // Update is called once per frame
     void Update()
     {
-        //TauntThrow code here initially
-        print($"follow = {follow}");
+        if (active)
+
         diffSwitch = (diffSwitch + 1) % 2;
         throwNormalizedTimes[diffSwitch] = animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
         throwNormalizedTime = throwNormalizedTimes[diffSwitch];
@@ -187,15 +159,13 @@ public class Thrower : MonoBehaviour
                 throwNormalizedTimeReady = true;
             }
         }
-
-        if (follow && !throwNormalizedTimeReady)
+        
+        if (follow && !throwNormalizedTimeReady) 
         {
             Follow();
         }
         
     }
-
-
     private void LateUpdate()
     {
         if(active)
@@ -210,13 +180,9 @@ public class Thrower : MonoBehaviour
     IEnumerator OnMouseDown()
     {
         if (active)
-        
+
         thrown = true;
         thrownSwitch++;
-        
-        //deactivate thrower
-        active = false;
-
         //play animation if there is a bait (animated object to follow)
         if (bait != null && animator != null && animationName != null && triggerName != null)
         { 
@@ -227,9 +193,6 @@ public class Thrower : MonoBehaviour
             follow = false;
             
         }
-
-        
-
         if (thrownSwitch < 2)
         {
             //set plane for launch
@@ -251,6 +214,7 @@ public class Thrower : MonoBehaviour
         }
 
         Destroy(dashes);
-        
+        //deactivate thrower
+        active = false;
     }
 }
