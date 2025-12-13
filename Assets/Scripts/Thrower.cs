@@ -96,8 +96,7 @@ public class Thrower : MonoBehaviour
         Vector3 newBaitPosition = transform.TransformPoint(bait.transform.position);
         if (oldBaitPosition != default)
         {
-            //plane.transform.position += newBaitPosition - oldBaitPosition;
-            plane.transform.position = bait.transform.position;
+            plane.transform.position += newBaitPosition - oldBaitPosition;
         }
         oldBaitPosition = newBaitPosition;
         
@@ -106,8 +105,6 @@ public class Thrower : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if (active)
-
         //disable physics, make plane face dashes
         dashes = new GameObject ("Throw Dashes");
         dashes.transform.parent = transform;
@@ -132,8 +129,6 @@ public class Thrower : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (active)
-
         diffSwitch = (diffSwitch + 1) % 2;
         throwNormalizedTimes[diffSwitch] = animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
         throwNormalizedTime = throwNormalizedTimes[diffSwitch];
@@ -168,8 +163,6 @@ public class Thrower : MonoBehaviour
     }
     private void LateUpdate()
     {
-        if(active)
-
         if (follow)
         {
             Follow();
@@ -179,8 +172,7 @@ public class Thrower : MonoBehaviour
 
     IEnumerator OnMouseDown()
     {
-        if (active)
-
+        
         thrown = true;
         thrownSwitch++;
         //play animation if there is a bait (animated object to follow)
@@ -195,13 +187,12 @@ public class Thrower : MonoBehaviour
         }
         if (thrownSwitch < 2)
         {
-            //set plane for launch
+            //launch plane
             plane.GetComponent<Rigidbody2D>().gravityScale = 1;
             plane.GetComponent<FlightControl>().enabled = true;
             plane.GetComponent<PolygonCollider2D>().enabled = true;
         }
 
-        //launch plane
         if (throwVector.magnitude < maxThrowIntensity)
         {
             plane.GetComponent<FlightControl>().initialThrowImpulse = -throwVector;
@@ -214,7 +205,5 @@ public class Thrower : MonoBehaviour
         }
 
         Destroy(dashes);
-        //deactivate thrower
-        active = false;
     }
 }
