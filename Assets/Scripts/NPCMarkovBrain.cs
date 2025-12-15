@@ -7,13 +7,14 @@ using UnityEngine;
 
 public class NPCMarkovBrain : MonoBehaviour
 {
+    [Serializable]
     public struct NPCParams {
         [Header("Behavioral Parameters")]
-        public float planeAffinity;
-        public float explorativity;
+        [Range(0f, 1f)] public float planeAffinity;
+        [Range(0f, 1f)] public float explorativity;
         [Header("Extra control")]
         public float maxTargetDistance;
-        public float decisionVolatility;
+        [Range(0f, 1f)] public float decisionVolatility;
     }
     public NPCParams NPCParameters;
     public enum NPCState
@@ -30,21 +31,25 @@ public class NPCMarkovBrain : MonoBehaviour
         switch (state) {
             case NPCState.Standing:
                 //call standing action
+                gameObject.GetComponent<Stand>().active = true;
                 break;
             case NPCState.Moving:
                 gameObject.GetComponent<Pusher>().active = true;
                 break;
             case NPCState.SwitchingLayer:
                 //call switching layer action
+                gameObject.GetComponent<NPCSwitchLayer>().active = true;
                 break;
             case NPCState.ThrowingPlane:
-                gameObject.GetComponent<Thrower>().active = true;
+                gameObject.GetComponent<NPCThrower>().active = true;
                 break;
             case NPCState.CatchingPlane:
                 //call catching plane action
+                gameObject.GetComponent<CatchPlane>().active = true;
                 break;
             case NPCState.DestroyingPlane:
                 //call destroying plane action
+                gameObject.GetComponent<DestroyPlane>().active = true;
                 break;
         }
     }
@@ -52,7 +57,11 @@ public class NPCMarkovBrain : MonoBehaviour
     {
         if (
             gameObject.GetComponent<Pusher>().active == false &&
-            gameObject.GetComponent<Thrower>().active == false
+            gameObject.GetComponent<Stand>().active == false &&
+            gameObject.GetComponent<NPCSwitchLayer>().active == false &&
+            gameObject.GetComponent<NPCThrower>().active == false &&
+            gameObject.GetComponent<CatchPlane>().active == false &&
+            gameObject.GetComponent<DestroyPlane>().active == false
            )
             return true;
         else
@@ -112,6 +121,7 @@ public class NPCMarkovBrain : MonoBehaviour
             //create bias lists with alternating signs. 
             double[] biases = distributeBias(UnityEngine.Random.Range(0, maxBias), 3, modSwitch);
             //create bias lists with alternating signs
+            
             double planeIX = planeDistance * (0.5 + biases[0])
                 + targetDistance * (0.25 + biases[1]) + planeAffinity * (0.25 + biases[2]) + biases[3];
             double motionIX = planeDistance * (0.4 + biases[0]) + targetDistance * (0.3 + biases[1])
@@ -247,6 +257,7 @@ public class NPCMarkovBrain : MonoBehaviour
     {
         while (true)
         {
+            
             Vector2 targetPosition = gameObject.GetComponent<Pusher>().DistanceToTarget(
                 NPCParameters.explorativity,
                 NPCParameters.maxTargetDistance
@@ -261,6 +272,7 @@ public class NPCMarkovBrain : MonoBehaviour
                 NPCParameters.explorativity,
                 0.5f
             );
+            print($"StatDist first 2: {statDist[0]}, {statDist[1]}");
             double[,] transitionMatrix = GenerateTransitionMatrix(statDist);
             // From initial state, make choice and call appropriate state action class
             double[] probabilityRow = new double[6];
@@ -280,12 +292,14 @@ public class NPCMarkovBrain : MonoBehaviour
                 else
                 {
                     decision = (NPCState) i;
+                    print($"Decision = {decision.ToString()}");
                     break;
                 }
             }
             if (NoState() || UnityEngine.Random.Range(0f, 1f) < NPCParameters.decisionVolatility)
             {
-                SelectAction(decision);
+                print($"Next action: {decision.ToString()}");
+                SelectAction(decision);   
             }
             yield return new WaitForSeconds(0.2f); // approx human reaction time
         }
@@ -294,6 +308,7 @@ public class NPCMarkovBrain : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        SelectAction(initState);
         StartCoroutine(NPCBehaviorRoutine());
     }
 

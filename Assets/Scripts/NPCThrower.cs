@@ -119,7 +119,7 @@ public class NPCThrower : MonoBehaviour
                 if (!usePoseLerp)
                 {
                     throwAnimation.SampleAnimation(gameObject, 1 - Mathf.Min(weightedThrowIntensity / maxThrowIntensity, 1f));
-                    print($"normalized intensity = {1 - Mathf.Min(weightedThrowIntensity / maxThrowIntensity, 1f)}");
+                    //print($"normalized intensity = {1 - Mathf.Min(weightedThrowIntensity / maxThrowIntensity, 1f)}");
                 }
                 else
                 {
