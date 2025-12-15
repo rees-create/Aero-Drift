@@ -34,7 +34,7 @@ public class NPCSwitchLayer : MonoBehaviour
             // Detect and handle action scripts that can cause conflicts
             //1. Thrower:
             
-            yield return new WaitWhile(() => gameObject.GetComponent<Thrower>().active);
+            yield return new WaitWhile(() => gameObject.GetComponent<NPCThrower>().active);
             
             yield return new WaitUntil(() => active);
             

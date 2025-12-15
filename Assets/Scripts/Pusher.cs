@@ -27,7 +27,7 @@ public class Pusher : MonoBehaviour
             //Check for blocking action scripts
             //1. Thrower
            
-            yield return new WaitUntil(()=> !gameObject.GetComponent<Thrower>().active);
+            yield return new WaitUntil(()=> !gameObject.GetComponent<NPCThrower>().active);
             
             Vector2 initialPosition = transform.position;
             float localTime = 0;
