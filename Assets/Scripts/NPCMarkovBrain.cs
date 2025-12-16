@@ -63,9 +63,13 @@ public class NPCMarkovBrain : MonoBehaviour
             gameObject.GetComponent<CatchPlane>().active == false &&
             gameObject.GetComponent<DestroyPlane>().active == false
            )
+        {
             return true;
+        }
         else
+        {
             return false;
+        }
     }
 
     public GameObject plane;
@@ -120,17 +124,41 @@ public class NPCMarkovBrain : MonoBehaviour
             int modSwitch = (i % 2) * 2 - 1;
             //create bias lists with alternating signs. 
             double[] biases = distributeBias(UnityEngine.Random.Range(0, maxBias), 3, modSwitch);
+            //string biasesStr = "Biases: ";
+            //foreach (double element in biases)
+            //{
+            //    biasesStr += element.ToString() + ", ";
+            //}
+            //print(biasesStr);
             //create bias lists with alternating signs
-            
-            double planeIX = planeDistance * (0.5 + biases[0])
-                + targetDistance * (0.25 + biases[1]) + planeAffinity * (0.25 + biases[2]) + biases[3];
-            double motionIX = planeDistance * (0.4 + biases[0]) + targetDistance * (0.3 + biases[1])
+            double normalizedPlaneDistance = Math.Min(planeDistance / NPCParameters.maxTargetDistance, 1);
+            double normalizedTargetDistance = Math.Min(targetDistance / NPCParameters.maxTargetDistance, 1);
+            double planeIX = normalizedPlaneDistance * (0.5 + biases[0])
+                + normalizedTargetDistance * (0.25 + biases[1]) + planeAffinity * (0.25 + biases[2]) + biases[3];
+            double motionIX = normalizedPlaneDistance * (0.4 + biases[0]) + normalizedTargetDistance *  (0.3 + biases[1])
                 + explorativity * (0.3 + biases[2]) + biases[3];
 
-            stationaryDistribution[i] = planeIX;
-            stationaryDistribution[i + 3] = motionIX;
+            stationaryDistribution[i] = planeIX; 
+            stationaryDistribution[i + 3] = motionIX; //6 cuz 6 elements
         }
+        // Force normalize the distribution
+        double sum = 0;
+        foreach (double value in stationaryDistribution)
+        {
+            sum += value;
+        }
+        for (int i = 0; i < stationaryDistribution.Length; i++)
+        {
+            stationaryDistribution[i] /= sum;
+        }
+        //test code
+        //string statDistStr = "Stationary Distribution: ";
+        //foreach (double element in stationaryDistribution) {
+        //    statDistStr += element.ToString() + ", ";
+        //}
         
+        //print(statDistStr);
+
         return stationaryDistribution;
     }
     /// <summary>
@@ -270,9 +298,9 @@ public class NPCMarkovBrain : MonoBehaviour
                 planeDistance,
                 NPCParameters.planeAffinity,
                 NPCParameters.explorativity,
-                0.5f
+                0.2f
             );
-            print($"StatDist first 2: {statDist[0]}, {statDist[1]}");
+            //print($"StatDist first 2: {statDist[0]}, {statDist[1]}");
             double[,] transitionMatrix = GenerateTransitionMatrix(statDist);
             // From initial state, make choice and call appropriate state action class
             double[] probabilityRow = new double[6];
@@ -292,11 +320,11 @@ public class NPCMarkovBrain : MonoBehaviour
                 else
                 {
                     decision = (NPCState) i;
-                    print($"Decision = {decision.ToString()}");
+                    //print($"Decision = {decision.ToString()}");
                     break;
                 }
             }
-            if (NoState() || UnityEngine.Random.Range(0f, 1f) < NPCParameters.decisionVolatility)
+            if (NoState() && UnityEngine.Random.Range(0f, 1f) < NPCParameters.decisionVolatility)
             {
                 print($"Next action: {decision.ToString()}");
                 SelectAction(decision);   

@@ -42,37 +42,40 @@ public class NPCThrower : MonoBehaviour
         Vector3 currentRotation = new Vector3(0, 0, Mathf.Atan2(plane2Mouse.y, plane2Mouse.x) * Mathf.Rad2Deg);
         Vector3 planeOrientation = currentRotation + initPlaneRotation;
         plane.transform.eulerAngles = planeOrientation;
-        if (diff < 0 && nDashes < 75)
-        { //less dashes
-            for (int i = 0; i < Mathf.Abs(diff); i++)
-            {
-                Destroy(dashes.transform.GetChild(i).gameObject);
-                nDashes--;
-                diff++;
-            }
-        }
-        else if (diff > 0 && nDashes < 75)
-        { //more dashes
-            int initChildCount = dashes.transform.childCount;
-            for (int i = 0; i < diff; i++)
-            {
-                float lerpFraction = numberOfDashes != 0 ? (float)(i + initChildCount) / (float)numberOfDashes : 1f;
-                GameObject _dash = Instantiate(dash, dashes.transform);
-                _dash.transform.position = Vector2.Lerp(plane.transform.position, mousePosition, lerpFraction);
-                _dash.transform.eulerAngles = currentRotation;
-                dashes.transform.localScale = dashScale;
-                nDashes++;
-                diff--;
-            }
-
-        }
-        if (nDashes > 0)
+        if (dashes != null)
         {
-            for (int i = 0; i < dashes.transform.childCount; i++)
+            if (diff < 0 && nDashes < 75)
+            { //less dashes
+                for (int i = 0; i < Mathf.Abs(diff); i++)
+                {
+                    Destroy(dashes.transform.GetChild(i).gameObject);
+                    nDashes--;
+                    diff++;
+                }
+            }
+            else if (diff > 0 && nDashes < 75)
+            { //more dashes
+                int initChildCount = dashes.transform.childCount;
+                for (int i = 0; i < diff; i++)
+                {
+                    float lerpFraction = numberOfDashes != 0 ? (float)(i + initChildCount) / (float)numberOfDashes : 1f;
+                    GameObject _dash = Instantiate(dash, dashes.transform);
+                    _dash.transform.position = Vector2.Lerp(plane.transform.position, mousePosition, lerpFraction);
+                    _dash.transform.eulerAngles = currentRotation;
+                    dashes.transform.localScale = dashScale;
+                    nDashes++;
+                    diff--;
+                }
+
+            }
+            if (nDashes > 0)
             {
-                float lerpFraction = numberOfDashes != 0 ? (float)i / (float)numberOfDashes : 1f;
-                dashes.transform.GetChild(i).position = Vector2.Lerp(plane.transform.position, mousePosition, lerpFraction);
-                dashes.transform.GetChild(i).eulerAngles = currentRotation;
+                for (int i = 0; i < dashes.transform.childCount; i++)
+                {
+                    float lerpFraction = numberOfDashes != 0 ? (float)i / (float)numberOfDashes : 1f;
+                    dashes.transform.GetChild(i).position = Vector2.Lerp(plane.transform.position, mousePosition, lerpFraction);
+                    dashes.transform.GetChild(i).eulerAngles = currentRotation;
+                }
             }
         }
 
@@ -151,17 +154,20 @@ public class NPCThrower : MonoBehaviour
         plane.GetComponent<Rigidbody2D>().gravityScale = 1;
         plane.GetComponent<FlightControl>().enabled = true;
         plane.GetComponent<PolygonCollider2D>().enabled = true;
-
+        
         //launch plane without exceeding max throw intensity
         if (throwVector.magnitude < maxThrowIntensity)
         {
             plane.GetComponent<FlightControl>().initialThrowImpulse = -throwVector;
+            print($"go for launch, throw vector = {throwVector}");
         }
         else
         {
             float throwIntensity = throwVector.magnitude;
             Vector2 throwDirection = throwVector / throwIntensity;
+            print($"go for launch at max, throw vector = {maxThrowIntensity * throwDirection}");
             plane.GetComponent<FlightControl>().initialThrowImpulse = -maxThrowIntensity * throwDirection;
+            
         }
     }
 
@@ -169,9 +175,12 @@ public class NPCThrower : MonoBehaviour
     {
         while (true)
         {
-            
-            StartCoroutine(InitThrow());
-            StartCoroutine(TauntThrow());
+            //yield return new WaitUntil(() => active);
+            if (active)
+            {
+                StartCoroutine(InitThrow());
+                StartCoroutine(TauntThrow());
+            }
             yield return new WaitUntil(()=> thrown);
             StopCoroutine(TauntThrow());
             StopCoroutine(InitThrow());
