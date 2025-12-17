@@ -39,60 +39,72 @@ public class CatchPlane : MonoBehaviour
             //Initializations
             int animTime = 0;
             float incomingSpeed = 0f;
-            Vector2 incomingPosition = plane.transform.position;
+            Vector2 incomingPosition;
+            //seems to be a delay in plane gameobject's assignment so gotta use this conditional block to prevent null ref
+            if (plane == null)
+            {
+                incomingPosition = transform.position;
+            }
+            else 
+            {
+                incomingPosition = plane.transform.position;
+            }
+
             Vector2 localCatchSpot = (Vector2) transform.position + catchSpot;
             while (active)
             {
-                // Follow player
-                Vector3 playerVelocity = (plane.transform.position - transform.position).normalized;
-
-                // Check distance to player
-                float distanceToPlayer = Vector3.Distance(transform.position, plane.transform.position);
-                if (Mathf.Abs(distanceToPlayer - catchRadius) < 2) // fulfil above TODO here. ?
+                if (plane != null)
                 {
-                    //print("about at radius");
-                    //disable physics
-                    incomingSpeed = plane.GetComponent<Rigidbody2D>().velocity.magnitude;
-                    incomingPosition = plane.transform.position;
-                    //player.GetComponent<PolygonCollider2D>().enabled = false;
-                    //player.GetComponent<Rigidbody2D>().gravityScale = 0;
-                    //player.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
-                    //player.GetComponent<FlightControl>().enabled = false;
-                    localCatchSpot = (Vector2) transform.position + catchSpot;
-                    
-                }
+                    // Follow player
+                    Vector3 playerVelocity = (plane.transform.position - transform.position).normalized;
 
-                if (distanceToPlayer <= catchRadius)
-                {
-                    //print("inside radius");
-                    //follow, catch plane and walk animations
-                    Follow(plane.GetComponent<Rigidbody2D>().velocity, speedFraction);
-                    leftUpperCatch.SampleAnimation(gameObject, (leftUpperCatch.length / animFrameCount) * animTime);
-                    Walk.SampleAnimation(gameObject, (Walk.length / animFrameCount) * animTime);
-
-                    //these must be off here too!
-                    plane.GetComponent<PolygonCollider2D>().enabled = false;
-                    plane.GetComponent<Rigidbody2D>().gravityScale = 0;
-                    plane.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
-                    plane.GetComponent<FlightControl>().enabled = false;
-                    localCatchSpot = (Vector2)transform.position + catchSpot; //think this should be here too
-                    // Move player to catch spot
-                    
-                    plane.transform.position = (Vector3) Vector2.Lerp(incomingPosition, localCatchSpot, (float) animTime / (float) animFrameCount);
-                    //print($"where i want it: {Vector2.Lerp(incomingPosition, catchSpot, animTime / animFrameCount)}, where it is: {player.transform.position}, animFraction: {(float)animTime / (float)animFrameCount}");
-                    if (animTime == animFrameCount - 1)
+                    // Check distance to player
+                    float distanceToPlayer = Vector3.Distance(transform.position, plane.transform.position);
+                    if (Mathf.Abs(distanceToPlayer - catchRadius) < 2) // fulfil above TODO here. ?
                     {
-                        // Reached catch radius, stop following
+                        //print("about at radius");
+                        //disable physics
+                        incomingSpeed = plane.GetComponent<Rigidbody2D>().velocity.magnitude;
+                        incomingPosition = plane.transform.position;
+                        //player.GetComponent<PolygonCollider2D>().enabled = false;
+                        //player.GetComponent<Rigidbody2D>().gravityScale = 0;
+                        //player.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
+                        //player.GetComponent<FlightControl>().enabled = false;
+                        localCatchSpot = (Vector2)transform.position + catchSpot;
+
+                    }
+
+                    if (distanceToPlayer <= catchRadius)
+                    {
+                        //print("inside radius");
+                        //follow, catch plane and walk animations
+                        Follow(plane.GetComponent<Rigidbody2D>().velocity, speedFraction);
+                        leftUpperCatch.SampleAnimation(gameObject, (leftUpperCatch.length / animFrameCount) * animTime);
+                        Walk.SampleAnimation(gameObject, (Walk.length / animFrameCount) * animTime);
+
+                        //these must be off here too!
                         plane.GetComponent<PolygonCollider2D>().enabled = false;
                         plane.GetComponent<Rigidbody2D>().gravityScale = 0;
                         plane.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
                         plane.GetComponent<FlightControl>().enabled = false;
-                        active = false;
+                        localCatchSpot = (Vector2)transform.position + catchSpot; //think this should be here too
+                                                                                  // Move player to catch spot
+
+                        plane.transform.position = (Vector3)Vector2.Lerp(incomingPosition, localCatchSpot, (float)animTime / (float)animFrameCount);
+                        //print($"where i want it: {Vector2.Lerp(incomingPosition, catchSpot, animTime / animFrameCount)}, where it is: {player.transform.position}, animFraction: {(float)animTime / (float)animFrameCount}");
+                        if (animTime == animFrameCount - 1)
+                        {
+                            // Reached catch radius, stop following
+                            plane.GetComponent<PolygonCollider2D>().enabled = false;
+                            plane.GetComponent<Rigidbody2D>().gravityScale = 0;
+                            plane.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
+                            plane.GetComponent<FlightControl>().enabled = false;
+                            active = false;
+                        }
+                        animTime = (animTime + 1) % animFrameCount;
                     }
-                    animTime = (animTime + 1) % animFrameCount;
+
                 }
-
-
 
                 
                 yield return new WaitForEndOfFrame(); // Wait for next frame

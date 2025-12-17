@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 
 public class NPCThrower : MonoBehaviour
@@ -30,8 +31,18 @@ public class NPCThrower : MonoBehaviour
     [Header("Throw Intensity")]
     public float maxThrowIntensity;
     public float throwIntensityScale;
-    
 
+    public void SetActive() {
+        float baitToPlaneDistance = Vector2.Distance((Vector2)bait.transform.position, (Vector2) plane.transform.position);
+        if (baitToPlaneDistance < followOffset.magnitude)
+        {
+            active = true;
+        }
+        else {
+            print($"Too far, bait to plane = {baitToPlaneDistance}, radius to stay within = {followOffset.magnitude}");
+            print($"bait: {(Vector2) bait.transform.position} plane: {(Vector2) plane.transform.position}");
+        }
+    }
     //Utility functions
     void MakeDashes(float throwLineLength, Vector3 mousePosition)
     {

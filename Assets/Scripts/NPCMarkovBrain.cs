@@ -41,7 +41,7 @@ public class NPCMarkovBrain : MonoBehaviour
                 gameObject.GetComponent<NPCSwitchLayer>().active = true;
                 break;
             case NPCState.ThrowingPlane:
-                gameObject.GetComponent<NPCThrower>().active = true;
+                gameObject.GetComponent<NPCThrower>().SetActive(); //to give action scripts control over activation decision
                 break;
             case NPCState.CatchingPlane:
                 //call catching plane action
