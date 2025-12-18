@@ -16,6 +16,7 @@ public class NPCMarkovBrain : MonoBehaviour
         [Header("Extra control")]
         public float maxTargetDistance;
         [Range(0f, 1f)] public float decisionVolatility;
+        [Range(0f, 0.2f)] public float maxBias;
     }
     public NPCParams NPCParameters;
     public enum NPCState
@@ -149,13 +150,13 @@ public class NPCMarkovBrain : MonoBehaviour
             //create bias lists with alternating signs
             double normalizedPlaneDistance = Math.Min(planeDistance / NPCParameters.maxTargetDistance, 1);
             double normalizedTargetDistance = Math.Min(targetDistance / NPCParameters.maxTargetDistance, 1);
-            double planeIX = normalizedPlaneDistance * (0.5 + biases[0])
-                + normalizedTargetDistance * (0.25 + biases[1]) + planeAffinity * (0.25 + biases[2]) + biases[3];
+            double planeIX = normalizedPlaneDistance * (0.3 + biases[0])
+                + normalizedTargetDistance * (0.2 + biases[1]) + planeAffinity * (0.5 + biases[2]) + biases[3];
             double motionIX = normalizedPlaneDistance * (0.4 + biases[0]) + normalizedTargetDistance *  (0.3 + biases[1])
                 + explorativity * (0.3 + biases[2]) + biases[3];
 
-            stationaryDistribution[i] = planeIX; 
-            stationaryDistribution[i + 3] = motionIX; //6 cuz 6 elements
+            stationaryDistribution[i] = motionIX; 
+            stationaryDistribution[i + 3] = planeIX; //6 cuz 6 elements
         }
         // Force normalize the distribution
         double sum = 0;
@@ -167,13 +168,7 @@ public class NPCMarkovBrain : MonoBehaviour
         {
             stationaryDistribution[i] /= sum;
         }
-        //test code
-        //string statDistStr = "Stationary Distribution: ";
-        //foreach (double element in stationaryDistribution) {
-        //    statDistStr += element.ToString() + ", ";
-        //}
         
-        //print(statDistStr);
 
         return stationaryDistribution;
     }
@@ -314,7 +309,7 @@ public class NPCMarkovBrain : MonoBehaviour
                 planeDistance,
                 NPCParameters.planeAffinity,
                 NPCParameters.explorativity,
-                0.2f
+                NPCParameters.maxBias
             );
             //print($"StatDist first 2: {statDist[0]}, {statDist[1]}");
             double[,] transitionMatrix = GenerateTransitionMatrix(statDist);
@@ -340,11 +335,20 @@ public class NPCMarkovBrain : MonoBehaviour
                     break;
                 }
             }
-            bool randomExit = UnityEngine.Random.Range(0f, 1f) < 1 - NPCParameters.decisionVolatility;
+            bool randomExit = UnityEngine.Random.Range(0f, 1f) > 1 - NPCParameters.decisionVolatility;
             if (NoState() || randomExit)
             {
                 print($"Next action: {decision.ToString()}");
-                SelectAction(decision, randomExit);   
+                SelectAction(decision, randomExit);
+
+                //test code
+                string statDistStr = "Stationary Distribution: ";
+                foreach (double element in statDist)
+                {
+                    statDistStr += element.ToString() + ", ";
+                }
+
+                print(statDistStr);
             }
             yield return new WaitForSeconds(0.2f); // approx human reaction time
         }
