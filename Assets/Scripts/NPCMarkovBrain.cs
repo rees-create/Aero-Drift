@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class NPCMarkovBrain : MonoBehaviour
 {
@@ -27,29 +28,44 @@ public class NPCMarkovBrain : MonoBehaviour
         DestroyingPlane
     }
     public NPCState initState;
-    void SelectAction(NPCState state) {
+    void SelectAction(NPCState state, bool randomExit) {
         switch (state) {
             case NPCState.Standing:
                 //call standing action
-                gameObject.GetComponent<Stand>().active = true;
+                if (!randomExit)
+                {
+                    gameObject.GetComponent<Stand>().active = true;
+                }
                 break;
             case NPCState.Moving:
                 gameObject.GetComponent<Pusher>().active = true;
                 break;
             case NPCState.SwitchingLayer:
                 //call switching layer action
-                gameObject.GetComponent<NPCSwitchLayer>().active = true;
+                if (!randomExit)
+                {
+                    gameObject.GetComponent<NPCSwitchLayer>().active = true;
+                }
                 break;
             case NPCState.ThrowingPlane:
-                gameObject.GetComponent<NPCThrower>().SetActive(); //to give action scripts control over activation decision
+                if (!randomExit)
+                {
+                    gameObject.GetComponent<NPCThrower>().SetActive(); //to give action scripts control over activation decision
+                }
                 break;
             case NPCState.CatchingPlane:
                 //call catching plane action
-                gameObject.GetComponent<CatchPlane>().active = true;
+                if (!randomExit)
+                {
+                    gameObject.GetComponent<CatchPlane>().active = true;
+                }
                 break;
             case NPCState.DestroyingPlane:
                 //call destroying plane action
-                gameObject.GetComponent<DestroyPlane>().active = true;
+                if (!randomExit)
+                {
+                    gameObject.GetComponent<DestroyPlane>().active = true;
+                }
                 break;
         }
     }
@@ -324,10 +340,11 @@ public class NPCMarkovBrain : MonoBehaviour
                     break;
                 }
             }
-            if (NoState() && UnityEngine.Random.Range(0f, 1f) < NPCParameters.decisionVolatility)
+            bool randomExit = UnityEngine.Random.Range(0f, 1f) < 1 - NPCParameters.decisionVolatility;
+            if (NoState() || randomExit)
             {
                 print($"Next action: {decision.ToString()}");
-                SelectAction(decision);   
+                SelectAction(decision, randomExit);   
             }
             yield return new WaitForSeconds(0.2f); // approx human reaction time
         }
@@ -336,7 +353,7 @@ public class NPCMarkovBrain : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        SelectAction(initState);
+        SelectAction(initState, false);
         StartCoroutine(NPCBehaviorRoutine());
     }
 
