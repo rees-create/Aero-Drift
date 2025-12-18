@@ -16,6 +16,7 @@ public class NPCMarkovBrain : MonoBehaviour
         [Header("Extra control")]
         public float maxTargetDistance;
         [Range(0f, 1f)] public float decisionVolatility;
+        [Range(0f, 10f)] public float distributionSharpness;
         [Range(0f, 0.2f)] public float maxBias;
     }
     public NPCParams NPCParameters;
@@ -24,9 +25,9 @@ public class NPCMarkovBrain : MonoBehaviour
         Standing,
         Moving,
         SwitchingLayer,
-        ThrowingPlane,
+        DestroyingPlane,
         CatchingPlane,
-        DestroyingPlane
+        ThrowingPlane
     }
     public NPCState initState;
     void SelectAction(NPCState state, bool randomExit) {
@@ -152,11 +153,14 @@ public class NPCMarkovBrain : MonoBehaviour
             double normalizedTargetDistance = Math.Min(targetDistance / NPCParameters.maxTargetDistance, 1);
             double planeIX = normalizedPlaneDistance * (0.3 + biases[0])
                 + normalizedTargetDistance * (0.2 + biases[1]) + planeAffinity * (0.5 + biases[2]) + biases[3];
-            double motionIX = normalizedPlaneDistance * (0.4 + biases[0]) + normalizedTargetDistance *  (0.3 + biases[1])
-                + explorativity * (0.3 + biases[2]) + biases[3];
+            double motionIX = normalizedPlaneDistance * (0.35 + biases[0]) + normalizedTargetDistance * (0.2 + biases[1])
+                + explorativity * (0.45 + biases[2]) + biases[3];
 
-            stationaryDistribution[i] = motionIX; 
-            stationaryDistribution[i + 3] = planeIX; //6 cuz 6 elements
+            int distAffirmSwitch = i > 0 ? 1 : -1;
+            float switchablePlaneAffinity = (planeAffinity - 0.5f) * 2f;
+            float switchableExplorativity = (explorativity - 0.5f) * 2f;
+            stationaryDistribution[i] = Math.Pow(motionIX, -distAffirmSwitch * switchableExplorativity * NPCParameters.distributionSharpness); 
+            stationaryDistribution[i + 3] = Math.Pow(planeIX, -distAffirmSwitch * switchablePlaneAffinity * NPCParameters.distributionSharpness); //power of 4 to accentuate differences
         }
         // Force normalize the distribution
         double sum = 0;
