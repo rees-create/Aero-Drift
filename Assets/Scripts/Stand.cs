@@ -131,14 +131,14 @@ public class Stand : MonoBehaviour
                 Vector3 thatScale = TransformKVP.KVPListGet(that.scale, child.gameObject).value;
                 TransformKVP scalePair = new TransformKVP(child.gameObject, Vector3.Lerp(localScale, thatScale, t));
                 TransformKVP.KVPListModify(ref interpolatedUnwrap.scale, child.gameObject, scalePair);
-                print($"scalePairValue: {scalePair.value}, orig scale: {localScale}, final scale: {thatScale}");
+                //print($"scalePairValue: {scalePair.value}, orig scale: {localScale}, final scale: {thatScale}");
                 child.gameObject.transform.localScale = scalePair.value; //apply interpolated scale
 
                 // Recursively scan children
                 if (child.childCount > 0)
                     ThisToThat(child, that, t);
             }
-            print($"t = {t}, {parent.gameObject.name} position = {parent.position}");
+            //print($"t = {t}, {parent.gameObject.name} position = {parent.position}");
             
         }
 

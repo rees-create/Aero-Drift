@@ -39,6 +39,7 @@ public class DestroyPlane : MonoBehaviour
         yield return new WaitUntil(()=>GetComponent<CatchPlane>().active == false); // until plane is caught
         print("catch plane deactivated");
         StartCoroutine(Crumple(crumpleType));
+        
         //let it fall;
         plane.GetComponent<PolygonCollider2D>().enabled = true;
         plane.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;

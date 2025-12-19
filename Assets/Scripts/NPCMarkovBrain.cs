@@ -342,11 +342,11 @@ public class NPCMarkovBrain : MonoBehaviour
             bool randomExit = UnityEngine.Random.Range(0f, 1f) > 1 - NPCParameters.decisionVolatility;
             if (NoState() || randomExit)
             {
-                print($"Next action: {decision.ToString()}");
+                print($"{gameObject.name} next action: {decision.ToString()}");
                 SelectAction(decision, randomExit);
 
-                //test code
-                string statDistStr = "Stationary Distribution: ";
+                ////test code
+                string statDistStr = $"{gameObject.name} Stationary Distribution: ";
                 foreach (double element in statDist)
                 {
                     statDistStr += element.ToString() + ", ";
