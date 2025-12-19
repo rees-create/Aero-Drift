@@ -298,6 +298,7 @@ public class NPCMarkovBrain : MonoBehaviour
     
     IEnumerator NPCBehaviorRoutine()
     {
+        NPCState currentState = initState;
         while (true)
         {
             
@@ -320,7 +321,7 @@ public class NPCMarkovBrain : MonoBehaviour
             // From initial state, make choice and call appropriate state action class
             double[] probabilityRow = new double[6];
             for (int i = 0; i < statDist.Length; i++) {
-                probabilityRow[i] = transitionMatrix[(int)initState, i];
+                probabilityRow[i] = transitionMatrix[(int)currentState, i];
             }
             FisherYatesShuffle(probabilityRow);
             double randValue = UnityEngine.Random.Range(0f, 1f);
@@ -339,6 +340,7 @@ public class NPCMarkovBrain : MonoBehaviour
                     break;
                 }
             }
+            currentState = decision;
             bool randomExit = UnityEngine.Random.Range(0f, 1f) > 1 - NPCParameters.decisionVolatility;
             if (NoState() || randomExit)
             {
@@ -350,6 +352,14 @@ public class NPCMarkovBrain : MonoBehaviour
                 foreach (double element in statDist)
                 {
                     statDistStr += element.ToString() + ", ";
+                }
+
+                print(statDistStr);
+
+                string probRowStr = $"{gameObject.name} Probability Row: ";
+                foreach (double element in probabilityRow)
+                {
+                    probRowStr += element.ToString() + ", ";
                 }
 
                 print(statDistStr);
