@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -323,21 +324,22 @@ public class NPCMarkovBrain : MonoBehaviour
             for (int i = 0; i < statDist.Length; i++) {
                 probabilityRow[i] = transitionMatrix[(int)currentState, i];
             }
-            FisherYatesShuffle(probabilityRow);
-            double randValue = UnityEngine.Random.Range(0f, 1f);
-            double accumulatedProb = 0;
+            //FisherYatesShuffle(probabilityRow);
+            
+            double topSelectionScore = -1;
+            double topRandValue = 0;
             NPCState decision = 0;
+            double randValue = (UnityEngine.Random.Range(0f, 10f) * probabilityRow.Max() * 1.5f) / 10f; //does this make it work better?
             for (int i = 0; i < statDist.Length; i++)
             {
-                if (accumulatedProb < randValue)
+                //double randValue = (UnityEngine.Random.Range(0f, 10f) * probabilityRow.Max() * 1.5f) / 10f; // expanding random range to avoid float overload for smooth distribution
+                double selectionScore = (probabilityRow[i] - randValue) / probabilityRow[i];
+                if (selectionScore > topSelectionScore) 
                 {
-                    accumulatedProb += probabilityRow[i];
-                }
-                else
-                {
+                    //update top selection score and decision
+                    topSelectionScore = selectionScore;
+                    topRandValue = randValue;
                     decision = (NPCState) i;
-                    //print($"Decision = {decision.ToString()}");
-                    break;
                 }
             }
             currentState = decision;
@@ -348,21 +350,21 @@ public class NPCMarkovBrain : MonoBehaviour
                 SelectAction(decision, randomExit);
 
                 ////test code
-                string statDistStr = $"{gameObject.name} Stationary Distribution: ";
-                foreach (double element in statDist)
-                {
-                    statDistStr += element.ToString() + ", ";
-                }
+                //string statDistStr = $"{gameObject.name} Stationary Distribution: ";
+                //foreach (double element in statDist)
+                //{
+                //    statDistStr += element.ToString() + ", ";
+                //}
 
-                print(statDistStr);
+                //print(statDistStr);
 
                 string probRowStr = $"{gameObject.name} Probability Row: ";
                 foreach (double element in probabilityRow)
                 {
                     probRowStr += element.ToString() + ", ";
                 }
-
-                print(statDistStr);
+                probRowStr += "Top Selection Score: " + topSelectionScore + "rand: " + topRandValue;
+                print(probRowStr);
             }
             yield return new WaitForSeconds(0.2f); // approx human reaction time
         }
