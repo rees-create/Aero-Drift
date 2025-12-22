@@ -105,11 +105,18 @@ public class CatchPlane : MonoBehaviour
                     }
 
                 }
-
                 
+
                 yield return new WaitForEndOfFrame(); // Wait for next frame
             }
+            
+
             yield return new WaitUntil(() => active);
+            // turn plane back on while waiting for active
+            plane.GetComponent<PolygonCollider2D>().enabled = true;
+            plane.GetComponent<Rigidbody2D>().gravityScale = 1;
+            plane.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
+            plane.GetComponent<FlightControl>().enabled = true;
         }
     }
 

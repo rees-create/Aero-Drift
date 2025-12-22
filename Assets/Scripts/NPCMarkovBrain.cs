@@ -358,13 +358,13 @@ public class NPCMarkovBrain : MonoBehaviour
 
                 //print(statDistStr);
 
-                string probRowStr = $"{gameObject.name} Probability Row: ";
-                foreach (double element in probabilityRow)
-                {
-                    probRowStr += element.ToString() + ", ";
-                }
-                probRowStr += "Top Selection Score: " + topSelectionScore + "rand: " + topRandValue;
-                print(probRowStr);
+                //string probRowStr = $"{gameObject.name} Probability Row: ";
+                //foreach (double element in probabilityRow)
+                //{
+                //    probRowStr += element.ToString() + ", ";
+                //}
+                //probRowStr += "Top Selection Score: " + topSelectionScore + "rand: " + topRandValue;
+                //print(probRowStr);
             }
             yield return new WaitForSeconds(0.2f); // approx human reaction time
         }
