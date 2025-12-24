@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
+
 
 public class CatchPlane : MonoBehaviour
 {
@@ -17,7 +19,14 @@ public class CatchPlane : MonoBehaviour
     //public string animationName;
     public float catchRadius;
     public Vector2 catchSpot;
-    
+
+    public void SetActive() {
+        if (!plane.GetComponent<FlightControl>().enabled == true) 
+        {
+            active = true;
+        }
+        
+    }
 
     void Follow(Vector3 playerVelocity, float speedFraction)
     {
@@ -35,7 +44,8 @@ public class CatchPlane : MonoBehaviour
     {
         // TODO: Instead of waiting for catch radius trigger, have a wider read radius to monitor local catch spot and
         // prevent teleportation.
-        while (true) { 
+        while (true) {
+            print($"({gameObject.name}: PlayCatchFollow()");
             //Initializations
             int animTime = 0;
             float incomingSpeed = 0f;
@@ -109,15 +119,19 @@ public class CatchPlane : MonoBehaviour
 
                 yield return new WaitForEndOfFrame(); // Wait for next frame
             }
-            
-
+            if (active)
+            {
+                print("reactivate physics");
+                plane.GetComponent<PolygonCollider2D>().enabled = true;
+                plane.GetComponent<Rigidbody2D>().gravityScale = 1;
+                plane.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
+                plane.GetComponent<FlightControl>().enabled = true;
+            }
+            print($"{gameObject.name}: waiting until reactivated");
             yield return new WaitUntil(() => active);
-            // turn plane back on while waiting for active
-            plane.GetComponent<PolygonCollider2D>().enabled = true;
-            plane.GetComponent<Rigidbody2D>().gravityScale = 1;
-            plane.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
-            plane.GetComponent<FlightControl>().enabled = true;
+            
         }
+        
     }
 
     // Update is called once per frame

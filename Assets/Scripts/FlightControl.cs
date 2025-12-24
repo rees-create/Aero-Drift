@@ -299,6 +299,16 @@ public class FlightControl : MonoBehaviour
         return new KeyValuePair<Vector2, float>(Vector2.zero, 0);
     }
 
+    //IEnumerator SetImpulseCoroutine() 
+    //{
+    //    while (true) 
+    //    {
+    //        rb.AddForce(initialThrowImpulse, ForceMode2D.Impulse);
+    //        initialThrowImpulse = 0;
+    //        yield return new WaitForSeconds(1f);
+
+    //    }
+    //}
    
     // Start is called before the first frame update
     void Start()
@@ -308,7 +318,7 @@ public class FlightControl : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         plane = ReadPlaneData(planeIndex);
         rb.centerOfMass = centerOfMass;
-        rb.AddForce(initialThrowImpulse, ForceMode2D.Impulse);
+        //rb.AddForce(initialThrowImpulse, ForceMode2D.Impulse);
 
     }
     private void OnDrawGizmos()
@@ -333,6 +343,14 @@ public class FlightControl : MonoBehaviour
         
     }
 
+    void Update()
+    {
+        if(initialThrowImpulse != Vector2.zero)
+        {
+            rb.AddForce(initialThrowImpulse, ForceMode2D.Impulse);
+            initialThrowImpulse = Vector2.zero;
+        }
+    }
     // Update is called once per frame
     void FixedUpdate()
     {

@@ -17,26 +17,33 @@ public class NPCThrower : MonoBehaviour
     
     bool thrown;
     [Header("Game Objects")]
-    public GameObject plane;
-    public GameObject bait;
-    public GameObject dash;
+    [SerializeField] GameObject plane;
+    [SerializeField] GameObject bait;
+    [SerializeField] GameObject dash;
     [Header("Throw Customization")]
-    public Vector2 dashScale;
-    public Vector2 followOffset;
+    [SerializeField] Vector2 dashScale;
+    [SerializeField] Vector2 followOffset;
     [Header("Animation Properties")]
-    public AnimationClip throwAnimation;
-    public bool usePoseLerp;
+    [SerializeField] AnimationClip throwAnimation;
+    [SerializeField] bool usePoseLerp;
     [Range(0,1)]
-    public float preLaunch;
+    [SerializeField] float preLaunch;
     [Header("Throw Intensity")]
-    public float maxThrowIntensity;
-    public float throwIntensityScale;
+    [SerializeField] float maxThrowIntensity;
+    [SerializeField] float throwIntensityScale;
+
+    int oldThrowerCount = 0;
+    int newThrowerCount = 0;
 
     public void SetActive() {
         float baitToPlaneDistance = Vector2.Distance((Vector2)bait.transform.position, (Vector2) plane.transform.position);
         if (baitToPlaneDistance < followOffset.magnitude)
         {
             active = true;
+            newThrowerCount++;
+            
+            //enabled = true;
+            print($"{gameObject.name}: Thrower activated, newThrowerCount = {newThrowerCount}");
         }
         else {
             print($"Too far, bait to plane = {baitToPlaneDistance}, radius to stay within = {followOffset.magnitude}");
@@ -164,6 +171,7 @@ public class NPCThrower : MonoBehaviour
         //clear plane for launch
         plane.GetComponent<Rigidbody2D>().gravityScale = 1;
         plane.GetComponent<FlightControl>().enabled = true;
+        plane.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
         plane.GetComponent<PolygonCollider2D>().enabled = true;
         
         //launch plane without exceeding max throw intensity
@@ -187,29 +195,43 @@ public class NPCThrower : MonoBehaviour
         while (true)
         {
             //yield return new WaitUntil(() => active);
+            print($"{gameObject.name}: PreThrow() oldThrowerCount: {oldThrowerCount}");
             if (active)
             {
+                print("init throw");
                 StartCoroutine(InitThrow());
                 StartCoroutine(TauntThrow());
+                print("after taunt");
             }
-            yield return new WaitUntil(()=> thrown);
-            StopCoroutine(TauntThrow());
-            StopCoroutine(InitThrow());
+            yield return new WaitUntil(() => thrown);
+            //StopCoroutine(TauntThrow());
+            //StopCoroutine(InitThrow());
+            print("thrown, waiting for deactivation");
             yield return new WaitUntil(()=> !active); //dependent on FPS by a little bit but we'll assume.
+            //enabled = false;    
             yield return new WaitUntil(() => active);
         }
     }
-
+    IEnumerator SleepALittle() 
+    {
+        yield return new WaitForSeconds(0.1f);
+    }
     // Start is called before the first frame update
     void Start()
     {
-        StartCoroutine(PreThrow());
+        //StartCoroutine(PreThrow());
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if (oldThrowerCount != newThrowerCount)
+        {
+            print("prethrow should happen");
+            oldThrowerCount++;
+            StartCoroutine(PreThrow());
+            //StartCoroutine(SleepALittle());
+        }
     }
     IEnumerator OnMouseDown() {
         //launch plane if active
@@ -221,6 +243,12 @@ public class NPCThrower : MonoBehaviour
        
         if (active) { 
             float animTime = 0;
+
+            //keep physics off till launch
+            //plane.GetComponent<FlightControl>().enabled = false;
+            //plane.GetComponent<Rigidbody2D>().gravityScale = 0;
+            //plane.GetComponent<PolygonCollider2D>().enabled = false;
+
             while (animTime <= 1-preLaunch) {
                 ThrowAnim(animTime);
                 animTime += Time.fixedDeltaTime;
