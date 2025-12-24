@@ -27,7 +27,7 @@ public class FlightControl : MonoBehaviour
     [SerializeField] float flapSpeed;
     [SerializeField] float flapInfluence;
     [SerializeField] bool flapsDirectlyIncreaseLift;
-    [Header("Impetus Force")]
+    [Header("Thrust")]
     public Vector2 initialThrowImpulse;
     public float maxThrust;
     [Header("Plane Specifications")]
