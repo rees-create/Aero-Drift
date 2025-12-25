@@ -185,6 +185,7 @@ public class Stand : MonoBehaviour
         {
             if (recordingStance)
             {
+                //TODO: change this.
                 print("recording stance");
                 StartCoroutine(SetStances());
             }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -43,7 +44,7 @@ public class FlightControl : MonoBehaviour
     }
     [Header("Flap Data")]
     public float AoA;
-    [SerializeField] float flapAngle;
+    public float flapAngle;
     [SerializeField] Vector2 flapDrag;
     [SerializeField] Vector2 flapLift;
     [SerializeField] float flapTorque;
@@ -256,7 +257,7 @@ public class FlightControl : MonoBehaviour
         return flapFraction * influence;
     }
 
-    float thrust = 0;
+    [NonSerialized] public float thrust = 0;
     float ApplyThrust(float maxThrust) 
     {
         

@@ -21,10 +21,10 @@ public class CatchPlane : MonoBehaviour
     public Vector2 catchSpot;
 
     public void SetActive() {
-        if (!plane.GetComponent<FlightControl>().enabled == true) 
-        {
+        //if (!plane.GetComponent<FlightControl>().enabled == true) 
+        //{
             active = true;
-        }
+        //}
         
     }
 

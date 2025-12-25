@@ -31,6 +31,9 @@ public class NPCThrower : MonoBehaviour
     [Header("Throw Intensity")]
     [SerializeField] float maxThrowIntensity;
     [SerializeField] float throwIntensityScale;
+    [Header("Plane Orientation")]
+    [SerializeField] bool setInitPlaneRotation;
+    [SerializeField] Vector3 defaultPlaneRotation;
 
     int oldThrowerCount = 0;
     int newThrowerCount = 0;
@@ -110,9 +113,17 @@ public class NPCThrower : MonoBehaviour
         {
             dashes = new GameObject("Throw Dashes");
             dashes.transform.parent = transform;
+            plane.GetComponent<FlightControl>().AoA = 0;
+            plane.GetComponent<FlightControl>().flapAngle = 0;
             plane.GetComponent<FlightControl>().enabled = false;
             plane.GetComponent<Rigidbody2D>().gravityScale = 0;
+            plane.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
             plane.GetComponent<PolygonCollider2D>().enabled = false;
+            if (setInitPlaneRotation) 
+            {
+                plane.transform.eulerAngles = defaultPlaneRotation;
+                //initPlaneRotation = defaultPlaneRotation;
+            }
             initPlaneRotation = plane.transform.eulerAngles;
             if (usePoseLerp)
             {
@@ -195,18 +206,19 @@ public class NPCThrower : MonoBehaviour
         while (true)
         {
             //yield return new WaitUntil(() => active);
-            print($"{gameObject.name}: PreThrow() oldThrowerCount: {oldThrowerCount}");
+            //print($"{gameObject.name}: PreThrow() oldThrowerCount: {oldThrowerCount}");
             if (active)
             {
-                print("init throw");
+                //print("init throw");
+                plane.GetComponent<FlightControl>().thrust = 0;
                 StartCoroutine(InitThrow());
                 StartCoroutine(TauntThrow());
-                print("after taunt");
+                //print("after taunt");
             }
             yield return new WaitUntil(() => thrown);
             //StopCoroutine(TauntThrow());
             //StopCoroutine(InitThrow());
-            print("thrown, waiting for deactivation");
+            //print("thrown, waiting for deactivation");
             yield return new WaitUntil(()=> !active); //dependent on FPS by a little bit but we'll assume.
             //enabled = false;    
             yield return new WaitUntil(() => active);
@@ -227,7 +239,7 @@ public class NPCThrower : MonoBehaviour
     {
         if (oldThrowerCount != newThrowerCount)
         {
-            print("prethrow should happen");
+            //print("prethrow should happen");
             oldThrowerCount++;
             StartCoroutine(PreThrow());
             //StartCoroutine(SleepALittle());

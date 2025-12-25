@@ -31,7 +31,7 @@ public class NPCMarkovBrain : MonoBehaviour
         ThrowingPlane
     }
     public NPCState initState;
-    void SelectAction(NPCState state, bool randomExit) {
+    void SelectAction(NPCState state, NPCState previousState, bool randomExit) {
         switch (state) {
             case NPCState.Standing:
                 //call standing action
@@ -296,11 +296,32 @@ public class NPCMarkovBrain : MonoBehaviour
 
         return transitionMatrix;
     }
+
+    NPCState DistributionSelect(double[] dist) 
+    {
+        double topSelectionScore = -1;
+        double topRandValue = 0;
+        NPCState decision = 0;
+        double randValue = (UnityEngine.Random.Range(0f, 10f) * dist.Max() * 1.5f) / 10f; //does this make it work better?
+        for (int i = 0; i < dist.Length; i++)
+        {
+            //double randValue = (UnityEngine.Random.Range(0f, 10f) * probabilityRow.Max() * 1.5f) / 10f; // expanding random range to avoid float overload for smooth distribution
+            double selectionScore = (dist[i] - randValue) / dist[i];
+            if (selectionScore > topSelectionScore)
+            {
+                //update top selection score and decision
+                topSelectionScore = selectionScore;
+                topRandValue = randValue;
+                decision = (NPCState)i;
+            }
+        }
+        return decision;
+    }
     
     IEnumerator NPCBehaviorRoutine()
     {
         NPCState currentState = initState;
-        //NPCState previousState = initState;
+        NPCState previousState = initState;
         while (true)
         {
             
@@ -325,8 +346,9 @@ public class NPCMarkovBrain : MonoBehaviour
             for (int i = 0; i < statDist.Length; i++) {
                 probabilityRow[i] = transitionMatrix[(int)currentState, i];
             }
+            previousState = currentState;
             //FisherYatesShuffle(probabilityRow);
-            
+
             double topSelectionScore = -1;
             double topRandValue = 0;
             NPCState decision = 0;
@@ -344,13 +366,13 @@ public class NPCMarkovBrain : MonoBehaviour
                 }
             }
             currentState = decision;
-            bool randomExit = UnityEngine.Random.Range(0f, 1f) > 1 - NPCParameters.decisionVolatility;
+            bool randomExit = (UnityEngine.Random.Range(0f, 10f) / 10) > 1 - NPCParameters.decisionVolatility;
             if (NoState() || randomExit)
             {
-                print($"{gameObject.name} next action: {decision.ToString()}");
-                SelectAction(decision, randomExit);
+                print($"{gameObject.name} next action: {decision.ToString()}, random exit = {randomExit}");
+                SelectAction(decision, previousState, randomExit);
 
-                ////test code
+                //test code
                 //string statDistStr = $"{gameObject.name} Stationary Distribution: ";
                 //foreach (double element in statDist)
                 //{
@@ -359,13 +381,13 @@ public class NPCMarkovBrain : MonoBehaviour
 
                 //print(statDistStr);
 
-                string probRowStr = $"{gameObject.name} Probability Row: ";
-                foreach (double element in probabilityRow)
-                {
-                    probRowStr += element.ToString() + ", ";
-                }
-                probRowStr += "Top Selection Score: " + topSelectionScore + "rand: " + topRandValue;
-                print(probRowStr);
+                //string probRowStr = $"{gameObject.name} Probability Row: ";
+                //foreach (double element in probabilityRow)
+                //{
+                //    probRowStr += element.ToString() + ", ";
+                //}
+                //probRowStr += "Top Selection Score: " + topSelectionScore + "rand: " + topRandValue;
+                //print(probRowStr);
             }
             yield return new WaitForSeconds(0.2f); // approx human reaction time
         }
@@ -374,7 +396,7 @@ public class NPCMarkovBrain : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        SelectAction(initState, false);
+        SelectAction(initState, (NPCState) (-1), false);
         StartCoroutine(NPCBehaviorRoutine());
     }
 
