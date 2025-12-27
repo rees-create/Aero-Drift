@@ -37,7 +37,7 @@ public class NPCMarkovBrain : MonoBehaviour
                 //call standing action
                 if (!randomExit)
                 {
-                    gameObject.GetComponent<Stand>().active = true;
+                    gameObject.GetComponent<Stand>().SetActive();
                 }
                 break;
             case NPCState.Moving:
@@ -349,22 +349,8 @@ public class NPCMarkovBrain : MonoBehaviour
             previousState = currentState;
             //FisherYatesShuffle(probabilityRow);
 
-            double topSelectionScore = -1;
-            double topRandValue = 0;
-            NPCState decision = 0;
-            double randValue = (UnityEngine.Random.Range(0f, 10f) * probabilityRow.Max() * 1.5f) / 10f; //does this make it work better?
-            for (int i = 0; i < statDist.Length; i++)
-            {
-                //double randValue = (UnityEngine.Random.Range(0f, 10f) * probabilityRow.Max() * 1.5f) / 10f; // expanding random range to avoid float overload for smooth distribution
-                double selectionScore = (probabilityRow[i] - randValue) / probabilityRow[i];
-                if (selectionScore > topSelectionScore) 
-                {
-                    //update top selection score and decision
-                    topSelectionScore = selectionScore;
-                    topRandValue = randValue;
-                    decision = (NPCState) i;
-                }
-            }
+
+            NPCState decision = DistributionSelect(probabilityRow);
             currentState = decision;
             bool randomExit = (UnityEngine.Random.Range(0f, 10f) / 10) > 1 - NPCParameters.decisionVolatility;
             if (NoState() || randomExit)

@@ -8,6 +8,7 @@ using UnityEngine.UIElements;
 public class Stand : MonoBehaviour
 {
     public bool active;
+    [SerializeField] bool recordStanceMode;
     public bool recordingStance;
 
     public UnwrapObject beforeStance;
@@ -15,6 +16,13 @@ public class Stand : MonoBehaviour
     public List<UnwrapObject> afterStances;
     public float animationSeconds;
 
+    int oldStandCount = 0;
+    int newStandCount = 0;
+
+    public void SetActive() {
+        newStandCount++;
+        active = true;
+    }
 
     [System.Serializable]
     public class TransformKVP {
@@ -207,13 +215,20 @@ public class Stand : MonoBehaviour
     
     void Start()
     {
-        StartCoroutine(StandLoop(TransitionState.In));
+        if (recordStanceMode)
+        {
+            StartCoroutine(StandLoop(TransitionState.In));
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if (newStandCount != oldStandCount && !recordStanceMode) 
+        {
+            oldStandCount++;
+            StartCoroutine(StandLoop(TransitionState.In));
+        }
     }
 
 
