@@ -76,7 +76,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 5
+  m_SortingOrder: 6
   m_Sprite: {fileID: 1375288712, guid: 7a04dd86621b4b442ad92e5672a9a8cd, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -134,8 +134,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   objects:
   - {fileID: 196389054103402087, guid: 2a3f57b2f3650f14eacfe553c43fe20b, type: 3}
-  decision: 0.6971431
-  sortingOrder: 6
+  decision: 0.88803613
+  sortingOrder: 7
 --- !u!1001 &424489200567095225
 PrefabInstance:
   m_ObjectHideFlags: 0

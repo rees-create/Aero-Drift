@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using System.Linq;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 [ExecuteInEditMode]
 public class VariableObject : MonoBehaviour
@@ -13,29 +14,82 @@ public class VariableObject : MonoBehaviour
     public int sortingOrder;
     // Start is called before the first frame update
 
-    public void SetSortingOrder(GameObject g, int desiredSortingOrder)
-    {
-        if (g.GetComponent<SpriteRenderer>())
-        {
-            g.transform.GetComponent<SpriteRenderer>().sortingOrder = desiredSortingOrder;
+    //public void SetSortingOrder(GameObject g, int desiredSortingOrder, int upperSortingOrder = -1)
+    //{
+    //    int layerDifference = 0;  
+    //    if (g.GetComponent<SpriteRenderer>())
+    //    {
+    //        g.transform.GetComponent<SpriteRenderer>().sortingOrder = desiredSortingOrder;
+    //        layerDifference = desiredSortingOrder - g.GetComponent<SpriteRenderer>().sortingOrder;
+    //        upperSortingOrder = g.GetComponent<SpriteRenderer>().sortingOrder;
+    //        //Debug.Log(g.name + " sorting order: " + g.GetComponent<SpriteRenderer>().sortingOrder);
+    //    }
+    //    if (g.transform.childCount > 0)
+    //    {
+    //        //Debug.Log("Descending hierarchy: " + g.name + " desired sorting order: " + desiredSortingOrder);
+    //        for (int i = 0; i < g.transform.childCount; i++)
+    //        {
+    //            //SetSortingOrder(g.transform.GetChild(i).gameObject, desiredSortingOrder + i);
+    //            int layerVariation = 0;
+    //            if (g.transform.GetChild(i).GetComponent<SpriteRenderer>() && upperSortingOrder != -1) //check for most recent g sprite renderer in tree 
+    //            {
+    //                layerVariation = upperSortingOrder - g.transform.GetChild(i).GetComponent<SpriteRenderer>().sortingOrder;
+    //                //print($"layerVariation for child {child} = {layerVariation}, upper sorting order = {upperSortingOrder}, child order {child.GetComponent<SpriteRenderer>().sortingOrder}");
+    //            }
+    //            //recursively search children
+    //            SetSortingOrder(g.transform.GetChild(i).gameObject, desiredSortingOrder - layerVariation, upperSortingOrder);
+    //        }
+    //    }
+    //    //if (g.GetComponent<VariableObject>())
+    //    //{
+    //    //    g.GetComponent<VariableObject>().sortingOrder = desiredSortingOrder;
+    //    //}
+    //}
 
+    public void SetSortingOrder(GameObject g, int desiredSortingOrder, int upperSortingOrder = -1)
+    {
+        //TODO: relative sorting order preservation.
+        int layerDifference = 0;
+        if (g.GetComponent<SpriteRenderer>() || g.GetComponent<VariableObject>())
+        {
+
+            if (g.GetComponent<SpriteRenderer>())
+            {
+                layerDifference = desiredSortingOrder - g.GetComponent<SpriteRenderer>().sortingOrder;
+                upperSortingOrder = g.GetComponent<SpriteRenderer>().sortingOrder;
+                g.transform.GetComponent<SpriteRenderer>().sortingOrder = desiredSortingOrder;
+            }
+            else
+            {
+                layerDifference = desiredSortingOrder - g.GetComponent<VariableObject>().sortingOrder;
+                upperSortingOrder = g.GetComponent<VariableObject>().sortingOrder;
+                g.transform.GetComponent<VariableObject>().sortingOrder = desiredSortingOrder;
+            }
             //Debug.Log(g.name + " sorting order: " + g.GetComponent<SpriteRenderer>().sortingOrder);
         }
-        else if (g.transform.childCount > 0)
+
+
+        //Debug.Log("Descending hierarchy: " + g.name + " desired sorting order: " + desiredSortingOrder);
+        for (int i = 0; i < g.transform.childCount; i++)
         {
-            //Debug.Log("Descending hierarchy: " + g.name + " desired sorting order: " + desiredSortingOrder);
-            for (int i = 0; i < g.transform.childCount; i++)
+            int layerVariation = 0;
+            if (g.transform.GetChild(i).GetComponent<SpriteRenderer>() && upperSortingOrder != -1) //check for most recent g sprite renderer in tree 
             {
-                SetSortingOrder(g.transform.GetChild(i).gameObject, desiredSortingOrder + i);
+                layerVariation = upperSortingOrder - g.transform.GetChild(i).GetComponent<SpriteRenderer>().sortingOrder;
+                //print($"layerVariation for child {child} = {layerVariation}, upper sorting order = {upperSortingOrder}, child order {child.GetComponent<SpriteRenderer>().sortingOrder}");
             }
-        }
-        if (g.GetComponent<VariableObject>())
-        {
-            g.GetComponent<VariableObject>().sortingOrder = desiredSortingOrder;
+            if (g.transform.GetChild(i).GetComponent<VariableObject>() && upperSortingOrder != -1) //check for most recent g sprite renderer in tree 
+            {
+                layerVariation = upperSortingOrder - g.transform.GetChild(i).GetComponent<VariableObject>().sortingOrder;
+            }
+            if (g.transform.childCount > 0)
+            {
+                SetSortingOrder(g.transform.GetChild(i).gameObject, desiredSortingOrder - layerVariation, upperSortingOrder);
+            }
         }
     }
 
-    void ApplyBlueShift(GameObject g, DepthIllusion illusion)
+        void ApplyBlueShift(GameObject g, DepthIllusion illusion)
     {
         for (int i = 0; i < g.transform.childCount; i++)
         {
