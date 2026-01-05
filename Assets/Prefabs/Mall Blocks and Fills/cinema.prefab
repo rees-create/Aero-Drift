@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3620137521722268889}
   - component: {fileID: 1745030291495066171}
+  - component: {fileID: 3705768793145799809}
   m_Layer: 0
   m_Name: cinema
   m_TagString: Untagged
@@ -72,7 +73,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 5
+  m_SortingOrder: 10
   m_Sprite: {fileID: -845901197, guid: 7a04dd86621b4b442ad92e5672a9a8cd, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -84,3 +85,21 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &3705768793145799809
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7941887584439784315}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d82db47c642a5a4cb3b46f20ea7cf18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colliders:
+  - on: 1
+    size: {x: -5, y: 3.7}
+    position: {x: 0.05, y: -1.5}
+    directionToLayer: -1
+  DrawGizmos: 1

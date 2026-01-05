@@ -73,7 +73,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 5
+  m_SortingOrder: 10
   m_Sprite: {fileID: -1416947310, guid: f0f7aea65b17eca48bc597a13803822e, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -235,5 +235,9 @@ MonoBehaviour:
   - on: 1
     size: {x: 16.7, y: 14.4}
     position: {x: -10.4, y: -8.12}
+    directionToLayer: 1
+  - on: 1
+    size: {x: 16.7, y: 14.4}
+    position: {x: 31.2, y: 17.04}
     directionToLayer: -1
   DrawGizmos: 1

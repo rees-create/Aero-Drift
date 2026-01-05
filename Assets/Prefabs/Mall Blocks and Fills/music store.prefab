@@ -81,7 +81,7 @@ SpriteMask:
   m_BackSortingLayer: 0
   m_FrontSortingOrder: 7
   m_BackSortingOrder: 0
-  m_IsCustomRangeActive: 1
+  m_IsCustomRangeActive: 0
   m_SpriteSortPoint: 0
 --- !u!1 &4134500776855053546
 GameObject:
@@ -93,6 +93,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7569953330620820264}
   - component: {fileID: 6428969563029214456}
+  - component: {fileID: 658351578367111372}
   m_Layer: 0
   m_Name: music store
   m_TagString: Untagged
@@ -160,7 +161,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 5
+  m_SortingOrder: 10
   m_Sprite: {fileID: -641301755, guid: 7a04dd86621b4b442ad92e5672a9a8cd, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -172,6 +173,24 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &658351578367111372
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4134500776855053546}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d82db47c642a5a4cb3b46f20ea7cf18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colliders:
+  - on: 1
+    size: {x: 4.88, y: 3.58}
+    position: {x: 0.1, y: -0.47}
+    directionToLayer: 0
+  DrawGizmos: 1
 --- !u!1 &4776908068548801922
 GameObject:
   m_ObjectHideFlags: 0
@@ -218,8 +237,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   objects:
   - {fileID: 8579668629105899711, guid: 97863dd9f94908c47bca7dcc84e1d0a3, type: 3}
-  decision: 0.6149048
-  sortingOrder: 6
+  decision: 0.9151027
+  sortingOrder: 16
 --- !u!1001 &1763933192575885523
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -277,7 +296,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8357282863036984581, guid: f998c39ea0c92d6499f377bb40ce09e4, type: 3}
       propertyPath: m_SortingOrder
-      value: 7
+      value: 22
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f998c39ea0c92d6499f377bb40ce09e4, type: 3}
@@ -347,7 +366,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6183550127637368904, guid: 41529eced0295ce4289f38d3222a9c85, type: 3}
       propertyPath: m_SortingOrder
-      value: 7
+      value: 22
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 41529eced0295ce4289f38d3222a9c85, type: 3}
@@ -417,7 +436,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6183550127637368904, guid: 41529eced0295ce4289f38d3222a9c85, type: 3}
       propertyPath: m_SortingOrder
-      value: 7
+      value: 22
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 41529eced0295ce4289f38d3222a9c85, type: 3}

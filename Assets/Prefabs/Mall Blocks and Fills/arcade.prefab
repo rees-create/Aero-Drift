@@ -46,8 +46,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   objects:
   - {fileID: 4201181096283646785, guid: 1460fa5673fc7e3408b80bdd5d58a348, type: 3}
-  decision: 0.23452127
-  sortingOrder: 6
+  decision: 0.09895575
+  sortingOrder: 16
 --- !u!1 &6703389830368860128
 GameObject:
   m_ObjectHideFlags: 0
@@ -58,6 +58,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3574470245675672717}
   - component: {fileID: 7033521778898483214}
+  - component: {fileID: 379825932593856489}
   m_Layer: 0
   m_Name: arcade
   m_TagString: Untagged
@@ -124,7 +125,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 5
+  m_SortingOrder: 10
   m_Sprite: {fileID: 1503315009, guid: 7a04dd86621b4b442ad92e5672a9a8cd, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -136,6 +137,24 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &379825932593856489
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6703389830368860128}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d82db47c642a5a4cb3b46f20ea7cf18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colliders:
+  - on: 1
+    size: {x: 4.87, y: 3.59}
+    position: {x: -0.05, y: -0.45}
+    directionToLayer: -1
+  DrawGizmos: 1
 --- !u!1001 &5234981200551164731
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -193,7 +212,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8357282863036984581, guid: f998c39ea0c92d6499f377bb40ce09e4, type: 3}
       propertyPath: m_SortingOrder
-      value: 7
+      value: 22
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f998c39ea0c92d6499f377bb40ce09e4, type: 3}
@@ -263,7 +282,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6183550127637368904, guid: 41529eced0295ce4289f38d3222a9c85, type: 3}
       propertyPath: m_SortingOrder
-      value: 8
+      value: 22
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 41529eced0295ce4289f38d3222a9c85, type: 3}
@@ -333,7 +352,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6183550127637368904, guid: 41529eced0295ce4289f38d3222a9c85, type: 3}
       propertyPath: m_SortingOrder
-      value: 8
+      value: 22
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 41529eced0295ce4289f38d3222a9c85, type: 3}

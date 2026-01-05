@@ -103,6 +103,7 @@ public class NPCSwitchLayer : MonoBehaviour
         SwitchHierarchyLayer(gameObject, floorController.layers[currentLayer].sortingOrder);
         //Also change layer collider map.
         NPCLayerColliderMap = floorController.layers[currentLayer].colliderMap;
+        print("switching layer");
     }
     void SwitchHierarchyLayer(GameObject g, int layer, int upperSortingOrder = -1) {
         int layerDifference = 0;
@@ -136,6 +137,7 @@ public class NPCSwitchLayer : MonoBehaviour
             {
                 if(Vector2.Distance(transform.position, collider.position) < Vector2.Distance(transform.position, closest))
                 {
+                    closest = collider.position;
                     closestIndex = index;
                 }
             }

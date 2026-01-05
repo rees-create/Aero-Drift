@@ -77,11 +77,6 @@ public class ObjectSpawnSystem : MonoBehaviour
                 SetSortingOrder(g.transform.GetChild(i).gameObject, desiredSortingOrder - layerVariation, upperSortingOrder);
             }
         }
-        
-        //if (g.GetComponent<VariableObject>()) 
-        //{
-        //    g.GetComponent<VariableObject>().sortingOrder = desiredSortingOrder;
-        //}
     }
 
     [Serializable]

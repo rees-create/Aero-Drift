@@ -11,6 +11,7 @@ public class LayerColliderMap : MonoBehaviour
     public List<LayerCollider> colliders;
     [SerializeField] bool useAbsolutePosition;
     public bool clearTarget;
+    public bool flipDirectionToLayer;
     public ObjectSpawnSystem popBackController;
 
     [System.Serializable]
@@ -22,11 +23,12 @@ public class LayerColliderMap : MonoBehaviour
         [Range(-1, 1)]
         public int directionToLayer;
 
-        public LayerCollider(Vector2 size, Vector2 position, bool on)
+        public LayerCollider(Vector2 size, Vector2 position, bool on, int directionToLayer)
         {
             this.size = size;
             this.position = position;
             this.on = on;
+            this.directionToLayer = directionToLayer;
         }
         public void DrawCollider(Vector2 worldPosition)
         { 
@@ -52,6 +54,10 @@ public class LayerColliderMap : MonoBehaviour
                 return false;
             }
         }
+        public override string ToString()
+        {
+            return $"LayerCollider(on: {on}, size: {size}, position: {position}, directionToLayer: {directionToLayer})";
+        }
     }
     IEnumerator ColliderMapResetCycle() 
     {
@@ -69,7 +75,7 @@ public class LayerColliderMap : MonoBehaviour
     }
     public void SearchForLayerColliders(GameObject g, Vector2 scaleMultiplier = default, Vector2 positionAddon = default)
     {
-        //TODO: Scale multiplier and position addon
+        //TODO: Do not include (or delete) layer colliders in child collider maps
         for (int i = 0; i < g.transform.childCount; i++)
         {
             LayerColliderGroup layerColliderGroup = g.transform.GetChild(i).GetComponent<LayerColliderGroup>();
@@ -84,12 +90,14 @@ public class LayerColliderMap : MonoBehaviour
                         //print($"Found active LayerCollider on {g.name}");
                         LayerCollider layerCollider = layerColliderGroup.colliders[j];
                         positionAddon = layerColliderGroup.gameObject.transform.position;
+                        int directionToLayer = flipDirectionToLayer ? -layerCollider.directionToLayer : layerCollider.directionToLayer;
                         LayerCollider layerColliderCopy = new LayerCollider(
                             layerCollider.size * scaleMultiplier,
                             layerCollider.position + positionAddon,
-                            layerCollider.on
+                            layerCollider.on,
+                            directionToLayer
                         );
-                        
+                        //print($"layerCollider: {layerCollider}, layerColliderCopy: {layerColliderCopy}");
                         //layerColliderCopy.position = layerCollider.position + positionAddon;
                         //layerColliderCopy.size *= scaleMultiplier;
                         colliders.Add(layerColliderCopy);
@@ -104,7 +112,7 @@ public class LayerColliderMap : MonoBehaviour
                     scaleMultiplier = (Vector2) g.transform.GetComponent<ObjectSpawnSystem>().elementVariation.scale;
                     //print($"ObjectSpawnSystem for {g.name} has scale {scaleMultiplier}");
                 }
-                if (g.transform.childCount > 0)
+                if (g.transform.childCount > 0) //TODO: this might be the best place to exclude child layer colliders
                 {
                     //print($"Next step in tree: {g.transform.GetChild(i).gameObject.name}");
                     SearchForLayerColliders(g.transform.GetChild(i).gameObject, scaleMultiplier, positionAddon);
