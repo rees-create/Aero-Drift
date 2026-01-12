@@ -17,6 +17,7 @@ public class FloorControl : MonoBehaviour
 
     public List<LayerInfo> layers;
     public GameObject player;
+    public bool flipLayerDirection;
 
     int currentLayer;
     public int GetCurrentLayer() { return currentLayer; }
@@ -61,11 +62,11 @@ public class FloorControl : MonoBehaviour
     {
         if (Input.GetKeyUp(KeyCode.S)) //move floor down
         {
-            StartCoroutine(SwitchLayer(1));
+            StartCoroutine(SwitchLayer(flipLayerDirection ? -1 : 1));
         }
         if (Input.GetKeyUp(KeyCode.W)) //move floor up
         {
-            StartCoroutine(SwitchLayer(-1));
+            StartCoroutine(SwitchLayer(flipLayerDirection ? -1 : 1));
         }
         //when ready reassign sorting order
     }

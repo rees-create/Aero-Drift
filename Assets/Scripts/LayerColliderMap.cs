@@ -9,6 +9,7 @@ public class LayerColliderMap : MonoBehaviour
 {
     [SerializeField] GameObject target;
     public List<LayerCollider> colliders;
+    public int recursionDepth;
     [SerializeField] bool useAbsolutePosition;
     public bool clearTarget;
     public bool flipDirectionToLayer;
@@ -20,6 +21,7 @@ public class LayerColliderMap : MonoBehaviour
         public bool on;
         public Vector2 size;
         public Vector2 position;
+        //public int layerLevel;
         [Range(-1, 1)]
         public int directionToLayer;
 
@@ -63,16 +65,25 @@ public class LayerColliderMap : MonoBehaviour
     {
         while (true)
         {
-            yield return new WaitUntil(() => popBackController.popBack || colliders.Count == 0);
+            if (popBackController != null)
+            {
+                yield return new WaitUntil(() => popBackController.popBack || colliders.Count == 0);
+            }
+            else 
+            {
+                yield return new WaitUntil(()=> colliders.Count == 0);
+            }
+            
             //reset colliders
             colliders = new List<LayerCollider>();
-            //This loop assumes that the LayerColliderMap is the first child of the parent object.
-            for (int i = 1; i < gameObject.transform.parent.childCount; i++)
+            //This loop assumes that the LayerColliderMap is the first child of the parent object... guess what screw that, also search the LayerColliderMap for configuration purposes.
+            for (int i = 0; i < gameObject.transform.parent.childCount; i++)
             {
                 SearchForLayerColliders(gameObject.transform.parent.GetChild(i).gameObject);
             }
         }
     }
+    
     public void SearchForLayerColliders(GameObject g, Vector2 scaleMultiplier = default, Vector2 positionAddon = default)
     {
         //TODO: Do not include (or delete) layer colliders in child collider maps
@@ -85,7 +96,7 @@ public class LayerColliderMap : MonoBehaviour
                 //if (g.name.Contains("Apartment")) print("Hello?? you have a LayerColliderGroup");
                 for (int j = 0; j < layerColliderGroup.colliders.Count; j++)
                 {
-                    if (layerColliderGroup.colliders[j].on)
+                    if (layerColliderGroup.colliders[j].on && RecursiveDepth(g.transform.GetChild(i).gameObject) == recursionDepth)
                     {
                         //print($"Found active LayerCollider on {g.name}");
                         LayerCollider layerCollider = layerColliderGroup.colliders[j];
@@ -105,23 +116,64 @@ public class LayerColliderMap : MonoBehaviour
                     }
                 }
             }
-            else 
-            {
+            //else 
+            //{
                 if (g.transform.GetComponent<ObjectSpawnSystem>())
                 {
-                    scaleMultiplier = (Vector2) g.transform.GetComponent<ObjectSpawnSystem>().elementVariation.scale;
+                    scaleMultiplier = (Vector2)g.transform.GetComponent<ObjectSpawnSystem>().elementVariation.scale;
                     //print($"ObjectSpawnSystem for {g.name} has scale {scaleMultiplier}");
                 }
-                if (g.transform.childCount > 0) //TODO: this might be the best place to exclude child layer colliders
+                else 
+                {
+                    scaleMultiplier = FindHigherScaleMultiplier(g);
+                }
+                 
+                if (g.transform.childCount > 0 /*&& !(g.transform.GetChild(i).GetComponent<LayerColliderMap>())*/) 
                 {
                     //print($"Next step in tree: {g.transform.GetChild(i).gameObject.name}");
                     SearchForLayerColliders(g.transform.GetChild(i).gameObject, scaleMultiplier, positionAddon);
                 }
-                //else
+                //else if(g.transform.GetChild(i).GetComponent<LayerColliderMap>())
                 //{
-                //    print($"dump recursion here {g.name} transform.childCount = {transform.childCount}");
+                    //print($"dump recursion here {g.name} transform.childCount = {transform.childCount}");
+                    //g.transform.GetChild(i).GetComponent<LayerColliderMap>().flipDirectionToLayer = this.flipDirectionToLayer;
+                    
                 //}
-            }
+            //}
+        }
+    }
+    int RecursiveDepth(GameObject g, int depth = 0)
+    {
+        if (g.GetComponent<ObjectSpawnSystem>())
+        {
+            //print($"depth = {depth}, found ObjectSpawnSystem at: {g.name}");
+            return depth;
+        }
+        else if(g.GetComponent<LayerColliderGroup>())
+        {
+            depth++;
+            //print($"recursive depth: {depth} at {g.name}");
+            return RecursiveDepth(g.transform.parent.gameObject, depth);
+        }
+        else 
+        {
+            //print($"climbing from: {g.name}");
+            return RecursiveDepth(g.transform.parent.gameObject, depth);
+        }
+    }
+    Vector2 FindHigherScaleMultiplier(GameObject g)
+    {
+        if (g.GetComponent<ObjectSpawnSystem>())
+        {
+            return g.GetComponent<ObjectSpawnSystem>().elementVariation.scale;
+        }
+        else if (g.transform.parent == null)
+        {
+            return Vector2.one;
+        }
+        else 
+        {
+            return FindHigherScaleMultiplier(g.transform.parent.gameObject);
         }
     }
     // Start is called before the first frame update

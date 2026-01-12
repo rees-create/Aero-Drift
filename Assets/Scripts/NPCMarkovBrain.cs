@@ -355,7 +355,7 @@ public class NPCMarkovBrain : MonoBehaviour
             bool randomExit = (UnityEngine.Random.Range(0f, 10f) / 10) > 1 - NPCParameters.decisionVolatility;
             if (NoState() || randomExit)
             {
-                print($"{gameObject.name} next action: {decision.ToString()}, random exit = {randomExit}");
+                //print($"{gameObject.name} next action: {decision.ToString()}, random exit = {randomExit}");
                 SelectAction(decision, previousState, randomExit);
 
                 //test code

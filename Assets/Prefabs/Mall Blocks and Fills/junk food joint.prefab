@@ -77,7 +77,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 10
+  m_SortingOrder: 53
   m_Sprite: {fileID: 1375288712, guid: 7a04dd86621b4b442ad92e5672a9a8cd, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -107,6 +107,56 @@ MonoBehaviour:
     position: {x: 0, y: -0.51}
     directionToLayer: -1
   DrawGizmos: 1
+--- !u!1 &6424609653771151886
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2825361233287170733}
+  - component: {fileID: 7291044733487898075}
+  m_Layer: 0
+  m_Name: Back Of Store
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2825361233287170733
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6424609653771151886}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8990825993252600305}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7291044733487898075
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6424609653771151886}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d82db47c642a5a4cb3b46f20ea7cf18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colliders:
+  - on: 1
+    size: {x: 0.92, y: 3.08}
+    position: {x: -2.23, y: 0}
+    directionToLayer: 1
+  DrawGizmos: 1
 --- !u!1 &8084403520996830132
 GameObject:
   m_ObjectHideFlags: 0
@@ -117,6 +167,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8990825993252600305}
   - component: {fileID: 7402755398150975406}
+  - component: {fileID: 3944518962809103147}
   m_Layer: 0
   m_Name: Fill
   m_TagString: Untagged
@@ -135,7 +186,8 @@ Transform:
   m_LocalPosition: {x: 0.25, y: -0.53, z: 0.014805585}
   m_LocalScale: {x: 1, y: 0.81, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 2825361233287170733}
   m_Father: {fileID: 1190047410419964231}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -153,8 +205,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   objects:
   - {fileID: 196389054103402087, guid: 2a3f57b2f3650f14eacfe553c43fe20b, type: 3}
-  decision: 0.29201597
-  sortingOrder: 16
+  decision: 0.0982548
+  sortingOrder: 54
+--- !u!114 &3944518962809103147
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8084403520996830132}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d82db47c642a5a4cb3b46f20ea7cf18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colliders:
+  - on: 1
+    size: {x: 0.76, y: 3.08}
+    position: {x: 0.55, y: 0}
+    directionToLayer: -1
+  DrawGizmos: 1
 --- !u!1001 &424489200567095225
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -220,7 +290,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6183550127637368904, guid: 41529eced0295ce4289f38d3222a9c85, type: 3}
       propertyPath: m_SortingOrder
-      value: 22
+      value: 55
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 41529eced0295ce4289f38d3222a9c85, type: 3}
@@ -238,7 +308,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 517154941082470469, guid: 32b47baceb6b6f745a1742b778f2fb68, type: 3}
       propertyPath: m_SortingOrder
-      value: 23
+      value: 55
       objectReference: {fileID: 0}
     - target: {fileID: 6282114700733955376, guid: 32b47baceb6b6f745a1742b778f2fb68, type: 3}
       propertyPath: m_Name
@@ -360,7 +430,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6183550127637368904, guid: 41529eced0295ce4289f38d3222a9c85, type: 3}
       propertyPath: m_SortingOrder
-      value: 22
+      value: 55
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 41529eced0295ce4289f38d3222a9c85, type: 3}

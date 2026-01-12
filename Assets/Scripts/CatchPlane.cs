@@ -45,7 +45,7 @@ public class CatchPlane : MonoBehaviour
         // TODO: Instead of waiting for catch radius trigger, have a wider read radius to monitor local catch spot and
         // prevent teleportation.
         while (true) {
-            print($"({gameObject.name}: PlayCatchFollow()");
+            //print($"({gameObject.name}: PlayCatchFollow()");
             //Initializations
             int animTime = 0;
             float incomingSpeed = 0f;
@@ -127,7 +127,7 @@ public class CatchPlane : MonoBehaviour
                 plane.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
                 plane.GetComponent<FlightControl>().enabled = true;
             }
-            print($"{gameObject.name}: waiting until reactivated");
+            //print($"{gameObject.name}: waiting until reactivated");
             yield return new WaitUntil(() => active);
             
         }
