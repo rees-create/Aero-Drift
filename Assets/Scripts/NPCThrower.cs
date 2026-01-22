@@ -34,6 +34,7 @@ public class NPCThrower : MonoBehaviour
     [Header("Plane Orientation")]
     [SerializeField] bool setInitPlaneRotation;
     [SerializeField] Vector3 defaultPlaneRotation;
+    [Header("Audio")]
 
     int oldThrowerCount = 0;
     int newThrowerCount = 0;
@@ -185,6 +186,9 @@ public class NPCThrower : MonoBehaviour
         plane.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
         plane.GetComponent<PolygonCollider2D>().enabled = true;
         
+        //play throw sound. TODO: rn we're assuming the throw sound is already set, improve this
+        plane.GetComponent<AudioSource>().Play();
+
         //launch plane without exceeding max throw intensity
         if (throwVector.magnitude < maxThrowIntensity)
         {

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Security.Cryptography;
@@ -15,9 +16,11 @@ public class Pusher : MonoBehaviour
     public float slowDownDamping;
     public GameObject popBackController;
 
+    private AudioClip[] footstepSounds;
     // Start is called before the first frame update
     void Start()
     {
+        footstepSounds = Resources.LoadAll<AudioClip>("Audio/Footsteps");
         StartCoroutine(Play());
     }
     // Add play coroutine. Coroutine should play movement frames and wait for animation.
@@ -38,19 +41,41 @@ public class Pusher : MonoBehaviour
                 progress = Push(time * pushSpeed, initialPosition, target, slowDownProximity, slowDownDamping);
                 yield return new WaitForFixedUpdate();
             }
+            
             while (active && progress < 1 && walkAnimation != null && localTime <= 1)
             {
                 localTime += Time.fixedDeltaTime;
                 walkAnimation.SampleAnimation(gameObject, localTime);
                 Push(localTime * pushSpeed, initialPosition, target, slowDownProximity, slowDownDamping);
+                PlayWalkAudio(0.33f, 0.67f, localTime);
                 yield return new WaitForFixedUpdate();
             }
             if (Vector2.Distance(transform.position, target) < 0.02f)
             {
                 active = false;
             }
+            if (active)
+            {
+                //gameObject.GetComponent<AudioSource>().Play();
+                //TODO: instead chop audio into one shot clips for each footstep in the walk animation (walk animation has footsteps at time 0.33 and 0.67) 
+                
+            }
+            
             yield return new WaitUntil(() => (animator.GetCurrentAnimatorStateInfo(0).IsName(animationName) || active));
             
+        }
+    }
+
+    void PlayWalkAudio(float step1, float step2, float t) 
+    {
+
+        //print($"clip count: {footstepSounds.Length}, time: {t}");
+        int clipIndex1 = UnityEngine.Random.Range(0, footstepSounds.Length);
+        if (Math.Abs(t - step1) < 0.01 || Math.Abs(t - step2) < 0.01)
+        {
+            //print("footstep");
+            gameObject.GetComponent<AudioSource>().Stop(); 
+            gameObject.GetComponent<AudioSource>().PlayOneShot(footstepSounds[clipIndex1]);
         }
     }
     
