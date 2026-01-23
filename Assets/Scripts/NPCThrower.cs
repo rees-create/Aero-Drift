@@ -35,7 +35,9 @@ public class NPCThrower : MonoBehaviour
     [SerializeField] bool setInitPlaneRotation;
     [SerializeField] Vector3 defaultPlaneRotation;
     [Header("Audio")]
-
+    [SerializeField] AudioSource speechSource;
+    [SerializeField] string gruntSoundFile;
+    [SerializeField] [Range(0,1)] float gruntLoudness;
     int oldThrowerCount = 0;
     int newThrowerCount = 0;
 
@@ -185,9 +187,10 @@ public class NPCThrower : MonoBehaviour
         plane.GetComponent<FlightControl>().enabled = true;
         plane.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
         plane.GetComponent<PolygonCollider2D>().enabled = true;
-        
+
         //play throw sound. TODO: rn we're assuming the throw sound is already set, improve this
-        plane.GetComponent<AudioSource>().Play();
+        AudioClip throwSound = Resources.Load<AudioClip>("Audio/paper swoosh");
+        plane.GetComponent<AudioSource>().PlayOneShot(throwSound, 1);
 
         //launch plane without exceeding max throw intensity
         if (throwVector.magnitude < maxThrowIntensity)
@@ -264,7 +267,12 @@ public class NPCThrower : MonoBehaviour
             //plane.GetComponent<FlightControl>().enabled = false;
             //plane.GetComponent<Rigidbody2D>().gravityScale = 0;
             //plane.GetComponent<PolygonCollider2D>().enabled = false;
-
+            //TODO: make grunt sound switchable based on throw intensity
+            AudioClip gruntSound = Resources.Load<AudioClip>($"Audio/{gruntSoundFile}");
+            if (animTime < Time.deltaTime && throwVector.magnitude > (0.5f * maxThrowIntensity) && speechSource != null && gruntSound != null) 
+            {
+                speechSource.PlayOneShot(gruntSound, (throwVector.magnitude/maxThrowIntensity) * gruntLoudness);
+            }
             while (animTime <= 1-preLaunch) {
                 ThrowAnim(animTime);
                 animTime += Time.fixedDeltaTime;
