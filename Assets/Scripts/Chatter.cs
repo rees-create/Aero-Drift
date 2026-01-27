@@ -137,7 +137,7 @@ public class Chatter : MonoBehaviour
         centroid.x /= (float)maxNPCsInList;
         centroid.y /= (float)maxNPCsInList;
 
-        print($"MaxNPCs = {maxNPCsInList}; Chatter NPCs = {npcListString}; centroid = {centroid}");
+        //print($"MaxNPCs = {maxNPCsInList}; Chatter NPCs = {npcListString}; centroid = {centroid}");
 
         return centroid;
     }

@@ -48,7 +48,14 @@ public class FlightControl : MonoBehaviour
     [SerializeField] Vector2 flapDrag;
     [SerializeField] Vector2 flapLift;
     [SerializeField] float flapTorque;
+    [Header("Audio")]
+    public float engineVolume;
+    public float lowPassFilterInit;
+    public float lowPassFilterRange;
+    public string resourcesSoundPath;
     
+
+
     Plane plane;
     Vector2[] forceLog = new Vector2[2];
     float[] torqueLog = new float[2];
@@ -274,11 +281,11 @@ public class FlightControl : MonoBehaviour
 
         // Audio
         float soundLevel = thrust / maxThrust;
-        float scale = 0.6f; //im lazy now so just making a local variable, but this should be pickable
+        // scale = 0.6f; //im lazy now so just making a local variable, but this should be pickable
         // make these pickable too, later.
-        float lowPassRange = 21200; 
-        float initLowPass = 800; //2 vars seems redundant but is useful in case you don't want full release of cutoff freq.
-        AudioClip clip = Resources.Load<AudioClip>("Audio/simple thrust"); //right now play "simple thrust.wav" by default, later make sound pickable.
+        //float lowPassRange = 21200; 
+        //float initLowPass = 800; //2 vars seems redundant but is useful in case you don't want full release of cutoff freq.
+        AudioClip clip = Resources.Load<AudioClip>(resourcesSoundPath); //right now play "simple thrust.wav" by default, later make sound pickable.
         if (soundLevel > 0.005)
         {
             audioTime += Time.deltaTime;
@@ -287,14 +294,14 @@ public class FlightControl : MonoBehaviour
             if (audioTime < 2.97)
             {
                 gameObject.GetComponent<AudioSource>().volume = soundLevel;
-                gameObject.GetComponent<AudioLowPassFilter>().cutoffFrequency = initLowPass + lowPassRange * soundLevel;
+                gameObject.GetComponent<AudioLowPassFilter>().cutoffFrequency = lowPassFilterInit + lowPassFilterRange * soundLevel;
             }
             else
             {
                 audioTime = 0;
                 gameObject.GetComponent<AudioSource>().volume = soundLevel;
-                gameObject.GetComponent<AudioLowPassFilter>().cutoffFrequency = initLowPass + lowPassRange * soundLevel;
-                gameObject.GetComponent<AudioSource>().PlayOneShot(clip, scale);
+                gameObject.GetComponent<AudioLowPassFilter>().cutoffFrequency = lowPassFilterInit + lowPassFilterRange * soundLevel;
+                gameObject.GetComponent<AudioSource>().PlayOneShot(clip, engineVolume);
             }
         }
         else 
