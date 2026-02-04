@@ -66,7 +66,7 @@ public class FloorControl : MonoBehaviour
         }
         if (Input.GetKeyUp(KeyCode.W)) //move floor up
         {
-            StartCoroutine(SwitchLayer(flipLayerDirection ? -1 : 1));
+            StartCoroutine(SwitchLayer(flipLayerDirection ? 1 : -1));
         }
         //when ready reassign sorting order
     }

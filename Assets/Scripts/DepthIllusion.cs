@@ -9,6 +9,7 @@ public class DepthIllusion : MonoBehaviour
     Rigidbody2D playerRigidbody;
     Vector3 initialPosition;
     public GameObject popBackController;
+    public bool popBackToOriginalRelativePosition;
     /// <summary>
     /// Set horizon to 0 to set the DepthIllusion to abstract and disable it.
     /// </summary>
@@ -16,11 +17,15 @@ public class DepthIllusion : MonoBehaviour
     [SerializeField] float depth;
     public float parallaxFraction;
     public Color absoluteBlue;
-
+    Vector3 distanceDifference;
+    Vector3 previousPlayerPosition;
     void Follow(Vector3 playerVelocity, float speedFraction) 
     {
         //print($"follow params of {gameObject.name}: {Time.deltaTime}, {speedFraction}, {playerVelocity}");
-        gameObject.transform.position += Time.deltaTime * speedFraction * playerVelocity;
+
+        //print($"gameobject position {gameObject.transform.position}");
+        gameObject.transform.position += playerVelocity * speedFraction * Time.deltaTime;
+
     }
     
 
@@ -36,6 +41,8 @@ public class DepthIllusion : MonoBehaviour
             parallaxFraction = Mathf.Sin(deg90 * horizonFraction);
             playerRigidbody = player.GetComponent<Rigidbody2D>();
             initialPosition = transform.position;
+            distanceDifference = Vector3.Lerp(gameObject.transform.position, player.transform.position, playerRigidbody.velocity.magnitude * parallaxFraction);//gameObject.transform.position - player.transform.position;
+            previousPlayerPosition = player.transform.position;
             //if (gameObject.GetComponent<ObjectSpawnSystem>().elementVariation.inReferenceFrame) 
             //{
             //    initialPosition = 
@@ -48,17 +55,31 @@ public class DepthIllusion : MonoBehaviour
     {
         if (horizon != 0)
         {
-            //print(playerRigidbody);
-            if (!popBackController.GetComponent<ObjectSpawnSystem>().popBack)
+            if (popBackController != null)
             {
-                Follow(player.GetComponent<Rigidbody2D>().velocity, parallaxFraction);
-                //print($"rigidbody velocity: {playerRigidbody.velocity}, parallaxFraction {parallaxFraction}, product = {player.GetComponent<Rigidbody2D>().velocity * parallaxFraction}");
-                
+                Vector3 playerVelocity = (player.transform.position - previousPlayerPosition) * 1 / Time.deltaTime;
+                //print(playerRigidbody);
+                //if (popBackToOriginalRelativePosition) { }
+                if (!popBackController.GetComponent<ObjectSpawnSystem>().popBack)
+                {
+
+                    //print($"rigidbody velocity: {playerRigidbody.velocity}, parallaxFraction {parallaxFraction}, product = {player.GetComponent<Rigidbody2D>().velocity * parallaxFraction}");
+                    
+                    //print($"diff = {player.transform.position - previousPlayerPosition}, delta = {Time.deltaTime}, diff * delta = {(player.transform.position - previousPlayerPosition) * Time.deltaTime}");
+                    Follow(playerVelocity, parallaxFraction);
+                    
+                }
+                else
+                {
+                    Follow(playerVelocity, 1);
+                    //pop back
+                    //transform.position = player.transform.position + transform.InverseTransformDirection(distanceDifference);///transform.localScale.x; //fuck it i'll just use x assuming x, y, and z scales are equal
+                }
+                previousPlayerPosition = player.transform.position;
             }
-            else
+            else 
             {
-                //pop back
-                transform.position = initialPosition;
+                //Follow(player.GetComponent<Rigidbody2D>().velocity, parallaxFraction > 0.000001 ? parallaxFraction : 1);
             }
             
         }

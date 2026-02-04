@@ -67,6 +67,7 @@
     <Compile Include="Assets\Scripts\Plane.cs" />
     <Compile Include="Assets\Scripts\NPCSwitchLayer.cs" />
     <Compile Include="Assets\Scripts\AnimationRandomizer.cs" />
+    <Compile Include="Assets\Scripts\ExhaustControl.cs" />
     <Compile Include="Assets\Scripts\SceneTransitionControl.cs" />
     <Compile Include="Assets\Scripts\LiftSortingOrder.cs" />
     <Compile Include="Assets\Scripts\PoseLerp.cs" />
@@ -74,6 +75,7 @@
     <Compile Include="Assets\Scripts\Collectible.cs" />
     <Compile Include="Assets\Scripts\Thrower.cs" />
     <Compile Include="Assets\Scripts\GalleryView.cs" />
+    <Compile Include="Assets\Scripts\Chatter.cs" />
     <Compile Include="Assets\Scripts\LayerColliderMap.cs" />
     <Compile Include="Assets\Scripts\DepthIllusion.cs" />
     <Compile Include="Assets\Scripts\RandomizeSpeed.cs" />
@@ -90,7 +92,6 @@
     <Compile Include="Assets\Scripts\DestroyPlane.cs" />
     <Compile Include="Assets\Scripts\PopBackSync.cs" />
     <Compile Include="Assets\Scripts\ActionRandomizer.cs" />
-    <Compile Include="Assets\Scripts\Chatter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

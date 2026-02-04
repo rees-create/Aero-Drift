@@ -51,7 +51,8 @@ MonoBehaviour:
   - {fileID: 6328034558278833479, guid: 6aae7dd865f550342b5b219ee5b54c26, type: 3}
   - {fileID: 5498643825318254919, guid: de31e0f23a7839645afdc14be834c961, type: 3}
   - {fileID: 1615051111701038559, guid: bce1e0186dc73b849912a3ac60705455, type: 3}
-  decision: 0.3116179
+  decision: 0.20721638
+  sortingOrder: 0
 --- !u!114 &6498332243240781962
 MonoBehaviour:
   m_ObjectHideFlags: 0
