@@ -111,7 +111,8 @@ public class ObjectSpawnSystem : MonoBehaviour
         [NonSerialized] public int iterator;
         [Header("Reference Frame Object?")]
         public bool inReferenceFrame;
-        [Header("Layer Position")]
+        [Header("Layer Position (check tooltip!)")]
+        [Tooltip("Sets sorting order of objects. Make sure there's a SpriteRenderer or VariableObject in the top object of multilayer objects to prevent layer flattening and possible clipping")]
         public int layerPosition;
         [Header("Transform Properties")]
         public Vector3 spawnSpacing;
@@ -328,6 +329,7 @@ public class ObjectSpawnSystem : MonoBehaviour
                 {
                     g.GetComponent<DepthIllusion>().player = gameObject.GetComponent<DepthIllusion>().player;
                     g.GetComponent<DepthIllusion>().popBackController = gameObject.GetComponent<DepthIllusion>().popBackController;
+                    g.GetComponent<DepthIllusion>().popBackToRelativePosition = gameObject.GetComponent<DepthIllusion>().popBackToRelativePosition;
                 }
                 //set blue shift for reference frame objects
                 if (elementVariation.inReferenceFrame && gameObject.GetComponent<DepthIllusion>() != null)

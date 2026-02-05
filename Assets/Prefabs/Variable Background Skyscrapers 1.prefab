@@ -67,6 +67,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 0}
   popBackController: {fileID: 0}
+  popBackToRelativePosition: 0
   horizon: 500
   depth: 410
   parallaxFraction: 0
