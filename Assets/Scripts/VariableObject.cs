@@ -4,6 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using System.Linq;
 using static UnityEditor.Experimental.GraphView.GraphView;
+using UnityEngine.Rendering;
 
 [ExecuteInEditMode]
 public class VariableObject : MonoBehaviour
@@ -58,6 +59,10 @@ public class VariableObject : MonoBehaviour
                 layerDifference = desiredSortingOrder - g.GetComponent<SpriteRenderer>().sortingOrder;
                 upperSortingOrder = g.GetComponent<SpriteRenderer>().sortingOrder;
                 g.transform.GetComponent<SpriteRenderer>().sortingOrder = desiredSortingOrder;
+                if (g.GetComponent<SortingGroup>())
+                {
+                    g.transform.GetComponent<SortingGroup>().sortingOrder = desiredSortingOrder;
+                }
             }
             else
             {

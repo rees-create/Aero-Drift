@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3144541131244103354}
   - component: {fileID: 3144541131244103353}
   - component: {fileID: 3079302929685761789}
+  - component: {fileID: 5184135459141247567}
   m_Layer: 0
   m_Name: escalator
   m_TagString: Untagged
@@ -136,6 +137,17 @@ SpriteMask:
   m_BackSortingOrder: 0
   m_IsCustomRangeActive: 0
   m_SpriteSortPoint: 0
+--- !u!210 &5184135459141247567
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3144541131244103352}
+  m_Enabled: 1
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 55
 --- !u!1 &3144541131859656223
 GameObject:
   m_ObjectHideFlags: 0

@@ -125,6 +125,7 @@ GameObject:
   - component: {fileID: 7569953330620820264}
   - component: {fileID: 6428969563029214456}
   - component: {fileID: 658351578367111372}
+  - component: {fileID: 758508593613791132}
   m_Layer: 0
   m_Name: music store
   m_TagString: Untagged
@@ -223,6 +224,17 @@ MonoBehaviour:
     position: {x: 0.1, y: -0.47}
     directionToLayer: -1
   DrawGizmos: 1
+--- !u!210 &758508593613791132
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4134500776855053546}
+  m_Enabled: 1
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 53
 --- !u!1 &4776908068548801922
 GameObject:
   m_ObjectHideFlags: 0
@@ -271,7 +283,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   objects:
   - {fileID: 8579668629105899711, guid: 97863dd9f94908c47bca7dcc84e1d0a3, type: 3}
-  decision: 0.743029
+  decision: 0.9843042
   sortingOrder: 54
 --- !u!114 &3834089047423934593
 MonoBehaviour:
