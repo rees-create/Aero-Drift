@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Xml.Serialization;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -7,6 +8,7 @@ public class Chatter : MonoBehaviour
 {
     // Start is called before the first frame update
     public List<GameObject> Npcs = new List<GameObject>();
+    public List<ObjectSpawnSystem> spawnSystems = new List<ObjectSpawnSystem>();
     public float chatterDistance;
     [Range(0f, 1f)] public float chatterVolume;
     [Range(0f, 1f)] public float centroidFromFirstXRatio;
@@ -14,8 +16,40 @@ public class Chatter : MonoBehaviour
     int frameCounter;
     bool invalidCentroid = false;
 
-
-
+    void AddNpcsFromSpawnSystems()
+    {
+        foreach (ObjectSpawnSystem spawnSystem in spawnSystems)
+        { 
+            for (int i = 0; i < spawnSystem.gameObject.transform.childCount; i++)
+            {
+                if (!spawnSystem.elementVariation.inReferenceFrame)
+                {
+                    Npcs.Add(spawnSystem.gameObject.transform.GetChild(i).gameObject);
+                }
+                else
+                {
+                    Npcs.Add(spawnSystem.gameObject.transform.GetChild(i).GetChild(0).gameObject);
+                }
+            }
+        }
+    }
+    void ClearNpcsFromSpawnSystems() 
+    {
+        foreach (ObjectSpawnSystem spawnSystem in spawnSystems) 
+        {
+            for (int i = 0; i < spawnSystem.gameObject.transform.childCount; i++)
+            {
+                if (!spawnSystem.elementVariation.inReferenceFrame)
+                {
+                    Npcs.Remove(spawnSystem.gameObject.transform.GetChild(i).gameObject);
+                }
+                else
+                {
+                    Npcs.Remove(spawnSystem.gameObject.transform.GetChild(i).GetChild(0).gameObject);
+                }
+            }
+        }
+    }
     float PlayAudioSourceAtVolume(AudioSource source, float volume)
     { 
         source.PlayOneShot(source.clip, volume);
@@ -150,10 +184,11 @@ public class Chatter : MonoBehaviour
 
     // Update is called once per frame
     void Update()
-    {
+    { 
         frameCounter++;
         if (frameCounter >= updateCentroidAfterFrames)
         {
+            AddNpcsFromSpawnSystems();
             SortNPCsByDistance();
             Vector2 centroid = FindChatterCentroid();
             if (invalidCentroid)
@@ -170,6 +205,7 @@ public class Chatter : MonoBehaviour
                 }
                 frameCounter = 0;
             }
+            ClearNpcsFromSpawnSystems();
         }
     }
 }

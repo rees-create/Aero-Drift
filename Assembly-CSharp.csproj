@@ -65,6 +65,7 @@
     <Compile Include="Assets\Scripts\Stand.cs" />
     <Compile Include="Assets\Scripts\WindField.cs" />
     <Compile Include="Assets\Scripts\Plane.cs" />
+    <Compile Include="Assets\Scripts\PauseControl.cs" />
     <Compile Include="Assets\Scripts\NPCSwitchLayer.cs" />
     <Compile Include="Assets\Scripts\AnimationRandomizer.cs" />
     <Compile Include="Assets\Scripts\ExhaustControl.cs" />
@@ -92,6 +93,7 @@
     <Compile Include="Assets\Scripts\DestroyPlane.cs" />
     <Compile Include="Assets\Scripts\PopBackSync.cs" />
     <Compile Include="Assets\Scripts\ActionRandomizer.cs" />
+    <Compile Include="Assets\Scripts\FuelBar.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
