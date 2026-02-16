@@ -82,7 +82,9 @@
     <Compile Include="Assets\Scripts\RandomizeSpeed.cs" />
     <Compile Include="Assets\Scripts\BlueShift.cs" />
     <Compile Include="Assets\Scripts\LayerColliderGroup.cs" />
+    <Compile Include="Assets\Scripts\FuelBar.cs" />
     <Compile Include="Assets\Scripts\Planes.cs" />
+    <Compile Include="Assets\Scripts\GameOver.cs" />
     <Compile Include="Assets\Scripts\NPCMarkovBrain.cs" />
     <Compile Include="Assets\Scripts\LayerCatalog.cs" />
     <Compile Include="Assets\Scripts\CollectibleHandler.cs" />
@@ -93,7 +95,6 @@
     <Compile Include="Assets\Scripts\DestroyPlane.cs" />
     <Compile Include="Assets\Scripts\PopBackSync.cs" />
     <Compile Include="Assets\Scripts\ActionRandomizer.cs" />
-    <Compile Include="Assets\Scripts\FuelBar.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
