@@ -10,6 +10,8 @@ public class SceneTransitionControl : MonoBehaviour
     public float transitionTime = 1f;
     public Button triggerButton;
     public string sceneName;
+    public GalleryView sceneGallery;
+    public bool useSceneGallery;
 
     void Start() 
     {
@@ -22,7 +24,14 @@ public class SceneTransitionControl : MonoBehaviour
     
     public void LoadNextLevel() 
     {
-        StartCoroutine(TransitionToScene(sceneName));
+        if (useSceneGallery) 
+        {
+            StartCoroutine(TransitionToScene(sceneGallery.GetCurrentSceneName()));
+        }
+        else 
+        {
+            StartCoroutine(TransitionToScene(sceneName));
+        }
     }
 
     IEnumerator TransitionToScene(string sceneName) 

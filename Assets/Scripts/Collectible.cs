@@ -68,6 +68,7 @@ public class Collectible : MonoBehaviour
             follow = true;
             yield return new WaitUntil(()=> animationReady && animationTime >= 1);
             follow = false;
+
             if (inReferenceFrame)
             {
                 Destroy(gameObject.transform.parent.gameObject);
@@ -98,6 +99,7 @@ public class Collectible : MonoBehaviour
         }
     }
 
+    int hits = 0;
     IEnumerator OnTriggerEnter2D(Collider2D other)
     {
         //print($"other gameobject name: {other.gameObject.name} plane gameObject name= {plane.name}");
@@ -108,6 +110,11 @@ public class Collectible : MonoBehaviour
         if (other.name == plane.name)
         {
             //yield return new WaitUntil(() => animationReady);
+            if (GetObjectSpawnSystem(gameObject).GetComponent<CollectibleHandler>().collectibleCounter != null && hits == 0)
+            {
+                hits++;
+                GetObjectSpawnSystem(gameObject).GetComponent<CollectibleHandler>().collectibleCounter.collectibleCount++;
+            }
             StartCoroutine(WaitForCollect());
         }
         yield return null;

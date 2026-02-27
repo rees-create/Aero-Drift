@@ -14,6 +14,7 @@ using UnityEngine.UI;
 public class GalleryView : MonoBehaviour
 {
     [SerializeField] List<GameObject> slides;
+    [SerializeField] List<string> scenes;
     [SerializeField] GameObject frame;
     [SerializeField] GameObject mask;
     [SerializeField] GameObject leftButton, rightButton;
@@ -59,13 +60,17 @@ public class GalleryView : MonoBehaviour
     {
         return new Vector3(a.x / b.x, a.y / b.y, a.z / b.z);
     }
+    public string GetCurrentSceneName() 
+    {
+        return scenes[currentSlide];
+    }
     IEnumerator Slide(GameObject[] slides, SlideSettings settings, int direction) 
     {
-        for (int i = 0; i < (int) settings.slideDuration / settings.deltaTime; i++)
+        for (int i = 0; i < (int) (settings.slideDuration / settings.deltaTime); i++)
         {
             yield return new WaitForSeconds(settings.deltaTime);
             settings.elapsedTime += settings.deltaTime;
-            Vector3 nudge = Vector3.right * settings.deltaTime * settings.SlideSpeed() * direction;
+            Vector3 nudge = Vector3.right * settings.deltaTime * settings.SlideSpeed() * (float) direction;
             foreach(GameObject slide in slides) 
             {
                 slide.transform.position += nudge;

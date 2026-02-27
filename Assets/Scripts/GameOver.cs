@@ -1,5 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization.Json;
+using Newtonsoft.Json;
+using UnityEditor;
+using UnityEditor.ShaderGraph.Serialization;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Rendering;
@@ -15,6 +19,7 @@ public class GameOver : MonoBehaviour
     public float gameOverWatcherDelta;
     public float floorThickness;
     public float floorPositionLeeway;
+    public CollectibleCounter coinCounter;
     public UnityEvent gameOver;
     Vector3 initPosition;
     IEnumerator GameOverMenuSwipe(Vector3 init, Vector3 target)
@@ -56,6 +61,16 @@ public class GameOver : MonoBehaviour
             if (timeOutAccum >= floorBoundTimeout)
             {
                 menu.SetActive(true);
+                
+                if (PlayerPrefs.HasKey("AmountOfCoins"))
+                {
+                    PlayerPrefs.SetInt("AmountOfCoins", coinCounter.collectibleCount + PlayerPrefs.GetInt("AmountOfCoins"));
+                } 
+                else 
+                {
+                    PlayerPrefs.SetInt("AmountOfCoins", coinCounter.collectibleCount);
+                }
+
                 StartCoroutine(GameOverMenuSwipe(initPosition, Vector3.zero));
                 gameOver.Invoke();
                 break;  

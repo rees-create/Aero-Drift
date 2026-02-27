@@ -5,6 +5,7 @@ using UnityEngine;
 public class CollectibleHandler : MonoBehaviour
 {
     public GameObject plane;
+    public CollectibleCounter collectibleCounter;
     // Start is called before the first frame update
     void Start()
     {
