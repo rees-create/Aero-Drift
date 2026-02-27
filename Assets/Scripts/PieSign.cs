@@ -6,7 +6,8 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter))]
 public class PieSign : MonoBehaviour
 {
-    [Tooltip("\'Cyclic\' because 1 triangle is subtracted from the triangle count if the \'pie\' sector is less than 360 degrees, for algorithmic reasons")]
+    [Tooltip("\'Cyclic\' because 1 triangle is subtracted from the triangle count if the \'pie\' sector is less than 360 degrees, for algorithmic reasons." +
+        " Importantly, avoid using odd triangle counts, the algorithm is weird and would end up index wrapping the triangles wrongly")]
     public int cyclicTriangleCount;
     public float startAngle;
     public float endAngle;
@@ -16,7 +17,7 @@ public class PieSign : MonoBehaviour
         Mesh mesh = gameObject.GetComponent<MeshFilter>().mesh;
         int trisCount = triangleCount;
         int trisArrayCount = triangleCount * 3;
-        if (angles.y < 360 || angles.x > 0)
+        if ((angles.y < 360 || angles.x > 0) /*&& cyclicTriangleCount % 2 == 0*/)
         {
             trisCount = trisCount - 1;
         }
@@ -29,11 +30,15 @@ public class PieSign : MonoBehaviour
         for (int i = 0; i < triangleCount; i++)
         {
             if (i * 2 + 1 < triangleCount + 1)
-            {     
-                vertices[i * 2 + 1] = new Vector3(Mathf.Cos((angles.x + theta * i*2) * Mathf.Deg2Rad), Mathf.Sin((angles.x + theta * i * 2) * Mathf.Deg2Rad), 0);
-                vertices[i * 2 + 2] = new Vector3(Mathf.Cos((angles.x + theta * ((i*2) + 1)) * Mathf.Deg2Rad), Mathf.Sin((angles.x + theta * ((i*2) + 1)) * Mathf.Deg2Rad), 0);
+            {
+                vertices[i * 2 + 1] = new Vector3(Mathf.Cos((angles.x + theta * i * 2) * Mathf.Deg2Rad), Mathf.Sin((angles.x + theta * i * 2) * Mathf.Deg2Rad), 0);
+                if (i * 2 + 2 < triangleCount + 1)
+                {
+                    vertices[i * 2 + 2] = new Vector3(Mathf.Cos((angles.x + theta * ((i * 2) + 1)) * Mathf.Deg2Rad), Mathf.Sin((angles.x + theta * ((i * 2) + 1)) * Mathf.Deg2Rad), 0);
+                }
             }
-            if (!(angles.y < 360 || angles.x > 0))
+            
+            if (!((angles.y < 360 || angles.x > 0) /*&& cyclicTriangleCount % 2 == 0*/))
             {
                 triangles[(i * 3 + 1) % triangles.Length] = (i + 2) % (vertices.Length) == 0 ? 1 : (i + 2) % (vertices.Length);
                 triangles[(i * 3 + 2) % triangles.Length] = (i + 1) % (vertices.Length) == 0 ? 1 : (i + 1) % (vertices.Length);
