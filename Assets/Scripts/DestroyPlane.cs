@@ -35,8 +35,8 @@ public class DestroyPlane : MonoBehaviour
     {
         print("catch and destroy started");
         //GetComponent<CatchPlane>().catchRadius += 3.5f; //hahaha
-        GetComponent<CatchPlane>().active = true;
-        yield return new WaitUntil(()=>GetComponent<CatchPlane>().active == false); // until plane is caught
+        GetComponent<CatchPlane>().SetActive(0);
+        yield return new WaitUntil(()=>GetComponent<CatchPlane>().GetActive() == false); // until plane is caught
         print("catch plane deactivated");
         StartCoroutine(Crumple(crumpleType));
         

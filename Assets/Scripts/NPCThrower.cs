@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEditor.ShaderGraph.Internal;
+using UnityEditor.Tilemaps;
 using UnityEngine;
 
 public class NPCThrower : MonoBehaviour
@@ -14,7 +15,7 @@ public class NPCThrower : MonoBehaviour
     [System.NonSerialized] public GameObject dashes;
     [Header("Activation")]
     public bool active;
-    
+    public bool isInitialState;
     bool thrown;
     [Header("Game Objects")]
     [SerializeField] GameObject plane;
@@ -41,19 +42,25 @@ public class NPCThrower : MonoBehaviour
     int oldThrowerCount = 0;
     int newThrowerCount = 0;
 
-    public void SetActive() {
+    public IEnumerator SetActive() {
+        
         float baitToPlaneDistance = Vector2.Distance((Vector2)bait.transform.position, (Vector2) plane.transform.position);
         if (baitToPlaneDistance < followOffset.magnitude)
         {
             active = true;
             newThrowerCount++;
-            
-            //enabled = true;
             print($"{gameObject.name}: Thrower activated, newThrowerCount = {newThrowerCount}");
+        //enabled = true;
         }
         else {
-            print($"Too far, bait to plane = {baitToPlaneDistance}, radius to stay within = {followOffset.magnitude}");
-            print($"bait: {(Vector2) bait.transform.position} plane: {(Vector2) plane.transform.position}");
+            //print($"Too far, bait to plane = {baitToPlaneDistance}, radius to stay within = {followOffset.magnitude}");
+            //print($"bait: {(Vector2) bait.transform.position} plane: {(Vector2) plane.transform.position}");
+            print($"{gameObject.name}: Waiting for thrower");
+            GetComponent<CatchPlane>().SetActive(1);
+            yield return new WaitUntil(()=> !GetComponent<CatchPlane>().GetActive());
+            active = true;
+            newThrowerCount++;
+            
         }
     }
     //Utility functions
@@ -217,6 +224,11 @@ public class NPCThrower : MonoBehaviour
             if (active)
             {
                 //print("init throw");
+                if (!isInitialState) 
+                {
+                    GetComponent<CatchPlane>().SetActive(1);
+                    yield return new WaitUntil(() => GetComponent<CatchPlane>().GetActive() == false);
+                }
                 plane.GetComponent<FlightControl>().thrust = 0;
                 StartCoroutine(InitThrow());
                 StartCoroutine(TauntThrow());

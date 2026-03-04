@@ -1,12 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using UnityEngine;
 using UnityEngine.Rendering;
 
 
 public class CatchPlane : MonoBehaviour
 {
-    public bool active;
+    [SerializeField] bool active;
     public GameObject plane;
     public float followSpeed;
     public int animFrameCount;
@@ -19,13 +20,20 @@ public class CatchPlane : MonoBehaviour
     //public string animationName;
     public float catchRadius;
     public Vector2 catchSpot;
+    public PieSign catchSector;
+    int pieColorIndex;
 
-    public void SetActive() {
+    public void SetActive(int sectorColorIndex)
+    {
         //if (!plane.GetComponent<FlightControl>().enabled == true) 
         //{
-            active = true;
+        active = true;
         //}
-        
+        pieColorIndex = sectorColorIndex;
+    }
+    public bool GetActive()
+    {
+        return active;
     }
 
     void Follow(Vector3 playerVelocity, float speedFraction)
@@ -65,6 +73,9 @@ public class CatchPlane : MonoBehaviour
             {
                 if (plane != null)
                 {
+                    //Draw catch sector ("pie")
+                    catchSector.active = true;
+                    catchSector.colorIndex = pieColorIndex;
                     // Follow player
                     Vector3 playerVelocity = (plane.transform.position - transform.position).normalized;
 
@@ -119,6 +130,7 @@ public class CatchPlane : MonoBehaviour
 
                 yield return new WaitForEndOfFrame(); // Wait for next frame
             }
+            catchSector.active = false;
             if (active)
             {
                 print("reactivate physics");

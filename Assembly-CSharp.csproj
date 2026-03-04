@@ -70,6 +70,7 @@
     <Compile Include="Assets\Scripts\AnimationRandomizer.cs" />
     <Compile Include="Assets\Scripts\ExhaustControl.cs" />
     <Compile Include="Assets\Scripts\SceneTransitionControl.cs" />
+    <Compile Include="Assets\Scripts\PieSign.cs" />
     <Compile Include="Assets\Scripts\LiftSortingOrder.cs" />
     <Compile Include="Assets\Scripts\PoseLerp.cs" />
     <Compile Include="Assets\Scripts\ObjectSpawnSystem.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="Assets\Scripts\GalleryView.cs" />
     <Compile Include="Assets\Scripts\Chatter.cs" />
     <Compile Include="Assets\Scripts\LayerColliderMap.cs" />
+    <Compile Include="Assets\Scripts\Coin.cs" />
     <Compile Include="Assets\Scripts\DepthIllusion.cs" />
     <Compile Include="Assets\Scripts\RandomizeSpeed.cs" />
     <Compile Include="Assets\Scripts\BlueShift.cs" />
@@ -89,6 +91,7 @@
     <Compile Include="Assets\Scripts\GameOver.cs" />
     <Compile Include="Assets\Scripts\NPCMarkovBrain.cs" />
     <Compile Include="Assets\Scripts\LayerCatalog.cs" />
+    <Compile Include="Assets\Scripts\UpdateCoinAmount.cs" />
     <Compile Include="Assets\Scripts\CollectibleHandler.cs" />
     <Compile Include="Assets\Scripts\FlightControl.cs" />
     <Compile Include="Assets\Scripts\Pusher.cs" />
@@ -97,9 +100,7 @@
     <Compile Include="Assets\Scripts\DestroyPlane.cs" />
     <Compile Include="Assets\Scripts\PopBackSync.cs" />
     <Compile Include="Assets\Scripts\ActionRandomizer.cs" />
-    <Compile Include="Assets\Scripts\Coin.cs" />
-    <Compile Include="Assets\Scripts\UpdateCoinAmount.cs" />
-    <Compile Include="Assets\Scripts\PieSign.cs" />
+    <Compile Include="Assets\Scripts\Emote.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

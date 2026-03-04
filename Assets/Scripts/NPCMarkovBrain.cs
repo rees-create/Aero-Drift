@@ -27,7 +27,7 @@ public class NPCMarkovBrain : MonoBehaviour
         Moving,
         SwitchingLayer,
         DestroyingPlane,
-        CatchingPlane,
+        Emoting,
         ThrowingPlane
     }
     public NPCState initState;
@@ -53,15 +53,15 @@ public class NPCMarkovBrain : MonoBehaviour
             case NPCState.ThrowingPlane:
                 if (!randomExit)
                 {
-                    gameObject.GetComponent<NPCThrower>().SetActive(); //to give action scripts control over activation decision
+                    StartCoroutine(gameObject.GetComponent<NPCThrower>().SetActive()); //to give action scripts control over activation decision
                 }
                 break;
-            case NPCState.CatchingPlane:
-                //call catching plane action
-                if (!randomExit)
-                {
-                    gameObject.GetComponent<CatchPlane>().SetActive();
-                }
+            case NPCState.Emoting:
+                //call emote action
+                //if (!randomExit)
+                //{
+                    gameObject.GetComponent<Emote>().SetActive(NPCParameters.planeAffinity, NPCParameters.explorativity);
+                //}
                 break;
             case NPCState.DestroyingPlane:
                 //call destroying plane action
@@ -79,7 +79,7 @@ public class NPCMarkovBrain : MonoBehaviour
             gameObject.GetComponent<Stand>().active == false &&
             gameObject.GetComponent<NPCSwitchLayer>().active == false &&
             gameObject.GetComponent<NPCThrower>().active == false &&
-            gameObject.GetComponent<CatchPlane>().active == false &&
+            gameObject.GetComponent<Emote>().active == false &&
             gameObject.GetComponent<DestroyPlane>().active == false
            )
         {

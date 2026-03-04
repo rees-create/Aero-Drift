@@ -4,15 +4,20 @@ using UnityEditor.Animations;
 using UnityEngine;
 
 [RequireComponent(typeof(MeshFilter))]
+[RequireComponent(typeof(MeshRenderer))]
 public class PieSign : MonoBehaviour
 {
     [Tooltip("\'Cyclic\' because 1 triangle is subtracted when wrapping around 360 degrees, for algorithmic reasons." +
         " Even triangle counts are slightly more recommended")]
     [Min(3)]
+    public bool active;
     public int cyclicTriangleCount;
     public float startAngle;
     public float endAngle;
+    public float radius;
     public float refreshFPS;
+    public List<Color> colors;
+    public int colorIndex;
     //only run if MeshFilter and MeshRenderer are attached.
     public void DrawPieMesh(int triangleCount, Vector2 angles)
     {
@@ -33,10 +38,10 @@ public class PieSign : MonoBehaviour
         {
             if (i * 2 + 1 < triangleCount + 1)
             {
-                vertices[i * 2 + 1] = new Vector3(Mathf.Cos((angles.x + theta * i * 2) * Mathf.Deg2Rad), Mathf.Sin((angles.x + theta * i * 2) * Mathf.Deg2Rad), 0);
+                vertices[i * 2 + 1] = new Vector3(Mathf.Cos((angles.x + theta * i * 2) * Mathf.Deg2Rad), Mathf.Sin((angles.x + theta * i * 2) * Mathf.Deg2Rad), 0) * radius;
                 if (i * 2 + 2 < triangleCount + 1)
                 {
-                    vertices[i * 2 + 2] = new Vector3(Mathf.Cos((angles.x + theta * ((i * 2) + 1)) * Mathf.Deg2Rad), Mathf.Sin((angles.x + theta * ((i * 2) + 1)) * Mathf.Deg2Rad), 0);
+                    vertices[i * 2 + 2] = new Vector3(Mathf.Cos((angles.x + theta * ((i * 2) + 1)) * Mathf.Deg2Rad), Mathf.Sin((angles.x + theta * ((i * 2) + 1)) * Mathf.Deg2Rad), 0) * radius;
                 }
             }
             
@@ -61,21 +66,30 @@ public class PieSign : MonoBehaviour
     {
         while (true)
         {
-            DrawPieMesh(cyclicTriangleCount, new Vector2(startAngle, endAngle));
-            yield return new WaitForSeconds(1/refreshFPS);
+            while (active)
+            {
+                DrawPieMesh(cyclicTriangleCount, new Vector2(startAngle, endAngle));
+                GetComponent<MeshRenderer>().material.color = colors[colorIndex];
+                yield return new WaitForSeconds(1 / refreshFPS);
+            }
+            //on deactivation erase mesh
+            Mesh mesh = GetComponent<MeshFilter>().mesh;
+            mesh.vertices = new Vector3[0];
+            mesh.triangles = new int[0];
+            yield return new WaitUntil(() => active == true);
         }
     }
     // Start is called before the first frame update
     void Start()
-    {
-        if (refreshFPS > 0)
-        {
-            StartCoroutine(UpdateMesh());
-        }
-        else
-        {
-            DrawPieMesh(cyclicTriangleCount, new Vector2(startAngle, endAngle));
-        }
+    {    
+            if (refreshFPS > 0)
+            {
+                StartCoroutine(UpdateMesh());
+            }
+            //else
+            //{
+            //    DrawPieMesh(cyclicTriangleCount, new Vector2(startAngle, endAngle));
+            //}
     }
 
 }
