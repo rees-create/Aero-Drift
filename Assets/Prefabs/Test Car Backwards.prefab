@@ -378,12 +378,12 @@ GameObject:
   m_Component:
   - component: {fileID: 4835545514155881515}
   - component: {fileID: 4835545514155881508}
-  - component: {fileID: 4751555629644513424}
   - component: {fileID: 4835545514155881509}
+  - component: {fileID: 4751555629644513424}
   - component: {fileID: 2804362078043172856}
   - component: {fileID: 5320306092216205216}
   m_Layer: 0
-  m_Name: Test Car
+  m_Name: Test Car Backwards
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -429,25 +429,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &4751555629644513424
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4835545514155881514}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c661ff44a6a28604e9b2ba729293c282, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  animator: {fileID: 4835545514155881508}
-  animDuration: 0
-  speedMultiplier: 3
-  minSpeed: 1
-  propertyName: speed
-  animationClipName: xAcrossScene
-  bounceInfluence: 1
 --- !u!61 &4835545514155881509
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -474,6 +455,25 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 11.161301, y: 7.607815}
   m_EdgeRadius: 0
+--- !u!114 &4751555629644513424
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4835545514155881514}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c661ff44a6a28604e9b2ba729293c282, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 4835545514155881508}
+  animDuration: 0
+  speedMultiplier: 3
+  minSpeed: 1
+  propertyName: speed
+  animationClipName: xAcrossScene
+  bounceInfluence: 1
 --- !u!114 &2804362078043172856
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -512,5 +512,5 @@ MonoBehaviour:
   scaleFromObjectSpawnSystem: 0
   speedRange:
     active: 1
-    minSpeed: 11
-    maxSpeed: 35
+    minSpeed: -35
+    maxSpeed: -11

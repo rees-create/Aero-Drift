@@ -22,6 +22,11 @@ public class ObjectSpawnSystem : MonoBehaviour
     [SerializeField] GameObject player;
     [SerializeField] GameObject popBackController;
     [SerializeField] Vector3 playerInitialPosition;
+
+    public Vector3 GetPlayerInitialPosition() 
+    {
+        return playerInitialPosition;
+    }
     
     int numAnimResetRequests = 0;
     //[SerializeField] GameObject depthController;

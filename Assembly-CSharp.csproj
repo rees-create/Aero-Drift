@@ -94,13 +94,15 @@
     <Compile Include="Assets\Scripts\UpdateCoinAmount.cs" />
     <Compile Include="Assets\Scripts\CollectibleHandler.cs" />
     <Compile Include="Assets\Scripts\FlightControl.cs" />
+    <Compile Include="Assets\Scripts\Emote.cs" />
     <Compile Include="Assets\Scripts\Pusher.cs" />
     <Compile Include="Assets\Scripts\FloorControl.cs" />
     <Compile Include="Assets\Scripts\EscalatorAnim.cs" />
     <Compile Include="Assets\Scripts\DestroyPlane.cs" />
     <Compile Include="Assets\Scripts\PopBackSync.cs" />
     <Compile Include="Assets\Scripts\ActionRandomizer.cs" />
-    <Compile Include="Assets\Scripts\Emote.cs" />
+    <Compile Include="Assets\Scripts\SyncedMovingObject.cs" />
+    <Compile Include="Assets\Scripts\SyncedMovingObjectParams.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
