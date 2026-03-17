@@ -490,6 +490,13 @@ public class ObjectSpawnSystem : MonoBehaviour
             
         }
     }
+    public float PopBackEndPoint()
+    {
+        //print($"{gameObject.name} pbtransform: {popBackController.elementVariation.popBackTransform.position}, " +
+        //    $"offset: {popBackController.elementVariation.popBackProximity * Vector2.right}");
+        return ((Vector2)elementVariation.popBackTransform.position -
+            (elementVariation.popBackProximity * Vector2.right)).x;
+    }
 
     private void OnDrawGizmos()
     {

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UIElements;
 using static ObjectSpawnSystem;
 
@@ -15,6 +16,9 @@ public class SyncedMovingObject : MonoBehaviour
     public bool moveObject;
     public bool scaleFromObjectSpawnSystem;
     public RandomSpeed speedRange;
+
+    const int backlogSize = 5;
+    [Range(0, backlogSize)] public int useBacklogIndex;
     [Serializable]
     public struct RandomSpeed 
     {
@@ -26,18 +30,22 @@ public class SyncedMovingObject : MonoBehaviour
 
     public float PopBackEndPoint()
     {
+        //print($"{gameObject.name} pbtransform: {popBackController.elementVariation.popBackTransform.position}, " +
+        //    $"offset: {popBackController.elementVariation.popBackProximity * Vector2.right}");
         return ((Vector2)popBackController.elementVariation.popBackTransform.position -
             (popBackController.elementVariation.popBackProximity * Vector2.right)).x;
     }
-    public float DynamicPopBackStartPoint(bool popBackPointOnly)
+    public float DynamicPopBackStartPoint(float popBackEndPoint, bool popBackPointOnly = true)
     {
-        float distToPlaneX = transform.position.x /* (1f/transform.localScale.x)*/ - PopBackEndPoint();
+        float inverseScale = (1f / transform.localScale.x);
+        float distToPlaneX = (transform.position.x /** transform.localScale.x*/) - popBackEndPoint;
         if (!popBackPointOnly)
         { 
             distToPlaneX = transform.position.x - plane.transform.position.x;
         }
-        //print(plane.transform.position.x);
-        return (popBackController.GetPlayerInitialPosition().x + distToPlaneX);// * GetComponent<ObjectSpawnSystem>().elementVariation.scale.x;
+        print($"{gameObject.transform.parent.name} inverseScale: {inverseScale} distToPlaneX: {distToPlaneX} Position: {transform.position} PopBackEndPoint: {popBackEndPoint}," +
+            $"DynamicPopBackStartPoint {((popBackController.GetPlayerInitialPosition().x * inverseScale) + distToPlaneX)}");
+        return ((popBackController.GetPlayerInitialPosition().x * inverseScale) + distToPlaneX);// * GetComponent<ObjectSpawnSystem>().elementVariation.scale.x;
     }
     public void Move(float speed)
     {
@@ -107,24 +115,35 @@ public class SyncedMovingObject : MonoBehaviour
         }
     }
 
+    float[] popBackEndPointBacklog = new float[backlogSize];
+    int backlogIndex = 0;
+    int mod(int x, int m)
+    {
+        return (x % m + m) % m;
+    }
     // Update is called once per frame
     void FixedUpdate()
     {
         if (plane != null && popBackController != null)
         {
-            if (PopBackEndPoint() - transform.position.x <= triggerProximity)
+            if (popBackController.PopBackEndPoint() - transform.position.x <= triggerProximity)
             {
+                float popBackEndPoint = popBackController.PopBackEndPoint();
+                popBackEndPointBacklog[backlogIndex] = popBackEndPoint;
+                
+                //print(gameObject.transform.parent.name + " popBackEndPoint" + popBackEndPoint);
                 if (popBackController.popBack == true)
                 {
                     if (scaleFromObjectSpawnSystem)
                     {
-                        transform.position = new Vector3(DynamicPopBackStartPoint(true), transform.position.y, transform.position.z);
+                        transform.position = new Vector3(DynamicPopBackStartPoint(popBackEndPointBacklog[mod((backlogIndex - useBacklogIndex), popBackEndPointBacklog.Length)]), transform.position.y, transform.position.z);
                     }
                     else
                     {
-                        transform.position = new Vector3(DynamicPopBackStartPoint(true), 0, 0) * transform.localScale.x;
+                        transform.position = new Vector3(DynamicPopBackStartPoint(popBackEndPointBacklog[mod((backlogIndex - useBacklogIndex), popBackEndPointBacklog.Length)]), transform.position.y, transform.position.z); //* transform.localScale.x;
                     }
                 }
+                backlogIndex = (backlogIndex + 1) % backlogSize;
             }
             if (moveObject)
             {
@@ -137,16 +156,16 @@ public class SyncedMovingObject : MonoBehaviour
         }
     }
 
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        try
-        {
-            Gizmos.DrawSphere(new Vector3(PopBackEndPoint(), 0, 0), 1);
-        }
-        catch (NullReferenceException) 
-        {
+    //private void OnDrawGizmos()
+    //{
+    //    Gizmos.color = Color.red;
+    //    try
+    //    {
+    //        Gizmos.DrawSphere(new Vector3(PopBackEndPoint(), 0, 0), 1);
+    //    }
+    //    catch (NullReferenceException) 
+    //    {
             
-        }
-    }
+    //    }
+    //}
 }
