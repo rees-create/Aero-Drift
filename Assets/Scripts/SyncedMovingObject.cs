@@ -3,8 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.TerrainTools;
 using UnityEngine.UIElements;
-using static ObjectSpawnSystem;
 
 public class SyncedMovingObject : MonoBehaviour
 {
@@ -121,8 +121,9 @@ public class SyncedMovingObject : MonoBehaviour
     {
         return (x % m + m) % m;
     }
+    //Vector3 markerPos = Vector3.zero;
     // Update is called once per frame
-    void FixedUpdate()
+    void Update()
     {
         if (plane != null && popBackController != null)
         {
@@ -130,10 +131,11 @@ public class SyncedMovingObject : MonoBehaviour
             {
                 float popBackEndPoint = popBackController.PopBackEndPoint();
                 popBackEndPointBacklog[backlogIndex] = popBackEndPoint;
-                
+
                 //print(gameObject.transform.parent.name + " popBackEndPoint" + popBackEndPoint);
                 if (popBackController.popBack == true)
                 {
+                    //print("hello wtf????");
                     if (scaleFromObjectSpawnSystem)
                     {
                         transform.position = new Vector3(DynamicPopBackStartPoint(popBackEndPointBacklog[mod((backlogIndex - useBacklogIndex), popBackEndPointBacklog.Length)]), transform.position.y, transform.position.z);
@@ -141,31 +143,45 @@ public class SyncedMovingObject : MonoBehaviour
                     else
                     {
                         transform.position = new Vector3(DynamicPopBackStartPoint(popBackEndPointBacklog[mod((backlogIndex - useBacklogIndex), popBackEndPointBacklog.Length)]), transform.position.y, transform.position.z); //* transform.localScale.x;
+                        //markerPos = transform.position;
+                        //Instantiate(gameObject).transform.position = markerPos;
+                        //transform.SetPositionAndRotation(markerPos, Quaternion.identity);
                     }
+                    //speed = 0;
                 }
+                
                 backlogIndex = (backlogIndex + 1) % backlogSize;
             }
-            if (moveObject)
+            else 
             {
-                Move(speed);
+                //print($"check your ranges: {gameObject.transform.parent.name}- popBackEndPoint = {popBackController.PopBackEndPoint()} x pos = {transform.position.x}");
             }
+            
         }
         else 
         {
             Debug.Log("Plane or Pop Back controller is missing");
         }
     }
+    private void FixedUpdate()
+    {
+        if (moveObject)
+        {
+            Move(speed);
+        }
+    }
 
-    //private void OnDrawGizmos()
-    //{
-    //    Gizmos.color = Color.red;
-    //    try
-    //    {
-    //        Gizmos.DrawSphere(new Vector3(PopBackEndPoint(), 0, 0), 1);
-    //    }
-    //    catch (NullReferenceException) 
-    //    {
-            
-    //    }
-    //}
+    private void OnDrawGizmos()
+    {
+        //Gizmos.color = Color.red;
+        //Gizmos.DrawSphere(markerPos, 1);
+        //try
+        //{ 
+
+        //}
+        //catch (NullReferenceException) 
+        //{
+
+        //}
+    }
 }

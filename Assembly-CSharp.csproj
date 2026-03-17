@@ -79,10 +79,12 @@
     <Compile Include="Assets\Scripts\Thrower.cs" />
     <Compile Include="Assets\Scripts\GalleryView.cs" />
     <Compile Include="Assets\Scripts\Chatter.cs" />
+    <Compile Include="Assets\Scripts\SyncedMovingObjectParams.cs" />
     <Compile Include="Assets\Scripts\LayerColliderMap.cs" />
     <Compile Include="Assets\Scripts\Coin.cs" />
     <Compile Include="Assets\Scripts\DepthIllusion.cs" />
     <Compile Include="Assets\Scripts\RandomizeSpeed.cs" />
+    <Compile Include="Assets\Scripts\SyncedMovingObject.cs" />
     <Compile Include="Assets\Scripts\BlueShift.cs" />
     <Compile Include="Assets\Scripts\LayerColliderGroup.cs" />
     <Compile Include="Assets\Scripts\CollectibleCounter.cs" />
@@ -101,8 +103,6 @@
     <Compile Include="Assets\Scripts\DestroyPlane.cs" />
     <Compile Include="Assets\Scripts\PopBackSync.cs" />
     <Compile Include="Assets\Scripts\ActionRandomizer.cs" />
-    <Compile Include="Assets\Scripts\SyncedMovingObject.cs" />
-    <Compile Include="Assets\Scripts\SyncedMovingObjectParams.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
