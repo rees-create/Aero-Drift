@@ -59,6 +59,7 @@ public class FlightControl : MonoBehaviour
     Plane plane;
     Vector2[] forceLog = new Vector2[2];
     float[] torqueLog = new float[2];
+    bool useJoystickOnly;
     int t_ = 0;
 
     float AeroForce(float rho, Vector2 velocity, float area, float C, float maxC = 0) 
@@ -128,6 +129,10 @@ public class FlightControl : MonoBehaviour
         //TODO: read coefficients from JSON.. may not need this function though
         Planes planesInJSON = JsonUtility.FromJson<Planes>(planeSpecsFile.text);
         return planesInJSON.planes[planeIndex];
+    }
+    public void SetUseJoystickOnly(bool value) 
+    {
+        useJoystickOnly = value;
     }
     /// <summary>
     /// Gets appropriate coefficients for a given AoA from the full list
@@ -270,13 +275,15 @@ public class FlightControl : MonoBehaviour
     {
         //Thrust
         float increment = 0.01f;
-        if (Input.GetKey(KeyCode.RightArrow) && thrust <= maxThrust)
-        {
-            thrust += increment;
-        }
-        if (Input.GetKey(KeyCode.LeftArrow) && thrust >= 0)
-        {
-            thrust -= increment;
+        if (!useJoystickOnly) { 
+            if (Input.GetKey(KeyCode.RightArrow) && thrust <= maxThrust)
+            {
+                thrust += increment;
+            }
+            if (Input.GetKey(KeyCode.LeftArrow) && thrust >= 0)
+            {
+                thrust -= increment;
+            }
         }
         if (GetComponent<AudioSource>())
         { 

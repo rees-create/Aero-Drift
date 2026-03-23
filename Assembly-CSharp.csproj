@@ -70,6 +70,7 @@
     <Compile Include="Assets\Scripts\AnimationRandomizer.cs" />
     <Compile Include="Assets\Scripts\ExhaustControl.cs" />
     <Compile Include="Assets\Scripts\SceneTransitionControl.cs" />
+    <Compile Include="Assets\Scripts\FlightJoystick.cs" />
     <Compile Include="Assets\Scripts\PieSign.cs" />
     <Compile Include="Assets\Scripts\LiftSortingOrder.cs" />
     <Compile Include="Assets\Scripts\PoseLerp.cs" />
