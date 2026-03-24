@@ -12,6 +12,7 @@ public class FlightJoystick : MonoBehaviour
     public FlightControl flightControl;
     public Vector2 middle;
     public GameObject pod;
+    public Vector2 joystickPos;
     [SerializeField] float innerRadius;
     //TODO: use these values in FlightControl
     [NonSerialized] public FlightParams flightParams;
@@ -24,8 +25,8 @@ public class FlightJoystick : MonoBehaviour
     public struct FlightParams 
     {
         public float thrustMagnitude;
-        public float flapAngle;
-        public FlightParams(float thrustMagnitude, float flapAngle) { this.thrustMagnitude = thrustMagnitude; this.flapAngle = flapAngle; }
+        public float flapFraction;
+        public FlightParams(float thrustMagnitude, float flapFraction) { this.thrustMagnitude = thrustMagnitude; this.flapFraction = flapFraction; }
         
     }
 
@@ -35,7 +36,7 @@ public class FlightJoystick : MonoBehaviour
         //height [sin(angle)] = flaps , width [cos(angle)] = thrust
         float normThrust = Mathf.Cos(angle * Mathf.Deg2Rad);
         float flaps = Mathf.Sin(angle * Mathf.Deg2Rad);
-
+        joystickPos = new Vector2(normThrust, flaps);
         return new FlightParams(normThrust * flightControl.maxThrust * magnitude, flaps * magnitude);
     }
 
@@ -90,16 +91,17 @@ public class FlightJoystick : MonoBehaviour
         flightControl.SetUseJoystickOnly(useJoystickOnly);
     }
     int buffer = 0;
+    
     // Update is called once per frame
     void FixedUpdate()
     {
         //if first click is inside the joystick, track pointer.
 
         //1.For throw, set magnitude to throw intensity
-        throwIntensity = 0;
+        
         if (trackingPointer) 
         {
-            TrackPointer();
+            throwIntensity = TrackPointer();
         }
         if (Input.GetMouseButtonUp(0)) 
         {
@@ -111,6 +113,7 @@ public class FlightJoystick : MonoBehaviour
             }
             else
             {
+                throwIntensity = 0;
                 trackingPointer = false;
             }
         }

@@ -24,6 +24,8 @@ public class FlightControl : MonoBehaviour
     [SerializeField] float liftCoefficientRange;
     [SerializeField] float dragCoefficientRange;
     [SerializeField] float momentCoefficientRange;
+    [Header("Joystick")]
+    [SerializeField] FlightJoystick joystick;
     [Header("Flap Control")]
     [SerializeField] float flapSpeed;
     [SerializeField] float flapInfluence;
@@ -256,16 +258,27 @@ public class FlightControl : MonoBehaviour
     }
 
     float FlapValue(float influence) {
-        float degree = Mathf.PI / 180;
-        if (Input.GetKey(KeyCode.UpArrow) && flapAngle < Mathf.PI / 2)
+        //TODO: make compatible with joystick
+        float flapFraction = 0;
+        if (!useJoystickOnly)
         {
-            flapAngle += degree * flapSpeed;
+            float degree = Mathf.PI / 180;
+            if (Input.GetKey(KeyCode.UpArrow) && flapAngle < Mathf.PI / 2)
+            {
+                flapAngle += degree * flapSpeed;
+            }
+            if (Input.GetKey(KeyCode.DownArrow) && flapAngle > -Mathf.PI / 2)
+            {
+                flapAngle -= degree * flapSpeed;
+            }
+            flapFraction = flapAngle / (Mathf.PI / 2);
         }
-        if (Input.GetKey(KeyCode.DownArrow) && flapAngle > -Mathf.PI / 2)
+        else 
         {
-            flapAngle -= degree * flapSpeed;
+            flapFraction = joystick.flightParams.flapFraction;
+            flapAngle = flapFraction * (Mathf.PI / 2);
         }
-        float flapFraction = flapAngle / (Mathf.PI / 2);
+        
         return flapFraction * influence;
     }
 
@@ -275,7 +288,8 @@ public class FlightControl : MonoBehaviour
     {
         //Thrust
         float increment = 0.01f;
-        if (!useJoystickOnly) { 
+        if (!useJoystickOnly)
+        {
             if (Input.GetKey(KeyCode.RightArrow) && thrust <= maxThrust)
             {
                 thrust += increment;
@@ -285,8 +299,12 @@ public class FlightControl : MonoBehaviour
                 thrust -= increment;
             }
         }
+        else 
+        {
+            thrust = joystick.flightParams.thrustMagnitude;
+        }
         if (GetComponent<AudioSource>())
-        { 
+        {
             // Audio
             float soundLevel = thrust / maxThrust;
             // scale = 0.6f; //im lazy now so just making a local variable, but this should be pickable
@@ -367,7 +385,11 @@ public class FlightControl : MonoBehaviour
         plane = ReadPlaneData(planeIndex);
         rb.centerOfMass = centerOfMass;
         //rb.AddForce(initialThrowImpulse, ForceMode2D.Impulse);
-
+        if (joystick != null) 
+        {
+            useJoystickOnly = joystick.GetJoystickOnly();
+        }
+        
     }
     private void OnDrawGizmos()
     {

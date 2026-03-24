@@ -21,6 +21,8 @@ public class NPCThrower : MonoBehaviour
     [SerializeField] GameObject plane;
     [SerializeField] GameObject bait;
     [SerializeField] GameObject dash;
+    [Header("Joystick")]
+    public FlightJoystick flightJoystick;
     [Header("Throw Customization")]
     [SerializeField] Vector2 dashScale;
     [SerializeField] Vector2 followOffset;
@@ -150,13 +152,36 @@ public class NPCThrower : MonoBehaviour
 
             if (active)
             {
-                //track mouse
-                pointerPosition = Input.mousePosition;
-                Vector3 pointerWorldPosition = Camera.main.ScreenToWorldPoint(pointerPosition);
-                //calculate throw intensity from mouse position
-                throwVector = plane.transform.position - pointerWorldPosition;
                 float throwIntensity = throwVector.magnitude;
                 float weightedThrowIntensity = throwIntensity * throwIntensityScale;
+                bool joystickOnly = false;
+                Vector3 pointerWorldPosition = new Vector3();
+                if (flightJoystick != null)
+                {
+                    if (!flightJoystick.GetJoystickOnly())
+                    {
+                        //track mouse
+                        joystickOnly = true;
+                        pointerPosition = Input.mousePosition;
+                        pointerWorldPosition = Camera.main.ScreenToWorldPoint(pointerPosition);
+                        //calculate throw intensity from mouse position
+                        throwVector = plane.transform.position - pointerWorldPosition;
+                    }
+                }
+                else if (flightJoystick.GetJoystickOnly())
+                {
+                    throwIntensity = flightJoystick.throwIntensity;
+                }
+                else 
+                {
+                    //track mouse
+                    pointerPosition = Input.mousePosition;
+                    pointerWorldPosition = Camera.main.ScreenToWorldPoint(pointerPosition);
+                    //calculate throw intensity from mouse position
+                    throwVector = plane.transform.position - pointerWorldPosition;
+                }
+
+
                 //sample throw animation to match intensity
                 if (!usePoseLerp)
                 {
@@ -169,15 +194,22 @@ public class NPCThrower : MonoBehaviour
                 }
                 //throwAnimation.length - (Mathf.Min(weightedThrowIntensity / maxThrowIntensity, 1f) * throwAnimation.length)
                 //make dashes
-
-                MakeDashes(weightedThrowIntensity, pointerWorldPosition);
-                //follow bait
-                Follow(bait, followOffset);
+                if (!joystickOnly)
+                {
+                    MakeDashes(weightedThrowIntensity, pointerWorldPosition);
+                }
+                else 
+                {
+                    MakeDashes(weightedThrowIntensity, flightJoystick.joystickPos);
+                }
+                    //follow bait
+                    Follow(bait, followOffset);
             }
             yield return new WaitUntil(() => active);
             yield return new WaitForFixedUpdate();
         }
     }
+    
     void ThrowAnim(float normalizedTime, bool follow = true) {
         throwAnimation.SampleAnimation(gameObject, normalizedTime * throwAnimation.length);
 
