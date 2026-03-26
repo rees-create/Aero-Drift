@@ -302,6 +302,7 @@ public class FlightControl : MonoBehaviour
         else 
         {
             thrust = joystick.flightParams.thrustMagnitude;
+            print("thrust: " + thrust);
         }
         if (GetComponent<AudioSource>())
         {
@@ -311,7 +312,7 @@ public class FlightControl : MonoBehaviour
             // make these pickable too, later.
             //float lowPassRange = 21200; 
             //float initLowPass = 800; //2 vars seems redundant but is useful in case you don't want full release of cutoff freq.
-            AudioClip clip = Resources.Load<AudioClip>(resourcesSoundPath); //right now play "simple thrust.wav" by default, later make sound pickable.
+            AudioClip clip = Resources.Load<AudioClip>(resourcesSoundPath); 
             if (soundLevel > 0.005)
             {
                 audioTime += Time.deltaTime;

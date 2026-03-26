@@ -161,16 +161,22 @@ public class NPCThrower : MonoBehaviour
                     if (!flightJoystick.GetJoystickOnly())
                     {
                         //track mouse
-                        joystickOnly = true;
+
                         pointerPosition = Input.mousePosition;
                         pointerWorldPosition = Camera.main.ScreenToWorldPoint(pointerPosition);
-                        //calculate throw intensity from mouse position
                         throwVector = plane.transform.position - pointerWorldPosition;
+                        //calculate throw intensity from mouse position
+                        
                     }
-                }
-                else if (flightJoystick.GetJoystickOnly())
-                {
-                    throwIntensity = flightJoystick.throwIntensity;
+                    else
+                    {   
+                        joystickOnly = true;
+                        //throwIntensity = flightJoystick.throwIntensity;
+                        throwVector = -flightJoystick.flightParams.throwImpulse;
+                        throwIntensity = throwVector.magnitude;
+                        weightedThrowIntensity = throwIntensity * throwIntensityScale;
+                        print("throwVector = " + throwVector);
+                    }
                 }
                 else 
                 {
