@@ -14,6 +14,7 @@ public class FlightJoystick : MonoBehaviour
     public GameObject pod;
     [NonSerialized] public Vector2 joystickPos;
     [SerializeField] float innerRadius;
+    [SerializeField] float outerRadius;
     //TODO: use these values in FlightControl
     [NonSerialized] public FlightParams flightParams;
     [NonSerialized] public float throwIntensity;
@@ -21,6 +22,7 @@ public class FlightJoystick : MonoBehaviour
     [SerializeField] int fixedFrameBuffer;
 
     bool mouseDown = false;
+    Vector2 throwJoystickSnapshot;
 
     public bool GetJoystickOnly() { return useJoystickOnly; }
 
@@ -45,8 +47,8 @@ public class FlightJoystick : MonoBehaviour
         //height [sin(angle)] = flaps , width [cos(angle)] = thrust
         float normThrust = Mathf.Cos(angle * Mathf.Deg2Rad);
         float flaps = Mathf.Sin(angle * Mathf.Deg2Rad);
-        print("normThrust = " + normThrust);
-        return new FlightParams(normThrust * flightControl.maxThrust * magnitude, flaps * magnitude, joystickPos * flightControl.maxThrust);
+        //print("maxThrust = " + flightControl.maxThrust);
+        return new FlightParams(normThrust * flightControl.maxThrust * magnitude, flaps * magnitude, throwJoystickSnapshot * flightControl.maxThrust);
     }
 
     //inputtothrowparams
@@ -61,11 +63,22 @@ public class FlightJoystick : MonoBehaviour
         }
         return false;
     }
+    public bool MouseOnJoystick() 
+    {
+        Vector2 localMousePosition = transform.InverseTransformPoint(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+        if (Vector2.Distance(localMousePosition, middle) <= outerRadius)
+        {
+            return true;
+        }
+        return false;
+    }
+    bool trackingPointer;
 
-    float TrackPointer() 
+    public float TrackPointer(bool hover = false) 
     {
         mouseDown = Input.GetMouseButton(0);
-        if (mouseDown)
+        bool mouseDownXorHover = (mouseDown || hover) && !(mouseDown && hover);
+        if (MouseOnJoystick() && mouseDown)
         {
             //print("mouse down");
             Vector2 localMousePosition = transform.InverseTransformPoint(Camera.main.ScreenToWorldPoint(Input.mousePosition));
@@ -93,7 +106,7 @@ public class FlightJoystick : MonoBehaviour
             return 0;
         }
     }
-    bool trackingPointer;
+    
     public void StartTracking() //set this object to button onclick.
     {
         trackingPointer = true;
@@ -110,42 +123,61 @@ public class FlightJoystick : MonoBehaviour
         flightControl.SetUseJoystickOnly(useJoystickOnly);
     }
     int buffer = 0;
-    
+
     // Update is called once per frame
+    
     void FixedUpdate()
     {
         //if first click is inside the joystick, track pointer.
 
         //1.For throw, set magnitude to throw intensity
         float joystickMagnitude = TrackPointer();
-        if (trackingPointer) 
+        if (MouseOnJoystick() && Input.GetMouseButton(0))
         {
-            
+            joystickMagnitude = TrackPointer();
+            //print("trackingPointer = " + trackingPointer);
             throwIntensity = joystickMagnitude;//TrackPointer();
+            throwJoystickSnapshot = joystickPos;
+            
+            flightParams = InputToFlightParams(joystickMagnitude);
+            print("throw impulse: " + flightParams.throwImpulse);
         }
-        if (Input.GetMouseButton(0)) 
+        else //(!Input.GetMouseButton(0)) 
         {
-            throwIntensity = joystickMagnitude;
+            //throwIntensity = joystickMagnitude;
             //buffer then turn off tracking pointer;
             if (buffer <= fixedFrameBuffer)
             {
                 buffer++;
+                flightParams = InputToFlightParams(joystickMagnitude);
             }
             else
             {
                 buffer = 0;
                 throwIntensity = 0;
                 trackingPointer = false;
+                //joystickMagnitude = 0;
+                
+                //print("idle throw impulse: " + flightParams.throwImpulse);
             }
         }
+
+
         //2. For steering, set flight params
-        flightParams = InputToFlightParams(joystickMagnitude);
+        if (flightControl.enabled)
+        {
+            flightParams = InputToFlightParams(joystickMagnitude);
+            //print("flight control off");
+        }
+        
         //print("joystickMagnitude = " + joystickMagnitude);
     }
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.blue;
         Gizmos.DrawLine(transform.TransformPoint(middle), transform.TransformPoint(Vector3.right * innerRadius));
+        Gizmos.color = Color.red;
+        Gizmos.DrawLine(transform.TransformPoint(middle), transform.TransformPoint(Vector3.up * outerRadius));
     }
 
 }

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using UnityEditor.ShaderGraph.Internal;
 using UnityEditor.Tilemaps;
 using UnityEngine;
@@ -121,7 +122,7 @@ public class NPCThrower : MonoBehaviour
     // Throw sequence functions
     IEnumerator InitThrow() 
     {
-        if (active)
+        if (active && !thrown)
         {
             dashes = new GameObject("Throw Dashes");
             dashes.transform.parent = transform;
@@ -146,10 +147,14 @@ public class NPCThrower : MonoBehaviour
     }
     IEnumerator TauntThrow() 
     {
+        if (flightJoystick)
+        {
+            thrown = flightJoystick.TrackPointer() > 0;
+        }
         while (!thrown)
         {
             //yield return new WaitWhile(() => thrown);
-
+            //print("don't act on throw anim");
             if (active)
             {
                 float throwIntensity = throwVector.magnitude;
@@ -175,7 +180,7 @@ public class NPCThrower : MonoBehaviour
                         throwVector = -flightJoystick.flightParams.throwImpulse;
                         throwIntensity = throwVector.magnitude;
                         weightedThrowIntensity = throwIntensity * throwIntensityScale;
-                        print("throwVector = " + throwVector);
+                        print("throwVector = " + throwVector + "assignment = " + -flightJoystick.flightParams.throwImpulse);
                     }
                 }
                 else 
@@ -207,6 +212,7 @@ public class NPCThrower : MonoBehaviour
                 else 
                 {
                     MakeDashes(weightedThrowIntensity, flightJoystick.joystickPos);
+                    print("dashes?");
                 }
                     //follow bait
                     Follow(bait, followOffset);
@@ -255,6 +261,7 @@ public class NPCThrower : MonoBehaviour
 
     IEnumerator PreThrow()
     {
+        float animTime = 0;
         while (true)
         {
             //yield return new WaitUntil(() => active);
@@ -269,10 +276,72 @@ public class NPCThrower : MonoBehaviour
                 }
                 plane.GetComponent<FlightControl>().thrust = 0;
                 StartCoroutine(InitThrow());
+                
                 StartCoroutine(TauntThrow());
+                if (flightJoystick)
+                {
+                    yield return new WaitUntil(() => flightJoystick.TrackPointer() > 0);
+                }
                 //print("after taunt");
             }
-            yield return new WaitUntil(() => thrown);
+            if (flightJoystick)
+            {
+                yield return new WaitUntil(() => flightJoystick.TrackPointer() > 0);
+
+                //launch sequence
+                thrown = true;
+                if (usePoseLerp)
+                {
+                    gameObject.GetComponent<PoseLerp>().poseSequenceManager.play = false;
+                }
+
+                if (active)
+                {
+
+                    //keep physics off till launch
+                    //plane.GetComponent<FlightControl>().enabled = false;
+                    //plane.GetComponent<Rigidbody2D>().gravityScale = 0;
+                    //plane.GetComponent<PolygonCollider2D>().enabled = false;
+                    //TODO: make grunt sound switchable based on throw intensity
+                    AudioClip gruntSound = Resources.Load<AudioClip>($"Audio/{gruntSoundFile}");
+                    if (animTime < Time.deltaTime && throwVector.magnitude > (0.5f * maxThrowIntensity) && speechSource != null && gruntSound != null)
+                    {
+                        speechSource.PlayOneShot(gruntSound, (throwVector.magnitude / maxThrowIntensity) * gruntLoudness);
+                    }
+                    while (animTime <= 1 - preLaunch)
+                    {
+                        ThrowAnim(animTime);
+                        animTime += Time.fixedDeltaTime;
+                        
+                        yield return new WaitForFixedUpdate();
+                    }
+                    //print("throwVector = " + throwVector);
+                    //throwVector = -flightJoystick.flightParams.throwImpulse;
+                    LaunchPlane();
+                    while (animTime <= 1)
+                    {
+                        ThrowAnim(animTime, false);
+                        animTime += Time.fixedDeltaTime;
+                        
+                        yield return new WaitForFixedUpdate();
+                    }
+                    while (animTime >= 0)
+                    {
+                        ThrowAnim(animTime, false);
+                        animTime -= Time.fixedDeltaTime;
+                        
+                        yield return new WaitForFixedUpdate();
+                    }
+                }
+                
+                active = false;
+                thrown = false;
+                animTime = 0;
+            }
+            else
+            {
+                yield return new WaitUntil(() => thrown);
+            }
             //StopCoroutine(TauntThrow());
             //StopCoroutine(InitThrow());
             //print("thrown, waiting for deactivation");
@@ -304,48 +373,56 @@ public class NPCThrower : MonoBehaviour
     }
     IEnumerator OnMouseDown() {
         //launch plane if active
-        thrown = true;
-        if (usePoseLerp) 
+        if (!flightJoystick)  //TODO: find some way for the joystick to trigger this!
         {
-            gameObject.GetComponent<PoseLerp>().poseSequenceManager.play = false;
-        }
-       
-        if (active) { 
-            float animTime = 0;
+            thrown = true;
 
-            //keep physics off till launch
-            //plane.GetComponent<FlightControl>().enabled = false;
-            //plane.GetComponent<Rigidbody2D>().gravityScale = 0;
-            //plane.GetComponent<PolygonCollider2D>().enabled = false;
-            //TODO: make grunt sound switchable based on throw intensity
-            AudioClip gruntSound = Resources.Load<AudioClip>($"Audio/{gruntSoundFile}");
-            if (animTime < Time.deltaTime && throwVector.magnitude > (0.5f * maxThrowIntensity) && speechSource != null && gruntSound != null) 
-            {
-                speechSource.PlayOneShot(gruntSound, (throwVector.magnitude/maxThrowIntensity) * gruntLoudness);
-            }
-            while (animTime <= 1-preLaunch) {
-                ThrowAnim(animTime);
-                animTime += Time.fixedDeltaTime;
-                yield return new WaitForFixedUpdate();
-            }
-            LaunchPlane();
-            while (animTime <= 1)
-            {
-                ThrowAnim(animTime, false);
-                animTime += Time.fixedDeltaTime;
-                yield return new WaitForFixedUpdate();
-            }
-            while (animTime >= 0)
-            {
-                ThrowAnim(animTime, false);
-                animTime -= Time.fixedDeltaTime;
-                yield return new WaitForFixedUpdate();
-            }
-        }
-        Destroy(dashes);
-        
 
-        thrown = false;
-        active = false;
+            if (usePoseLerp)
+            {
+                gameObject.GetComponent<PoseLerp>().poseSequenceManager.play = false;
+            }
+
+            if (active)
+            {
+                float animTime = 0;
+
+                //keep physics off till launch
+                //plane.GetComponent<FlightControl>().enabled = false;
+                //plane.GetComponent<Rigidbody2D>().gravityScale = 0;
+                //plane.GetComponent<PolygonCollider2D>().enabled = false;
+                //TODO: make grunt sound switchable based on throw intensity
+                AudioClip gruntSound = Resources.Load<AudioClip>($"Audio/{gruntSoundFile}");
+                if (animTime < Time.deltaTime && throwVector.magnitude > (0.5f * maxThrowIntensity) && speechSource != null && gruntSound != null)
+                {
+                    speechSource.PlayOneShot(gruntSound, (throwVector.magnitude / maxThrowIntensity) * gruntLoudness);
+                }
+                
+                while (animTime <= 1 - preLaunch)
+                {
+                    ThrowAnim(animTime);
+                    animTime += Time.fixedDeltaTime;
+                    yield return new WaitForFixedUpdate();
+                }
+                LaunchPlane();
+                while (animTime <= 1)
+                {
+                    ThrowAnim(animTime, false);
+                    animTime += Time.fixedDeltaTime;
+                    yield return new WaitForFixedUpdate();
+                }
+                while (animTime >= 0)
+                {
+                    ThrowAnim(animTime, false);
+                    animTime -= Time.fixedDeltaTime;
+                    yield return new WaitForFixedUpdate();
+                }
+            }
+            Destroy(dashes);
+
+
+            thrown = false;
+            active = false;
+        }
     }
 }
