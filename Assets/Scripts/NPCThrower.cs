@@ -73,6 +73,10 @@ public class NPCThrower : MonoBehaviour
         int numberOfDashes = Mathf.FloorToInt(throwLineLength / dashQuotient);
         int diff = numberOfDashes - nDashes;
         Vector3 plane2Mouse = mousePosition - plane.transform.position;
+        if (flightJoystick) 
+        {
+            plane2Mouse = flightJoystick.flightParams.throwImpulse;
+        }
         Vector3 currentRotation = new Vector3(0, 0, Mathf.Atan2(plane2Mouse.y, plane2Mouse.x) * Mathf.Rad2Deg);
         Vector3 planeOrientation = currentRotation + initPlaneRotation;
         plane.transform.eulerAngles = planeOrientation;
@@ -180,7 +184,7 @@ public class NPCThrower : MonoBehaviour
                         throwVector = -flightJoystick.flightParams.throwImpulse;
                         throwIntensity = throwVector.magnitude;
                         weightedThrowIntensity = throwIntensity * throwIntensityScale;
-                        print("throwVector = " + throwVector + "assignment = " + -flightJoystick.flightParams.throwImpulse);
+                        //print("throwVector = " + throwVector + "assignment = " + -flightJoystick.flightParams.throwImpulse);
                     }
                 }
                 else 
@@ -212,7 +216,7 @@ public class NPCThrower : MonoBehaviour
                 else 
                 {
                     MakeDashes(weightedThrowIntensity, flightJoystick.joystickPos);
-                    print("dashes?");
+                    //print("dashes?");
                 }
                     //follow bait
                     Follow(bait, followOffset);
@@ -247,13 +251,13 @@ public class NPCThrower : MonoBehaviour
         if (throwVector.magnitude < maxThrowIntensity)
         {
             plane.GetComponent<FlightControl>().initialThrowImpulse = -throwVector;
-            print($"go for launch, throw vector = {throwVector}");
+            //print($"go for launch, throw vector = {throwVector}");
         }
         else
         {
             float throwIntensity = throwVector.magnitude;
             Vector2 throwDirection = throwVector / throwIntensity;
-            print($"go for launch at max, throw vector = {maxThrowIntensity * throwDirection}");
+            //print($"go for launch at max, throw vector = {maxThrowIntensity * throwDirection}");
             plane.GetComponent<FlightControl>().initialThrowImpulse = -maxThrowIntensity * throwDirection;
             
         }

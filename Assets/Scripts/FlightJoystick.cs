@@ -17,7 +17,7 @@ public class FlightJoystick : MonoBehaviour
     [SerializeField] float outerRadius;
     //TODO: use these values in FlightControl
     [NonSerialized] public FlightParams flightParams;
-    [NonSerialized] public float throwIntensity;
+    public float throwIntensity;
 
     [SerializeField] int fixedFrameBuffer;
 
@@ -43,12 +43,12 @@ public class FlightJoystick : MonoBehaviour
 
     FlightParams InputToFlightParams(float magnitude) 
     {
-        float angle = Vector2.Angle(Vector2.zero, (Vector2) pod.transform.localPosition - middle);
+        float angle = Vector2.SignedAngle(Vector2.right, (Vector2) pod.transform.localPosition - middle);
         //height [sin(angle)] = flaps , width [cos(angle)] = thrust
         float normThrust = Mathf.Cos(angle * Mathf.Deg2Rad);
         float flaps = Mathf.Sin(angle * Mathf.Deg2Rad);
-        //print("maxThrust = " + flightControl.maxThrust);
-        return new FlightParams(normThrust * flightControl.maxThrust * magnitude, flaps * magnitude, throwJoystickSnapshot * flightControl.maxThrust);
+        //print("flaps = " + flaps);
+        return new FlightParams(normThrust * flightControl.maxThrust * magnitude, flaps, throwJoystickSnapshot * throwIntensity);
     }
 
     //inputtothrowparams
@@ -77,7 +77,7 @@ public class FlightJoystick : MonoBehaviour
     public float TrackPointer(bool hover = false) 
     {
         mouseDown = Input.GetMouseButton(0);
-        bool mouseDownXorHover = (mouseDown || hover) && !(mouseDown && hover);
+        //bool mouseDownXorHover = (mouseDown || hover) && (!(mouseDown && hover));
         if (MouseOnJoystick() && mouseDown)
         {
             //print("mouse down");
@@ -136,11 +136,11 @@ public class FlightJoystick : MonoBehaviour
         {
             joystickMagnitude = TrackPointer();
             //print("trackingPointer = " + trackingPointer);
-            throwIntensity = joystickMagnitude;//TrackPointer();
+            //throwIntensity = joystickMagnitude;//TrackPointer();
             throwJoystickSnapshot = joystickPos;
             
             flightParams = InputToFlightParams(joystickMagnitude);
-            print("throw impulse: " + flightParams.throwImpulse);
+            //print("throw impulse: " + flightParams.throwImpulse);
         }
         else //(!Input.GetMouseButton(0)) 
         {
@@ -154,7 +154,7 @@ public class FlightJoystick : MonoBehaviour
             else
             {
                 buffer = 0;
-                throwIntensity = 0;
+                //throwIntensity = 0;
                 trackingPointer = false;
                 //joystickMagnitude = 0;
                 

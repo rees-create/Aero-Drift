@@ -283,7 +283,37 @@ public class FlightControl : MonoBehaviour
     }
 
     [NonSerialized] public float thrust = 0;
-    float audioTime = 3; //3 is current audio duration, this value should be pickable/serializable.
+    float audioTime = 3; //TODO: 3 is current audio duration, this value should be pickable/serializable.
+
+    void PlayExhaustJoystick(AudioClip clip, float soundLevel)
+    {
+        //if (soundLevel > 0.005)
+        //{
+        audioTime += Time.deltaTime;
+        if (joystick.TrackPointer() > 0)
+        { 
+            if (audioTime < 2.97)
+            {
+                gameObject.GetComponent<AudioSource>().volume = soundLevel;
+                gameObject.GetComponent<AudioLowPassFilter>().cutoffFrequency = lowPassFilterInit + lowPassFilterRange * soundLevel;
+                //gameObject.GetComponent<AudioSource>().Pause();
+            }
+            else
+            {
+                audioTime = 0;
+                print("play one shot");
+                gameObject.GetComponent<AudioSource>().volume = soundLevel;
+                gameObject.GetComponent<AudioLowPassFilter>().cutoffFrequency = lowPassFilterInit + lowPassFilterRange * soundLevel;
+                gameObject.GetComponent<AudioSource>().PlayOneShot(clip, engineVolume);
+            }
+        }
+        //}
+        //else
+        //{
+        //    audioTime = 3;
+        //}
+    }
+    
     float ApplyThrust(float maxThrust)
     {
         //Thrust
@@ -312,7 +342,9 @@ public class FlightControl : MonoBehaviour
             // make these pickable too, later.
             //float lowPassRange = 21200; 
             //float initLowPass = 800; //2 vars seems redundant but is useful in case you don't want full release of cutoff freq.
-            AudioClip clip = Resources.Load<AudioClip>(resourcesSoundPath); 
+            AudioClip clip = Resources.Load<AudioClip>(resourcesSoundPath);
+            //if (!useJoystickOnly)
+            //{
             if (soundLevel > 0.005)
             {
                 audioTime += Time.deltaTime;
@@ -335,6 +367,8 @@ public class FlightControl : MonoBehaviour
             {
                 audioTime = 3;
             }
+            
+
         }
         return thrust;
     }
@@ -427,6 +461,8 @@ public class FlightControl : MonoBehaviour
     {
         
         forces = AeroUpdate(plane, length, ApplyThrust(maxThrust));
-       
+        if (useJoystickOnly && joystick.TrackPointer() == 0) {
+            gameObject.GetComponent<AudioSource>().Stop();
+        }
     }
 }
