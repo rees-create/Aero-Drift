@@ -284,35 +284,6 @@ public class FlightControl : MonoBehaviour
 
     [NonSerialized] public float thrust = 0;
     float audioTime = 3; //TODO: 3 is current audio duration, this value should be pickable/serializable.
-
-    void PlayExhaustJoystick(AudioClip clip, float soundLevel)
-    {
-        //if (soundLevel > 0.005)
-        //{
-        audioTime += Time.deltaTime;
-        if (joystick.TrackPointer() > 0)
-        { 
-            if (audioTime < 2.97)
-            {
-                gameObject.GetComponent<AudioSource>().volume = soundLevel;
-                gameObject.GetComponent<AudioLowPassFilter>().cutoffFrequency = lowPassFilterInit + lowPassFilterRange * soundLevel;
-                //gameObject.GetComponent<AudioSource>().Pause();
-            }
-            else
-            {
-                audioTime = 0;
-                print("play one shot");
-                gameObject.GetComponent<AudioSource>().volume = soundLevel;
-                gameObject.GetComponent<AudioLowPassFilter>().cutoffFrequency = lowPassFilterInit + lowPassFilterRange * soundLevel;
-                gameObject.GetComponent<AudioSource>().PlayOneShot(clip, engineVolume);
-            }
-        }
-        //}
-        //else
-        //{
-        //    audioTime = 3;
-        //}
-    }
     
     float ApplyThrust(float maxThrust)
     {
