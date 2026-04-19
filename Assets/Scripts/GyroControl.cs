@@ -10,7 +10,7 @@ public class GyroControl : MonoBehaviour
 {
     bool gyroEnabled;
     Gyroscope gyro;
-    public Quaternion gyroRotation;
+    public Vector3 gyroRotation;
     [Serializable]
     public struct FlapRanges 
     {
@@ -32,28 +32,30 @@ public class GyroControl : MonoBehaviour
 
     public float FlapFraction() 
     {
-        float gyroX = gyroRotation.eulerAngles.x;
-        if (gyroX >= flapRanges.zeroUpper && gyroX < 270)
+        float gyroY = gyroRotation.y;
+        if (gyroY >= flapRanges.zeroUpper && gyroY < 270)
         {
             float range = flapRanges.upperBound - flapRanges.zeroUpper;
-            float xDiff = gyroX - flapRanges.zeroUpper;
-            float flapFraction = range / xDiff;
-            return flapFraction <= 1 ? flapFraction : 1;
+            float yDiff = gyroY - flapRanges.zeroUpper;
+            float flapFraction = yDiff / range;
+            print($"flapFraction: {flapFraction}");
+            return flapFraction <= 1f ? flapFraction : 1f;
         }
-        else if (gyroX < flapRanges.zeroUpper && gyroX > flapRanges.zeroLower)
+        else if (gyroY < flapRanges.zeroUpper && gyroY > flapRanges.zeroLower)
         {
             return 0;
         }
         else
         {
-            if (gyroX > 270)
+            if (gyroY > 270)
             {
-                gyroX = gyroX - 360;
+                gyroY = gyroY - 360;
             }
             float range = flapRanges.zeroLower - flapRanges.lowerBound;
-            float xDiff = gyroX - flapRanges.zeroUpper;
-            float flapFraction = range / xDiff;
-            return flapFraction >= -1 ? flapFraction : -1;
+            float yDiff = gyroY - flapRanges.zeroLower;
+            float flapFraction = yDiff / range;
+            print($"flapFraction: {flapFraction}");
+            return flapFraction >= -1f ? flapFraction : -1f;
         }
 
     }
@@ -69,7 +71,7 @@ public class GyroControl : MonoBehaviour
     {
         if (SupportsGyro()) 
         {
-            gyroRotation = gyro.attitude;
+            gyroRotation = gyro.attitude.eulerAngles;
             //print(gyroRotation.eulerAngles);
         }
         

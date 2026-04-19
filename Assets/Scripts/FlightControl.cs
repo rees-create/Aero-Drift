@@ -263,21 +263,21 @@ public class FlightControl : MonoBehaviour
         float flapFraction = 0;
         if (!useJoystickOnly)
         {
-            float degree = Mathf.PI / 180;
-            if (Input.GetKey(KeyCode.UpArrow) && flapAngle < Mathf.PI / 2)
+            float degree = Mathf.PI / 180f;
+            if (Input.GetKey(KeyCode.UpArrow) && flapAngle < Mathf.PI / 2f)
             {
                 flapAngle += degree * flapSpeed;
             }
-            if (Input.GetKey(KeyCode.DownArrow) && flapAngle > -Mathf.PI / 2)
+            if (Input.GetKey(KeyCode.DownArrow) && flapAngle > -Mathf.PI / 2f)
             {
                 flapAngle -= degree * flapSpeed;
             }
-            flapFraction = flapAngle / (Mathf.PI / 2);
+            flapFraction = flapAngle / (Mathf.PI / 2f);
         }
         else if (useGyroForFlaps)
         {
             flapFraction = GetComponent<GyroControl>().FlapFraction();
-            flapAngle = flapFraction * (Mathf.PI / 2);
+            flapAngle = flapFraction * (Mathf.PI / 2f);
             //print($"flapAngle: {flapAngle}");
         }
         else
@@ -285,12 +285,12 @@ public class FlightControl : MonoBehaviour
             if (!useGyroForFlaps)
             {
                 flapFraction = joystick.flightParams.flapFraction;
-                flapAngle = flapFraction * (Mathf.PI / 2);
+                flapAngle = flapFraction * (Mathf.PI / 2f);
             }
             else
             {
                 flapFraction = GetComponent<GyroControl>().FlapFraction();
-                flapAngle = flapFraction * (Mathf.PI / 2);
+                flapAngle = flapFraction * (Mathf.PI / 2f);
                 //print($"flapAngle: {flapAngle}");
             }
         }
