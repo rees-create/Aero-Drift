@@ -15,6 +15,7 @@ public class NPCThrower : MonoBehaviour
     Vector3 throwVector;
     [System.NonSerialized] public GameObject dashes;
     [Header("Activation")]
+    public bool autoActivate;
     public bool active;
     public bool isInitialState;
     bool thrown;
@@ -362,6 +363,10 @@ public class NPCThrower : MonoBehaviour
     void Start()
     {
         //StartCoroutine(PreThrow());
+        if (autoActivate) 
+        {
+            StartCoroutine(SetActive());
+        }
     }
 
     // Update is called once per frame

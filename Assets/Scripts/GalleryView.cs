@@ -47,7 +47,7 @@ public class GalleryView : MonoBehaviour
     {
         public float maskSize;
         public float imageToFrameRatio;
-        public Vector2 scrollButtonAspectRatio;
+        public Vector3 scrollButtonAspectRatio;
         public float scrollButtonOffset;
     }
     enum Aspect {None, Width, Height };
@@ -77,7 +77,7 @@ public class GalleryView : MonoBehaviour
             }
         }
     }
-    void ScaleToThisObject(ref GameObject child, GameObject parent, Vector2 scale = default, Vector2 relativeOffset = default, Aspect aspectRatioPreserve = Aspect.None) 
+    void ScaleToThisObject(ref GameObject child, GameObject parent, Vector3 scale = default, Vector3 relativeOffset = default, Aspect aspectRatioPreserve = Aspect.None) 
     {
         RectTransform galleryTransform = parent.GetComponent<RectTransform>();
         RectTransform childTransform = child.GetComponent<RectTransform>();
@@ -98,17 +98,21 @@ public class GalleryView : MonoBehaviour
 
         if (scale == default) 
         {
-            scale = Vector2.one;
+            scale = Vector3.one;
         }
         if (relativeOffset == default) 
         {
-            relativeOffset = Vector2.zero;
+            relativeOffset = Vector3.zero;
         }
 
-        child.transform.localScale *= scale;//multiplyVectors(child.transform.TransformVector(child.transform.localScale), 
+        child.transform.localScale = new Vector3(
+            child.transform.localScale.x * scale.x,
+            child.transform.localScale.y * scale.y,
+            child.transform.localScale.z * scale.z
+            );//multiplyVectors(child.transform.TransformVector(child.transform.localScale), 
             //new Vector3(scaleToFrameX, scaleToFrameY) * scale);
         
-        child.transform.position += new Vector3(relativeOffset.x, relativeOffset.y, 0);
+        child.transform.position += new Vector3(relativeOffset.x, relativeOffset.y, relativeOffset.z);
     }
     bool checkClicked() { return leftClicked || rightClicked; }
     IEnumerator SpawnSlide() 
@@ -132,7 +136,7 @@ public class GalleryView : MonoBehaviour
         }
 
         slides[0] = Instantiate(this.slides[currentSlide], mask.transform);
-        ScaleToThisObject(ref slides[0], mask, Vector2.one * manualScaleSettings.imageToFrameRatio, aspectRatioPreserve: Aspect.Height);
+        ScaleToThisObject(ref slides[0], mask, Vector3.one * manualScaleSettings.imageToFrameRatio, aspectRatioPreserve: Aspect.Height);
 
         slides[1] = Instantiate(this.slides[nextSlide], mask.transform);
 
@@ -149,7 +153,7 @@ public class GalleryView : MonoBehaviour
             displacementVector = Vector3.left;
         }
         
-        ScaleToThisObject(ref slides[1], mask, Vector2.one * manualScaleSettings.imageToFrameRatio, 
+        ScaleToThisObject(ref slides[1], mask, Vector3.one * manualScaleSettings.imageToFrameRatio, 
             displacementVector * slideSettings.slideDistance * slideDArrow, Aspect.Height);
         
         //animate
@@ -160,7 +164,7 @@ public class GalleryView : MonoBehaviour
         DestroyImmediate(slides[1]);
 
         slide_slot = Instantiate(this.slides[nextSlide], mask.transform);
-        ScaleToThisObject(ref slide_slot, mask, Vector2.one * manualScaleSettings.imageToFrameRatio, aspectRatioPreserve: Aspect.Height);
+        ScaleToThisObject(ref slide_slot, mask, Vector3.one * manualScaleSettings.imageToFrameRatio, aspectRatioPreserve: Aspect.Height);
 
         slideSettings.elapsedTime = 0;
         leftClicked = false;
@@ -204,7 +208,7 @@ public class GalleryView : MonoBehaviour
         ScaleToThisObject(ref frame, gameObject);
         
         mask = Instantiate(mask, frame.transform);
-        ScaleToThisObject(ref mask, frame, Vector2.one * manualScaleSettings.maskSize);
+        ScaleToThisObject(ref mask, frame, Vector3.one * manualScaleSettings.maskSize);
         
         GameObject angleArrowRight = Instantiate(rightButton, gameObject.transform);
         ScaleToThisObject(ref angleArrowRight, gameObject, manualScaleSettings.scrollButtonAspectRatio, Vector2.right * manualScaleSettings.scrollButtonOffset);
@@ -212,7 +216,7 @@ public class GalleryView : MonoBehaviour
         ScaleToThisObject(ref angleArrowLeft, gameObject, manualScaleSettings.scrollButtonAspectRatio, Vector2.left * manualScaleSettings.scrollButtonOffset);
         
         slide_slot = Instantiate(slides[currentSlide], mask.transform);
-        ScaleToThisObject(ref slide_slot, gameObject, Vector2.one * manualScaleSettings.imageToFrameRatio, aspectRatioPreserve: Aspect.Height);
+        ScaleToThisObject(ref slide_slot, gameObject, Vector3.one * manualScaleSettings.imageToFrameRatio, aspectRatioPreserve: Aspect.Height);
         
         angleArrowRight.GetComponent<Button>().onClick.AddListener(OnClickRight);
         angleArrowLeft.GetComponent<Button>().onClick.AddListener(OnClickLeft);

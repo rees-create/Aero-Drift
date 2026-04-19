@@ -27,6 +27,7 @@ public class FlightControl : MonoBehaviour
     [Header("Joystick")]
     [SerializeField] FlightJoystick joystick;
     [Header("Flap Control")]
+    [SerializeField] bool useGyroForFlaps;
     [SerializeField] float flapSpeed;
     [SerializeField] float flapInfluence;
     [SerializeField] bool flapsDirectlyIncreaseLift;
@@ -273,10 +274,25 @@ public class FlightControl : MonoBehaviour
             }
             flapFraction = flapAngle / (Mathf.PI / 2);
         }
-        else 
+        else if (useGyroForFlaps)
         {
-            flapFraction = joystick.flightParams.flapFraction;
+            flapFraction = GetComponent<GyroControl>().FlapFraction();
             flapAngle = flapFraction * (Mathf.PI / 2);
+            //print($"flapAngle: {flapAngle}");
+        }
+        else
+        {
+            if (!useGyroForFlaps)
+            {
+                flapFraction = joystick.flightParams.flapFraction;
+                flapAngle = flapFraction * (Mathf.PI / 2);
+            }
+            else
+            {
+                flapFraction = GetComponent<GyroControl>().FlapFraction();
+                flapAngle = flapFraction * (Mathf.PI / 2);
+                //print($"flapAngle: {flapAngle}");
+            }
         }
         
         return flapFraction * influence;
