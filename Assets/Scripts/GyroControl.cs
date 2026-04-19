@@ -38,7 +38,7 @@ public class GyroControl : MonoBehaviour
             float range = flapRanges.upperBound - flapRanges.zeroUpper;
             float yDiff = gyroY - flapRanges.zeroUpper;
             float flapFraction = yDiff / range;
-            print($"flapFraction: {flapFraction}");
+            //print($"flapFraction: {flapFraction}");
             return flapFraction <= 1f ? flapFraction : 1f;
         }
         else if (gyroY < flapRanges.zeroUpper && gyroY > flapRanges.zeroLower)
@@ -54,7 +54,7 @@ public class GyroControl : MonoBehaviour
             float range = flapRanges.zeroLower - flapRanges.lowerBound;
             float yDiff = gyroY - flapRanges.zeroLower;
             float flapFraction = yDiff / range;
-            print($"flapFraction: {flapFraction}");
+            //print($"flapFraction: {flapFraction}");
             return flapFraction >= -1f ? flapFraction : -1f;
         }
 
