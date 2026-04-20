@@ -274,12 +274,6 @@ public class FlightControl : MonoBehaviour
             }
             flapFraction = flapAngle / (Mathf.PI / 2f);
         }
-        else if (useGyroForFlaps)
-        {
-            flapFraction = GetComponent<GyroControl>().FlapFraction();
-            flapAngle = flapFraction * (Mathf.PI / 2f);
-            //print($"flapAngle: {flapAngle}");
-        }
         else
         {
             if (!useGyroForFlaps)
@@ -294,7 +288,14 @@ public class FlightControl : MonoBehaviour
                 //print($"flapAngle: {flapAngle}");
             }
         }
-        
+
+        if (useGyroForFlaps)
+        {
+            flapFraction = GetComponent<GyroControl>().FlapFraction();
+            flapAngle = flapFraction * (Mathf.PI / 2f);
+            //print($"flapAngle: {flapAngle}");
+        }
+
         return flapFraction * influence;
     }
 
