@@ -15,6 +15,11 @@ public class LayerColliderMap : MonoBehaviour
     public bool flipDirectionToLayer;
     public ObjectSpawnSystem popBackController;
 
+    public void SetTarget(GameObject target) 
+    {
+        this.target = target;
+    }
+
     [System.Serializable]
     public class LayerCollider
     {

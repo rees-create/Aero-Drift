@@ -1,10 +1,7 @@
-using Cinemachine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
-using Unity.VisualScripting.ReorderableList.Element_Adder_Menu;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -19,7 +16,7 @@ public class ObjectSpawnSystem : MonoBehaviour
     // Start is called before the first frame update
 
     [SerializeField] GameObject element;
-    [SerializeField] GameObject player;
+    public GameObject player;
     [SerializeField] GameObject popBackController;
     [SerializeField] Vector3 playerInitialPosition;
 

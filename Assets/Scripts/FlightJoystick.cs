@@ -112,6 +112,18 @@ public class FlightJoystick : MonoBehaviour
         trackingPointer = true;
     }
 
+    public void GlobalStart() 
+    {
+        if (setMiddleOnPlay)
+        {
+            middle = pod.transform.localPosition;
+        }
+        flightControl.SetUseJoystickOnly(useJoystickOnly);
+        if (!flightControl.JoystickAssigned())
+        {
+            flightControl.SetJoystick(this);
+        }
+    }
     
     // Start is called before the first frame update
     void Start()
@@ -121,6 +133,10 @@ public class FlightJoystick : MonoBehaviour
             middle = pod.transform.localPosition;
         }
         flightControl.SetUseJoystickOnly(useJoystickOnly);
+        if (!flightControl.JoystickAssigned()) 
+        {
+            flightControl.SetJoystick(this);
+        }
     }
     int buffer = 0;
 

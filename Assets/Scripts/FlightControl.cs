@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -32,7 +33,7 @@ public class FlightControl : MonoBehaviour
     [SerializeField] float flapInfluence;
     [SerializeField] bool flapsDirectlyIncreaseLift;
     [Header("Thrust")]
-    public Vector2 initialThrowImpulse;
+    [SerializeField] Vector2 initialThrowImpulse;
     public float maxThrust;
     [Header("Plane Specifications")]
     public TextAsset planeSpecsFile;
@@ -64,6 +65,24 @@ public class FlightControl : MonoBehaviour
     float[] torqueLog = new float[2];
     bool useJoystickOnly;
     int t_ = 0;
+
+
+    public void SetInitialThrowImpulse(Vector2 impulse) 
+    {
+        initialThrowImpulse = impulse;
+    }
+    public bool JoystickAssigned() 
+    {
+        return joystick != null;
+    }
+    public void SetJoystick(FlightJoystick joystick_) 
+    {
+        joystick = joystick_;
+    }
+    public FlightJoystick GetJoystick() 
+    {
+        return joystick;
+    }
 
     float AeroForce(float rho, Vector2 velocity, float area, float C, float maxC = 0) 
     {
@@ -320,7 +339,7 @@ public class FlightControl : MonoBehaviour
         else 
         {
             thrust = joystick.flightParams.thrustMagnitude;
-            print("thrust: " + thrust);
+            //print("thrust: " + thrust);
         }
         if (GetComponent<AudioSource>())
         {
@@ -436,12 +455,35 @@ public class FlightControl : MonoBehaviour
         
     }
 
+    [NonSerialized] public int netlagcount = 0;
     void Update()
     {
         if(initialThrowImpulse != Vector2.zero)
         {
-            rb.AddForce(initialThrowImpulse, ForceMode2D.Impulse);
-            initialThrowImpulse = Vector2.zero;
+            
+
+            //invoke event on sync script (for network client)
+            if (GetComponent<NetworkObject>())
+            {
+                //print("network obj on launch");
+                if (joystick != null)
+                {
+                    GetComponent<NetworkFlightControl>().initialThrowImpulse.Value = initialThrowImpulse;
+                    if (netlagcount == 0)
+                    {
+                        GetComponent<NetworkFlightControl>().joystickThrow.Invoke();
+                        netlagcount++;
+                    }
+                    //print("called invoke wy nun happening?");
+                    GetComponent<NetworkFlightControl>().endThrow.Invoke();
+                }
+            }
+            else
+            {
+                rb.AddForce(initialThrowImpulse, ForceMode2D.Impulse);
+                initialThrowImpulse = Vector2.zero;
+            }
+            
         }
     }
     // Update is called once per frame

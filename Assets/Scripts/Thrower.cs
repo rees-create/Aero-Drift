@@ -195,13 +195,13 @@ public class Thrower : MonoBehaviour
 
         if (throwVector.magnitude < maxThrowIntensity)
         {
-            plane.GetComponent<FlightControl>().initialThrowImpulse = -throwVector;
+            plane.GetComponent<FlightControl>().SetInitialThrowImpulse(-throwVector);
         }
         else 
         {
             float throwIntensity = throwVector.magnitude;
             Vector2 throwDirection = throwVector / throwIntensity;
-            plane.GetComponent<FlightControl>().initialThrowImpulse = -maxThrowIntensity * throwDirection;
+            plane.GetComponent<FlightControl>().SetInitialThrowImpulse(-maxThrowIntensity * throwDirection);
         }
 
         Destroy(dashes);

@@ -1,9 +1,7 @@
 using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting.Dependencies.Sqlite;
-using UnityEditor.Build;
 using UnityEngine;
-using UnityEngine.Rendering;
+using Unity.Netcode;
+
 
 public class Collectible : MonoBehaviour
 {
@@ -59,6 +57,7 @@ public class Collectible : MonoBehaviour
         oldBaitPosition = newBaitPosition;
 
     }
+    
     IEnumerator WaitForCollect() 
     {
         if (GetComponent<BoxCollider2D>() != null) 
@@ -107,6 +106,11 @@ public class Collectible : MonoBehaviour
         //{
 
         //}
+        print($"plane.name \"{plane.name}\", other.name \"{other.name} equality = {plane.name == other.name}");
+        if (other.GetComponent<NetworkObject>()) 
+        {
+            plane = GetObjectSpawnSystem(gameObject).GetComponent<CollectibleHandler>().plane;
+        }
         if (other.name == plane.name)
         {
             //yield return new WaitUntil(() => animationReady);

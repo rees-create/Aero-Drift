@@ -377,3 +377,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/Builds
+/Assets/Plugins/ParrelSync/ScriptableObjects
+/Assets/Samples/Netcode for GameObjects/1.8.1/Bootstrap

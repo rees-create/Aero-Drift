@@ -1,12 +1,8 @@
 using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.Serialization.Json;
-using Newtonsoft.Json;
-using UnityEditor;
-using UnityEditor.ShaderGraph.Serialization;
+
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Rendering;
+
 
 public class GameOver : MonoBehaviour
 {

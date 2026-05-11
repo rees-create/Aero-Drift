@@ -1,8 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Profiling;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 //[ExecuteInEditMode]
 public class EscalatorAnim : MonoBehaviour

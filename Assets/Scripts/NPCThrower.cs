@@ -1,9 +1,5 @@
 using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using UnityEditor.ShaderGraph.Internal;
-using UnityEditor.Tilemaps;
+using Unity.Netcode;
 using UnityEngine;
 
 public class NPCThrower : MonoBehaviour
@@ -20,7 +16,7 @@ public class NPCThrower : MonoBehaviour
     public bool isInitialState;
     bool thrown;
     [Header("Game Objects")]
-    [SerializeField] GameObject plane;
+    public GameObject plane;
     [SerializeField] GameObject bait;
     [SerializeField] GameObject dash;
     [Header("Joystick")]
@@ -43,6 +39,8 @@ public class NPCThrower : MonoBehaviour
     [SerializeField] AudioSource speechSource;
     [SerializeField] string gruntSoundFile;
     [SerializeField] [Range(0,1)] float gruntLoudness;
+    [Header("Extras for debugging")]
+    [SerializeField] bool DontFollowOnTaunt;
     int oldThrowerCount = 0;
     int newThrowerCount = 0;
 
@@ -57,8 +55,8 @@ public class NPCThrower : MonoBehaviour
         //enabled = true;
         }
         else {
-            //print($"Too far, bait to plane = {baitToPlaneDistance}, radius to stay within = {followOffset.magnitude}");
-            //print($"bait: {(Vector2) bait.transform.position} plane: {(Vector2) plane.transform.position}");
+            print($"Too far, bait to plane = {baitToPlaneDistance}, radius to stay within = {followOffset.magnitude}");
+            print($"bait: {(Vector2) bait.transform.position} plane: {(Vector2) plane.transform.position}");
             print($"{gameObject.name}: Waiting for thrower");
             GetComponent<CatchPlane>().SetActive(1);
             yield return new WaitUntil(()=> !GetComponent<CatchPlane>().GetActive());
@@ -219,8 +217,11 @@ public class NPCThrower : MonoBehaviour
                     MakeDashes(weightedThrowIntensity, flightJoystick.joystickPos);
                     //print("dashes?");
                 }
+                if (!DontFollowOnTaunt)
+                {
                     //follow bait
                     Follow(bait, followOffset);
+                }
             }
             yield return new WaitUntil(() => active);
             yield return new WaitForFixedUpdate();
@@ -251,17 +252,18 @@ public class NPCThrower : MonoBehaviour
         //launch plane without exceeding max throw intensity
         if (throwVector.magnitude < maxThrowIntensity)
         {
-            plane.GetComponent<FlightControl>().initialThrowImpulse = -throwVector;
-            //print($"go for launch, throw vector = {throwVector}");
+            plane.GetComponent<FlightControl>().SetInitialThrowImpulse(-throwVector);
+            print($"go for launch, throw vector = {throwVector}");
         }
         else
         {
             float throwIntensity = throwVector.magnitude;
             Vector2 throwDirection = throwVector / throwIntensity;
-            //print($"go for launch at max, throw vector = {maxThrowIntensity * throwDirection}");
-            plane.GetComponent<FlightControl>().initialThrowImpulse = -maxThrowIntensity * throwDirection;
+            print($"go for launch at max, throw vector = {maxThrowIntensity * throwDirection}");
+            plane.GetComponent<FlightControl>().SetInitialThrowImpulse(-maxThrowIntensity * throwDirection);
             
         }
+        
     }
 
     IEnumerator PreThrow()
