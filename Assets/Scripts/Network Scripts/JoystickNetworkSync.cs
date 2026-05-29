@@ -7,6 +7,7 @@ using UnityEngine;
 public class JoystickNetworkSync : NetworkBehaviour
 {
     public UnityEvent startJoystick;
+    
     //public override void OnNetworkSpawn()
     //{
     //   startJoystick.Invoke();
@@ -15,28 +16,25 @@ public class JoystickNetworkSync : NetworkBehaviour
     //NetworkVariable<float> impulseX = new NetworkVariable<float>();
     //NetworkVariable<float> impulseY = new NetworkVariable<float>();
 
-    
-
-    private void Update()
+    public override void OnNetworkSpawn()
     {
-        if (GetComponent<FlightJoystick>().flightParams.throwImpulse.magnitude > 0)
+        if (IsServer) 
         {
-            //AddImpulseServerRpc();
-
+            //GetComponent<NetworkObject>().ChangeOwnership();
         }
+        //GetComponent<NetworkObject>().ChangeOwnership(GetComponent<NetworkObject>().NetworkObjectId);
+        gameObject.name += " " + GetComponent<NetworkObject>().NetworkObjectId;
+        GetComponent<FlightJoystick>().isOwner = IsOwner;
+        print($"Joystick is owner?: {GetComponent<FlightJoystick>().isOwner} plane name: {GetComponent<FlightJoystick>().flightControl.gameObject.name}");
+        
     }
 
-    //[ClientRpc]
-    public void AddImpulse() 
-    {
-        if(IsOwner)
-            AddImpulseServerRpc();
-    }
     [ServerRpc]
-    public void AddImpulseServerRpc()
+    void JoystickIdServerRpc() 
     {
-        Vector2 impulse = GetComponent<FlightJoystick>().flightParams.throwImpulse;
-        print($"Impulse of {impulse} added");
-        GetComponent<FlightJoystick>().flightControl.SetInitialThrowImpulse(impulse);
+        
     }
+
+    
+    
 }

@@ -463,19 +463,20 @@ public class FlightControl : MonoBehaviour
             
 
             //invoke event on sync script (for network client)
-            if (GetComponent<NetworkObject>())
+            if (GetComponent<NetworkObject>() && GetComponent<NetworkFlightControl>().serverAuthority)
             {
                 //print("network obj on launch");
                 if (joystick != null)
                 {
                     GetComponent<NetworkFlightControl>().initialThrowImpulse.Value = initialThrowImpulse;
-                    if (netlagcount == 0)
-                    {
-                        GetComponent<NetworkFlightControl>().joystickThrow.Invoke();
-                        netlagcount++;
-                    }
+                    //if (netlagcount == 0)
+                    //{
+                    //    GetComponent<NetworkFlightControl>().joystickThrow.Invoke();
+                    //    netlagcount++;
+                    //}
                     //print("called invoke wy nun happening?");
-                    GetComponent<NetworkFlightControl>().endThrow.Invoke();
+                    //GetComponent<NetworkFlightControl>().endThrow.Invoke();
+                    initialThrowImpulse = Vector2.zero;
                 }
             }
             else

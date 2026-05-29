@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,6 +24,7 @@ public class FlightJoystick : MonoBehaviour
 
     bool mouseDown = false;
     Vector2 throwJoystickSnapshot;
+    [NonSerialized] public bool isOwner;
 
     public bool GetJoystickOnly() { return useJoystickOnly; }
 
@@ -182,7 +184,18 @@ public class FlightJoystick : MonoBehaviour
         //2. For steering, set flight params
         if (flightControl.enabled)
         {
-            flightParams = InputToFlightParams(joystickMagnitude);
+            NetworkObject netObj = GetComponent<NetworkObject>();
+            if (!netObj)
+            {
+                flightParams = InputToFlightParams(joystickMagnitude);
+            }
+            else 
+            {
+                if (netObj.enabled && isOwner)
+                {
+                    flightParams = InputToFlightParams(joystickMagnitude);
+                }
+            }
             //print("flight control off");
         }
         
