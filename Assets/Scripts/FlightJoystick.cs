@@ -154,9 +154,10 @@ public class FlightJoystick : MonoBehaviour
         if (resetSnapshot) 
         {
             resetSnapshotTimeElapsed += Time.deltaTime;
-            if (resetSnapshotTimeElapsed == 3) //TODO: 3 seconds wait time, make adjustable
+            if (resetSnapshotTimeElapsed <= 3) //TODO: 3 seconds wait time, make adjustable
             {
-                
+                throwJoystickSnapshot = Vector2.zero;
+                resetSnapshotTimeElapsed = 0;
                 resetSnapshot = false;
             }
         }
@@ -193,10 +194,11 @@ public class FlightJoystick : MonoBehaviour
                 //throwIntensity = 0;
                 trackingPointer = false;
                 //joystickMagnitude = 0;
-                if (resetSnapshot)
-                {
-                    throwJoystickSnapshot = Vector2.zero; //reset throw snapshot if mouse not on joystick
-                }
+
+                //if (resetSnapshot)
+                //{
+                //    throwJoystickSnapshot = Vector2.zero; //reset throw snapshot if mouse not on joystick
+                //}
 
                 //print("idle throw impulse: " + flightParams.throwImpulse);
             }
