@@ -143,7 +143,24 @@ public class FlightJoystick : MonoBehaviour
     int buffer = 0;
 
     // Update is called once per frame
-    
+    bool resetSnapshot;
+    float resetSnapshotTimeElapsed;
+    private void Update()
+    {
+        if (!(MouseOnJoystick() && Input.GetMouseButton(0))) 
+        {
+            resetSnapshot = true;
+        }
+        if (resetSnapshot) 
+        {
+            resetSnapshotTimeElapsed += Time.deltaTime;
+            if (resetSnapshotTimeElapsed == 3) //TODO: 3 seconds wait time, make adjustable
+            {
+                
+                resetSnapshot = false;
+            }
+        }
+    }
     void FixedUpdate()
     {
         //if first click is inside the joystick, track pointer.
@@ -164,7 +181,7 @@ public class FlightJoystick : MonoBehaviour
         {
             //throwIntensity = joystickMagnitude;
             //buffer then turn off tracking pointer;
-            throwJoystickSnapshot = Vector2.zero; //reset throw snapshot if mouse not on joystick
+            
             if (buffer <= fixedFrameBuffer)
             {
                 buffer++;
@@ -176,7 +193,11 @@ public class FlightJoystick : MonoBehaviour
                 //throwIntensity = 0;
                 trackingPointer = false;
                 //joystickMagnitude = 0;
-                
+                if (resetSnapshot)
+                {
+                    throwJoystickSnapshot = Vector2.zero; //reset throw snapshot if mouse not on joystick
+                }
+
                 //print("idle throw impulse: " + flightParams.throwImpulse);
             }
         }
