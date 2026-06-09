@@ -164,6 +164,7 @@ public class FlightJoystick : MonoBehaviour
         {
             //throwIntensity = joystickMagnitude;
             //buffer then turn off tracking pointer;
+            throwJoystickSnapshot = Vector2.zero; //reset throw snapshot if mouse not on joystick
             if (buffer <= fixedFrameBuffer)
             {
                 buffer++;

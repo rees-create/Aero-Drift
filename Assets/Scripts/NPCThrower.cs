@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class NPCThrower : MonoBehaviour
 {
-    int dashQuotient = 2;
+    
     int nDashes = 0;
     Vector3 initPlaneRotation; //auto set on active.
     Vector3 pointerPosition;
@@ -23,7 +23,8 @@ public class NPCThrower : MonoBehaviour
     public FlightJoystick flightJoystick;
     [Header("Throw Customization")]
     [SerializeField] Vector2 dashScale;
-    [SerializeField] Vector2 followOffset;
+    [SerializeField] int dashQuotient = 2;
+    [SerializeField] Vector2 followOffset;                          
     [Header("Animation Properties")]
     [SerializeField] AnimationClip throwAnimation;
     [SerializeField] bool usePoseLerp;
@@ -33,7 +34,7 @@ public class NPCThrower : MonoBehaviour
     [SerializeField] float maxThrowIntensity;
     [SerializeField] float throwIntensityScale;
     [Header("Plane Orientation")]
-    [SerializeField] bool setInitPlaneRotation;
+    [SerializeField] bool setInitPlaneRotation; // TODO: add default throw AOA to plane specs file
     [SerializeField] Vector3 defaultPlaneRotation;
     [Header("Audio")]
     [SerializeField] AudioSource speechSource;
@@ -118,6 +119,77 @@ public class NPCThrower : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Limited dash line length, joystick compatible version of MakeDashes
+    /// </summary>
+    /// <param name="fullNumDashes">Number of dashes</param>
+    /// <param name="weightedThrowIntensity">Final weighted throw intensity</param>
+    /// <param name="mousePosition"></param>
+    void MakeDashesConstrained(float fullNumDashes, float weightedThrowIntensity, Vector3 mousePosition)
+    {
+        //This is intended to be used in Update, so make sure to do if checks before running things.
+        int numberOfDashes = Mathf.FloorToInt(fullNumDashes * (weightedThrowIntensity / maxThrowIntensity));
+        int nDashes = dashes ? dashes.transform.childCount : 0;
+        int diff = numberOfDashes - nDashes;
+        Vector3 plane2Mouse = mousePosition - plane.transform.position;
+        if (flightJoystick)
+        {
+            plane2Mouse = weightedThrowIntensity * flightJoystick.flightParams.throwImpulse.normalized;
+        }
+
+        Vector3 currentRotation = new Vector3(0, 0, Mathf.Atan2(plane2Mouse.y, plane2Mouse.x) * Mathf.Rad2Deg);
+        if (flightJoystick)
+        {
+            plane.transform.eulerAngles = setInitPlaneRotation ? defaultPlaneRotation : initPlaneRotation;
+            //5 degree default AoA for skilled throw, else initPlaneRotation (also plane rotation at catch)
+        }
+        else
+        {
+            Vector3 planeOrientation = currentRotation + initPlaneRotation;
+            plane.transform.eulerAngles = planeOrientation;
+        }
+
+        if (dashes != null)
+        {
+            if (diff < 0)
+            { //less dashes
+                for (int i = Mathf.Abs(diff) - 1; i >= 0; i--)
+                {
+                    Destroy(dashes.transform.GetChild(i).gameObject);
+                    //nDashes--;
+                    //diff++;
+                }
+            }
+            else if (diff > 0 && nDashes < 75)
+            { //more dashes
+                int initChildCount = dashes.transform.childCount;
+                for (int i = 0; i < diff; i++)
+                {
+                    float lerpFraction = numberOfDashes != 0 ? (float)(i + initChildCount) / (float)numberOfDashes : 1f;
+                    GameObject _dash = Instantiate(dash, dashes.transform);
+                    Vector2 mousePos = plane.transform.position + plane2Mouse;
+                    _dash.transform.position = Vector2.Lerp(plane.transform.position, mousePos, lerpFraction);
+                    _dash.transform.eulerAngles = currentRotation;
+                    dashes.transform.localScale = dashScale;
+                    //nDashes++;
+                    //diff--;
+                }
+
+            }
+            if (nDashes > 0)
+            {
+                for (int i = 0; i < dashes.transform.childCount; i++)
+                {
+                    float lerpFraction = numberOfDashes != 0 ? (float)i / (float)numberOfDashes : 1f;
+                    Vector2 mousePos = plane.transform.position + plane2Mouse;
+                    dashes.transform.GetChild(i).position = Vector2.Lerp(plane.transform.position, mousePos, lerpFraction);
+                    dashes.transform.GetChild(i).eulerAngles = currentRotation;
+                }
+            }
+        }
+
+    }
+
     void Follow(GameObject bait, Vector2 offset)
     {
         plane.transform.position = bait.transform.position + (Vector3) offset;
@@ -127,8 +199,11 @@ public class NPCThrower : MonoBehaviour
     {
         if (active && !thrown)
         {
-            dashes = new GameObject("Throw Dashes");
-            dashes.transform.parent = transform;
+            if (!dashes)
+            {
+                dashes = new GameObject("Throw Dashes");
+                dashes.transform.parent = transform;
+            }
             plane.GetComponent<FlightControl>().AoA = 0;
             plane.GetComponent<FlightControl>().flapAngle = 0;
             plane.GetComponent<FlightControl>().enabled = false;
@@ -210,11 +285,13 @@ public class NPCThrower : MonoBehaviour
                 //make dashes
                 if (!joystickOnly)
                 {
-                    MakeDashes(weightedThrowIntensity, pointerWorldPosition);
+                    //MakeDashes(weightedThrowIntensity, pointerWorldPosition);
+                    MakeDashesConstrained(8, weightedThrowIntensity, pointerWorldPosition);
                 }
                 else 
                 {
-                    MakeDashes(weightedThrowIntensity, flightJoystick.joystickPos);
+                    //MakeDashes(weightedThrowIntensity, flightJoystick.joystickPos);
+                    MakeDashesConstrained(8, weightedThrowIntensity, Vector3.zero); //if joystick mouse pos is calculated in function
                     //print("dashes?");
                 }
                 if (!DontFollowOnTaunt)
@@ -260,10 +337,10 @@ public class NPCThrower : MonoBehaviour
             float throwIntensity = throwVector.magnitude;
             Vector2 throwDirection = throwVector / throwIntensity;
             print($"go for launch at max, throw vector = {maxThrowIntensity * throwDirection}");
-            plane.GetComponent<FlightControl>().SetInitialThrowImpulse(-maxThrowIntensity * throwDirection);
-            
+            plane.GetComponent<FlightControl>().SetInitialThrowImpulse(-maxThrowIntensity * throwDirection);    
         }
-        
+        //throwVector = Vector3.zero; //reset throw vector
+
     }
 
     IEnumerator PreThrow()
@@ -311,6 +388,7 @@ public class NPCThrower : MonoBehaviour
                     //plane.GetComponent<PolygonCollider2D>().enabled = false;
                     //TODO: make grunt sound switchable based on throw intensity
                     AudioClip gruntSound = Resources.Load<AudioClip>($"Audio/{gruntSoundFile}");
+                    
                     if (animTime < Time.deltaTime && throwVector.magnitude > (0.5f * maxThrowIntensity) && speechSource != null && gruntSound != null)
                     {
                         speechSource.PlayOneShot(gruntSound, (throwVector.magnitude / maxThrowIntensity) * gruntLoudness);
@@ -347,6 +425,11 @@ public class NPCThrower : MonoBehaviour
             }
             else
             {
+                //delete throw dashes
+                for (int i = 0; i < dashes.transform.childCount && !thrown; i++)
+                {
+                    Destroy(dashes.transform.GetChild(i).gameObject);
+                }
                 yield return new WaitUntil(() => thrown);
             }
             //StopCoroutine(TauntThrow());
@@ -408,7 +491,7 @@ public class NPCThrower : MonoBehaviour
                 {
                     speechSource.PlayOneShot(gruntSound, (throwVector.magnitude / maxThrowIntensity) * gruntLoudness);
                 }
-                
+
                 while (animTime <= 1 - preLaunch)
                 {
                     ThrowAnim(animTime);
@@ -434,6 +517,18 @@ public class NPCThrower : MonoBehaviour
 
             thrown = false;
             active = false;
+        }
+        else 
+        {
+            //delete throw dashes
+            yield return new WaitForSeconds(0.6f);
+            for (int i = 0; i < dashes.transform.childCount; i++)
+            {
+                Destroy(dashes.transform.GetChild(i).gameObject);
+            }
+            Destroy(dashes);
+           
+
         }
     }
 }
