@@ -10,6 +10,7 @@ public class FlightJoystick : MonoBehaviour
 {
     [SerializeField] bool setMiddleOnPlay;
     [SerializeField] bool useJoystickOnly;
+    public bool resetThrowSnapshot;
     public FlightControl flightControl;
     public Vector2 middle;
     public GameObject pod;
@@ -143,25 +144,25 @@ public class FlightJoystick : MonoBehaviour
     int buffer = 0;
 
     // Update is called once per frame
-    bool resetSnapshot;
-    float resetSnapshotTimeElapsed;
-    private void Update()
-    {
-        if (!(MouseOnJoystick() && Input.GetMouseButton(0))) 
-        {
-            resetSnapshot = true;
-        }
-        if (resetSnapshot) 
-        {
-            resetSnapshotTimeElapsed += Time.deltaTime;
-            if (resetSnapshotTimeElapsed <= 3) //TODO: 3 seconds wait time, make adjustable
-            {
-                throwJoystickSnapshot = Vector2.zero;
-                resetSnapshotTimeElapsed = 0;
-                resetSnapshot = false;
-            }
-        }
-    }
+    //bool resetSnapshot;
+    //float resetSnapshotTimeElapsed;
+    //private void Update()
+    //{
+    //    if (!(MouseOnJoystick() && Input.GetMouseButton(0))) 
+    //    {
+    //        resetSnapshot = true;
+    //    }
+    //    if (resetSnapshot) 
+    //    {
+    //        resetSnapshotTimeElapsed += Time.deltaTime;
+    //        if (resetSnapshotTimeElapsed <= 3) //TODO: 3 seconds wait time, make adjustable
+    //        {
+    //            throwJoystickSnapshot = Vector2.zero;
+    //            resetSnapshotTimeElapsed = 0;
+    //            resetSnapshot = false;
+    //        }
+    //    }
+    //}
     void FixedUpdate()
     {
         //if first click is inside the joystick, track pointer.
@@ -195,10 +196,11 @@ public class FlightJoystick : MonoBehaviour
                 trackingPointer = false;
                 //joystickMagnitude = 0;
 
-                //if (resetSnapshot)
-                //{
-                //    throwJoystickSnapshot = Vector2.zero; //reset throw snapshot if mouse not on joystick
-                //}
+                if (resetThrowSnapshot)
+                {
+                    throwJoystickSnapshot = Vector2.zero; //reset throw snapshot
+                    resetThrowSnapshot = false;
+                }
 
                 //print("idle throw impulse: " + flightParams.throwImpulse);
             }

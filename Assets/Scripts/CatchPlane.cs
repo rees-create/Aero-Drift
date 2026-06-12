@@ -59,7 +59,8 @@ public class CatchPlane : MonoBehaviour
             float incomingSpeed = 0f;
             Vector2 incomingPosition;
             //seems to be a delay in plane gameobject's assignment so gotta use this conditional block to prevent null ref
-            if (plane == null)
+            bool nullPlane = plane == null;
+            if (nullPlane)
             {
                 incomingPosition = transform.position;
             }
@@ -71,7 +72,7 @@ public class CatchPlane : MonoBehaviour
             Vector2 localCatchSpot = (Vector2) transform.position + catchSpot;
             while (active)
             {
-                if (plane != null)
+                if (!nullPlane)
                 {
                     //Draw catch sector ("pie")
                     catchSector.active = true;
@@ -103,7 +104,7 @@ public class CatchPlane : MonoBehaviour
                         leftUpperCatch.SampleAnimation(gameObject, (leftUpperCatch.length / animFrameCount) * animTime);
                         Walk.SampleAnimation(gameObject, (Walk.length / animFrameCount) * animTime);
 
-                        //these must be off here too!
+                        //physics deactivation - these must be off here too!
                         plane.GetComponent<PolygonCollider2D>().enabled = false;
                         plane.GetComponent<Rigidbody2D>().gravityScale = 0;
                         plane.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;

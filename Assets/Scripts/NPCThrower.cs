@@ -199,6 +199,7 @@ public class NPCThrower : MonoBehaviour
     {
         if (active && !thrown)
         {
+            
             if (!dashes)
             {
                 dashes = new GameObject("Throw Dashes");
@@ -459,6 +460,10 @@ public class NPCThrower : MonoBehaviour
     {
         if (oldThrowerCount != newThrowerCount)
         {
+            if (flightJoystick)
+            {
+                flightJoystick.resetThrowSnapshot = true;
+            }
             //print("prethrow should happen");
             oldThrowerCount++;
             StartCoroutine(PreThrow());
