@@ -19,6 +19,10 @@ public class CatchPlane : MonoBehaviour
     public AnimationClip leftUpperCatch;
     //public string animationName;
     public float catchRadius;
+    /// <summary>
+    /// Radius to start reading possible catch spot position
+    /// </summary>
+    public float catchReadRadius;
     public Vector2 catchSpot;
     public PieSign catchSector;
     int pieColorIndex;
@@ -82,7 +86,7 @@ public class CatchPlane : MonoBehaviour
 
                     // Check distance to player
                     float distanceToPlayer = Vector3.Distance(transform.position, plane.transform.position);
-                    if (Mathf.Abs(distanceToPlayer - catchRadius) < 2) // fulfil above TODO here. ?
+                    if (/*Mathf.Abs(*/distanceToPlayer - catchRadius/*)*/ < catchReadRadius) // fulfil above TODO here. ?
                     {
                         //print("about at radius");
                         //disable physics
@@ -100,7 +104,7 @@ public class CatchPlane : MonoBehaviour
                     {
                         //print("inside radius");
                         //follow, catch plane and walk animations
-                        Follow(plane.GetComponent<Rigidbody2D>().velocity, speedFraction);
+                        //Follow(plane.GetComponent<Rigidbody2D>().velocity, speedFraction);
                         leftUpperCatch.SampleAnimation(gameObject, (leftUpperCatch.length / animFrameCount) * animTime);
                         Walk.SampleAnimation(gameObject, (Walk.length / animFrameCount) * animTime);
 
@@ -112,18 +116,22 @@ public class CatchPlane : MonoBehaviour
                         localCatchSpot = (Vector2)transform.position + catchSpot; //think this should be here too
                                                                                   // Move player to catch spot
 
-                        plane.transform.position = (Vector3)Vector2.Lerp(incomingPosition, localCatchSpot, (float)animTime / (float)animFrameCount);
+                        //plane.transform.position = (Vector3)Vector2.Lerp(incomingPosition, localCatchSpot, (float)animTime / (float)animFrameCount);
+                        plane.transform.position = (Vector3)Vector2.Lerp(incomingPosition, localCatchSpot, 1/followSpeed);
                         //print($"where i want it: {Vector2.Lerp(incomingPosition, catchSpot, animTime / animFrameCount)}, where it is: {player.transform.position}, animFraction: {(float)animTime / (float)animFrameCount}");
                         if (animTime == animFrameCount - 1)
                         {
                             // Reached catch radius, stop following
-                            plane.GetComponent<PolygonCollider2D>().enabled = false;
-                            plane.GetComponent<Rigidbody2D>().gravityScale = 0;
-                            plane.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
-                            plane.GetComponent<FlightControl>().enabled = false;
+                            //plane.GetComponent<PolygonCollider2D>().enabled = false;
+                            //plane.GetComponent<Rigidbody2D>().gravityScale = 0;
+                            //plane.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
+                            //plane.GetComponent<FlightControl>().enabled = false;
                             active = false;
                         }
-                        animTime = (animTime + 1) % animFrameCount;
+                        else if (animTime < animFrameCount)
+                        {
+                            animTime = (animTime + 1) % animFrameCount;
+                        }
                     }
 
                 }
@@ -140,6 +148,7 @@ public class CatchPlane : MonoBehaviour
                 plane.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
                 plane.GetComponent<FlightControl>().enabled = true;
             }
+            animTime = 0;
             //print($"{gameObject.name}: waiting until reactivated");
             yield return new WaitUntil(() => active);
             
