@@ -90,8 +90,11 @@ public class CatchPlane : MonoBehaviour
                     {
                         //print("about at radius");
                         //disable physics
-                        incomingSpeed = plane.GetComponent<Rigidbody2D>().velocity.magnitude;
-                        incomingPosition = plane.transform.position;
+                        if (Mathf.Abs(distanceToPlayer - catchRadius) < catchReadRadius)
+                        {
+                            incomingSpeed = plane.GetComponent<Rigidbody2D>().velocity.magnitude;
+                            incomingPosition = plane.transform.position;
+                        }
                         //player.GetComponent<PolygonCollider2D>().enabled = false;
                         //player.GetComponent<Rigidbody2D>().gravityScale = 0;
                         //player.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
@@ -104,7 +107,7 @@ public class CatchPlane : MonoBehaviour
                     {
                         //print("inside radius");
                         //follow, catch plane and walk animations
-                        //Follow(plane.GetComponent<Rigidbody2D>().velocity, speedFraction);
+                        Follow(plane.GetComponent<Rigidbody2D>().velocity, speedFraction);
                         leftUpperCatch.SampleAnimation(gameObject, (leftUpperCatch.length / animFrameCount) * animTime);
                         Walk.SampleAnimation(gameObject, (Walk.length / animFrameCount) * animTime);
 
@@ -115,10 +118,11 @@ public class CatchPlane : MonoBehaviour
                         plane.GetComponent<FlightControl>().enabled = false;
                         localCatchSpot = (Vector2)transform.position + catchSpot; //think this should be here too
                                                                                   // Move player to catch spot
-
+                        //print($"anim prog: {(float)animTime / (float)animFrameCount}");
                         //plane.transform.position = (Vector3)Vector2.Lerp(incomingPosition, localCatchSpot, (float)animTime / (float)animFrameCount);
-                        plane.transform.position = (Vector3)Vector2.Lerp(incomingPosition, localCatchSpot, 1/followSpeed);
+                        plane.transform.position = (Vector3)Vector2.Lerp(incomingPosition, localCatchSpot, (float) animTime / (float) animFrameCount);
                         //print($"where i want it: {Vector2.Lerp(incomingPosition, catchSpot, animTime / animFrameCount)}, where it is: {player.transform.position}, animFraction: {(float)animTime / (float)animFrameCount}");
+
                         if (animTime == animFrameCount - 1)
                         {
                             // Reached catch radius, stop following

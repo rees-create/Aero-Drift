@@ -106,7 +106,7 @@ public class Collectible : MonoBehaviour
         //{
 
         //}
-        print($"plane.name \"{plane.name}\", other.name \"{other.name} equality = {plane.name == other.name}");
+        //print($"plane.name \"{plane.name}\", other.name \"{other.name} equality = {plane.name == other.name}");
         if (other.GetComponent<NetworkObject>()) 
         {
             plane = GetObjectSpawnSystem(gameObject).GetComponent<CollectibleHandler>().plane;

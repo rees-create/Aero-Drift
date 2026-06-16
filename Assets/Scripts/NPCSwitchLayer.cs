@@ -43,10 +43,10 @@ public class NPCSwitchLayer : MonoBehaviour
                 //1
                 KeyValuePair<Vector2, int> targetColliderInfo = FindClosestLayerCollider(NPCLayerColliderMap);
                 gameObject.GetComponent<Pusher>().target = targetColliderInfo.Key;
-                print("Target: escalator");
+                //print("Target: escalator");
                 gameObject.GetComponent<Pusher>().active = true;
                 yield return new WaitUntil(() => !gameObject.GetComponent<Pusher>().active); //wait for pusher to finish
-                print("to 2");
+                //print("to 2");
                 //2
                 if (beforeSwitchAnim != null && beforeSwitchAnim.length > 0)
                 {
@@ -62,10 +62,10 @@ public class NPCSwitchLayer : MonoBehaviour
                 if (beforeSwitchTranslation != default) { 
                     gameObject.GetComponent<Pusher>().target = (Vector2) transform.position + beforeSwitchTranslation;
                     gameObject.GetComponent<Pusher>().active = true;
-                    print("translating before switch..");
+                    //print("translating before switch..");
                     yield return new WaitForSeconds(2);
                     yield return new WaitUntil(() => !gameObject.GetComponent<Pusher>().active); //wait for pusher to finish
-                    print("switch layer");
+                    //print("switch layer");
                 }
                 //3
                 SwitchLayer(targetColliderInfo.Value);
@@ -103,7 +103,7 @@ public class NPCSwitchLayer : MonoBehaviour
         SwitchHierarchyLayer(gameObject, floorController.layers[currentLayer].sortingOrder);
         //Also change layer collider map.
         NPCLayerColliderMap = floorController.layers[currentLayer].colliderMap;
-        print("switching layer");
+        //print("switching layer");
     }
     void SwitchHierarchyLayer(GameObject g, int layer, int upperSortingOrder = -1) {
         int layerDifference = 0;

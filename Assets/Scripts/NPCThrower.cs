@@ -52,13 +52,13 @@ public class NPCThrower : MonoBehaviour
         {
             active = true;
             newThrowerCount++;
-            print($"{gameObject.name}: Thrower activated, newThrowerCount = {newThrowerCount}");
+            //print($"{gameObject.name}: Thrower activated, newThrowerCount = {newThrowerCount}");
         //enabled = true;
         }
         else {
-            print($"Too far, bait to plane = {baitToPlaneDistance}, radius to stay within = {followOffset.magnitude}");
-            print($"bait: {(Vector2) bait.transform.position} plane: {(Vector2) plane.transform.position}");
-            print($"{gameObject.name}: Waiting for thrower");
+            //print($"Too far, bait to plane = {baitToPlaneDistance}, radius to stay within = {followOffset.magnitude}");
+            //print($"bait: {(Vector2) bait.transform.position} plane: {(Vector2) plane.transform.position}");
+            //print($"{gameObject.name}: Waiting for thrower");
             GetComponent<CatchPlane>().SetActive(1);
             yield return new WaitUntil(()=> !GetComponent<CatchPlane>().GetActive());
             active = true;
@@ -331,13 +331,13 @@ public class NPCThrower : MonoBehaviour
         if (throwVector.magnitude < maxThrowIntensity)
         {
             plane.GetComponent<FlightControl>().SetInitialThrowImpulse(-throwVector);
-            print($"go for launch, throw vector = {throwVector}");
+            //print($"go for launch, throw vector = {throwVector}");
         }
         else
         {
             float throwIntensity = throwVector.magnitude;
             Vector2 throwDirection = throwVector / throwIntensity;
-            print($"go for launch at max, throw vector = {maxThrowIntensity * throwDirection}");
+            //print($"go for launch at max, throw vector = {maxThrowIntensity * throwDirection}");
             plane.GetComponent<FlightControl>().SetInitialThrowImpulse(-maxThrowIntensity * throwDirection);    
         }
         //throwVector = Vector3.zero; //reset throw vector
