@@ -18,6 +18,7 @@ public class FloorControl : MonoBehaviour
     public List<LayerInfo> layers;
     public GameObject player;
     public bool flipLayerDirection;
+    public bool useButtonsNotKeys;
 
     int currentLayer;
     public int GetCurrentLayer() { return currentLayer; }
@@ -60,14 +61,27 @@ public class FloorControl : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        if (Input.GetKeyUp(KeyCode.S)) //move floor down
-        {
-            StartCoroutine(SwitchLayer(flipLayerDirection ? -1 : 1));
-        }
-        if (Input.GetKeyUp(KeyCode.W)) //move floor up
-        {
-            StartCoroutine(SwitchLayer(flipLayerDirection ? 1 : -1));
+        if (!useButtonsNotKeys) { 
+            if (Input.GetKeyUp(KeyCode.S)) //move floor down
+            {
+                StartCoroutine(SwitchLayer(flipLayerDirection ? -1 : 1));
+            }
+            if (Input.GetKeyUp(KeyCode.W)) //move floor up
+            {
+                StartCoroutine(SwitchLayer(flipLayerDirection ? 1 : -1));
+            }
         }
         //when ready reassign sorting order
     }
+
+    public void OnUpButton()
+    {
+        //if (useButtonsNotKeys) //.. ykw forget this
+        StartCoroutine(SwitchLayer(flipLayerDirection ? 1 : -1));
+    }
+    public void OnDownButton()
+    {
+        StartCoroutine(SwitchLayer(flipLayerDirection ? -1 : 1));
+    }
+
 }
