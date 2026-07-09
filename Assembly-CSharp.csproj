@@ -79,6 +79,7 @@
     <Compile Include="Assets\Scripts\LiftSortingOrder.cs" />
     <Compile Include="Assets\Scripts\PoseLerp.cs" />
     <Compile Include="Assets\Scripts\ObjectSpawnSystem.cs" />
+    <Compile Include="Assets\Scripts\PopupMessage.cs" />
     <Compile Include="Assets\Scripts\Collectible.cs" />
     <Compile Include="Assets\Scripts\AnimationOnHover.cs" />
     <Compile Include="Assets\Scripts\Thrower.cs" />
@@ -112,6 +113,7 @@
     <Compile Include="Assets\Scripts\DestroyPlane.cs" />
     <Compile Include="Assets\Scripts\PopBackSync.cs" />
     <Compile Include="Assets\Scripts\ActionRandomizer.cs" />
+    <Compile Include="Assets\Scripts\BoundWall.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
