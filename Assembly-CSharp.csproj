@@ -105,6 +105,7 @@
     <Compile Include="Assets\Scripts\CollectibleHandler.cs" />
     <Compile Include="Assets\Scripts\PlayerTestSpawn.cs" />
     <Compile Include="Assets\Scripts\FlightControl.cs" />
+    <Compile Include="Assets\Scripts\BoundWall.cs" />
     <Compile Include="Assets\Scripts\Emote.cs" />
     <Compile Include="Assets\Scripts\Network Scripts\NetworkUI.cs" />
     <Compile Include="Assets\Scripts\Pusher.cs" />
@@ -113,7 +114,6 @@
     <Compile Include="Assets\Scripts\DestroyPlane.cs" />
     <Compile Include="Assets\Scripts\PopBackSync.cs" />
     <Compile Include="Assets\Scripts\ActionRandomizer.cs" />
-    <Compile Include="Assets\Scripts\BoundWall.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

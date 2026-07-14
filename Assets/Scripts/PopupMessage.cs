@@ -8,6 +8,7 @@ using System;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(TextMeshProUGUI))]
+
 public class PopupMessage : MonoBehaviour
 {
     TextMeshProUGUI tmp;
@@ -32,31 +33,34 @@ public class PopupMessage : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        TextMeshProUGUI tmp = GetComponent<TextMeshProUGUI>();
+        tmp = GetComponent<TextMeshProUGUI>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (message.text.Length > 0 && message.duration > 0)
+        if (tmp)
         {
-            if (tmp.text.Length == 0)
+            if (message.text.Length > 0 && message.duration > 0)
             {
-                tmp.text = message.text;
+                if (tmp.text.Length == 0)
+                {
+                    tmp.text = message.text;
+                }
+                message.duration -= Time.deltaTime;
+                //pad color
+                float alphaCurve = 1.2f * Mathf.Sin(Mathf.PI * Time.deltaTime);
+                padColor.a = alphaCurve <= 1 ? alphaCurve : 1;
+                popUpPad.color = padColor;
             }
-            message.duration -= Time.deltaTime;
-            //pad color
-            float alphaCurve = 1.2f * Mathf.Sin(Mathf.PI * Time.deltaTime);
-            padColor.a = alphaCurve <= 1 ? alphaCurve : 1;
-            popUpPad.color = padColor;
-        }
-        else if (message.duration < 0)
-        {
-            message.duration = 0; // message duration can't be under 0
-        }
-        else 
-        {
-            message.text = tmp.text = ""; //clear message
+            else if (message.duration < 0)
+            {
+                message.duration = 0; // message duration can't be under 0
+            }
+            else
+            {
+                message.text = tmp.text = ""; //clear message
+            }
         }
     }
 
@@ -65,8 +69,8 @@ public class PopupMessage : MonoBehaviour
         Vector3 messageAreaSize = preview.messageBoxTopLeft - preview.messageBoxBottomRight;
         Vector3 center = Vector2.Lerp(preview.messageBoxTopLeft, preview.messageBoxBottomRight, 0.5f);
         Gizmos.color = new Vector4(0.6f, 0.851f, 0.918f, 1); //turquoise
-        Gizmos.DrawWireCube(center, messageAreaSize);
-        Gizmos.DrawSphere(preview.dot, 0.5f);
+        Gizmos.DrawWireCube(transform.TransformPoint(center), messageAreaSize);
+        Gizmos.DrawSphere(transform.TransformPoint(preview.dot), 0.5f);
     }
 
 }
