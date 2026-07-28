@@ -6,6 +6,7 @@ using UnityEngine.Events;
 using UnityEngine.Networking.PlayerConnection;
 using System;
 using UnityEngine.UI;
+using System.Data;
 
 [RequireComponent(typeof(TextMeshProUGUI))]
 
@@ -18,6 +19,7 @@ public class PopupMessage : MonoBehaviour
         public float duration;
         Vector2 normalizedScreenCoords;
         [NonSerialized] public bool active;
+        
     }
     public Message message;
     
@@ -37,29 +39,45 @@ public class PopupMessage : MonoBehaviour
     }
 
     // Update is called once per frame
+    bool msgUpdateActive = false;
+    float initMsgDuration;
     void Update()
     {
+        //buffer code to catch message params (just duration for now) when message is initialized.. hate writing this type of code
+        bool[] msgUpdateActiveBuffer = new bool[2];
+        int bufferIndex = 0;
+        msgUpdateActiveBuffer[bufferIndex] = msgUpdateActive;
+        bufferIndex = (bufferIndex + 1) % 2;
+        //check buffer, catch params
+        if (msgUpdateActiveBuffer[0] != msgUpdateActiveBuffer[1]) 
+        {
+            initMsgDuration = message.duration;
+        }
+
         if (tmp)
         {
             if (message.text.Length > 0 && message.duration > 0)
             {
+                msgUpdateActive = true;
                 if (tmp.text.Length == 0)
                 {
                     tmp.text = message.text;
                 }
                 message.duration -= Time.deltaTime;
                 //pad color
-                float alphaCurve = 1.2f * Mathf.Sin(Mathf.PI * Time.deltaTime);
+                float alphaCurve = 1.2f * Mathf.Sin((Mathf.PI/2) * message.duration/initMsgDuration);
                 padColor.a = alphaCurve <= 1 ? alphaCurve : 1;
                 popUpPad.color = padColor;
             }
             else if (message.duration < 0)
             {
                 message.duration = 0; // message duration can't be under 0
+                msgUpdateActive = false;
             }
             else
             {
                 message.text = tmp.text = ""; //clear message
+                msgUpdateActive = false;
             }
         }
     }
