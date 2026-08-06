@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class BoundWall : MonoBehaviour
@@ -17,9 +18,11 @@ public class BoundWall : MonoBehaviour
         
     }
 
-    private void OnCollisionEnter(Collision collision)
+    void OnCollisionEnter2D(Collision2D other)
     {
         popup.message.text = "You've hit the wall.. please go forward :)";
         popup.message.duration = 1.5f;
+        print("You've hit the wall.. please go forward :)");
     }
+    
 }

@@ -44,6 +44,7 @@ public class PopupMessage : MonoBehaviour
     void Update()
     {
         //buffer code to catch message params (just duration for now) when message is initialized.. hate writing this type of code
+        //TODO: something here is likely freezing the pop up message fade
         bool[] msgUpdateActiveBuffer = new bool[2];
         int bufferIndex = 0;
         msgUpdateActiveBuffer[bufferIndex] = msgUpdateActive;
