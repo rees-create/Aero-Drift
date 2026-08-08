@@ -66,14 +66,16 @@ public class PopupMessage : MonoBehaviour
                 }
                 message.duration -= Time.deltaTime;
                 //pad color
-                float alphaCurve = 1.2f * Mathf.Sin((Mathf.PI/2) * message.duration/initMsgDuration);
+                float alphaCurve = 1.2f * Mathf.Sin((Mathf.PI/2) * (message.duration/initMsgDuration));
                 padColor.a = alphaCurve <= 1 ? alphaCurve : 1;
+                print($"padColor = {padColor}");
                 popUpPad.color = padColor;
+
             }
             else if (message.duration < 0)
             {
                 message.duration = 0; // message duration can't be under 0
-                msgUpdateActive = false;
+                //msgUpdateActive = false;
             }
             else
             {
