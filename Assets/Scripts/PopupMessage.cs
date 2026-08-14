@@ -40,13 +40,14 @@ public class PopupMessage : MonoBehaviour
 
     // Update is called once per frame
     bool msgUpdateActive = false;
+    bool[] msgUpdateActiveBuffer = new bool[2];
+    int bufferIndex = 0;
     float initMsgDuration;
     void Update()
     {
         //buffer code to catch message params (just duration for now) when message is initialized.. hate writing this type of code
         //TODO: something here is likely freezing the pop up message fade
-        bool[] msgUpdateActiveBuffer = new bool[2];
-        int bufferIndex = 0;
+        
         msgUpdateActiveBuffer[bufferIndex] = msgUpdateActive;
         bufferIndex = (bufferIndex + 1) % 2;
         //check buffer, catch params
@@ -68,19 +69,20 @@ public class PopupMessage : MonoBehaviour
                 //pad color
                 float alphaCurve = 1.2f * Mathf.Sin((Mathf.PI/2) * (message.duration/initMsgDuration));
                 padColor.a = alphaCurve <= 1 ? alphaCurve : 1;
-                print($"padColor = {padColor}");
+                //print($"array = [{msgUpdateActiveBuffer[0]}, {msgUpdateActiveBuffer[1]}], padColor unclamped = {1.2f * Mathf.Sin((Mathf.PI / 2) * (message.duration / initMsgDuration))}");
                 popUpPad.color = padColor;
 
             }
-            else if (message.duration < 0)
+            else if (message.duration <= 0)
             {
                 message.duration = 0; // message duration can't be under 0
+                message.text = tmp.text = ""; //clear message
+                msgUpdateActive = false;
                 //msgUpdateActive = false;
             }
             else
             {
-                message.text = tmp.text = ""; //clear message
-                msgUpdateActive = false;
+               
             }
         }
     }

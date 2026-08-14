@@ -9,7 +9,7 @@ public class BoundWall : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+     
     }
 
     // Update is called once per frame
@@ -22,7 +22,7 @@ public class BoundWall : MonoBehaviour
     {
         popup.message.text = "You've hit the wall.. please go forward :)";
         popup.message.duration = 1.5f;
-        print("You've hit the wall.. please go forward :)");
+        //print("You've hit the wall.. please go forward :)");
     }
     
 }
