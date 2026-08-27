@@ -37,7 +37,7 @@ public class Tutorial : MonoBehaviour
     public List<TutorialObject> onLoadTutorials;
 
     float displayTime;
-    public void DisplayTutorial() 
+    public void DisplayTutorial(TutorialObject tutorial) 
     {
         header.text = currentTutorial.title;
         body.text = currentTutorial.description;
@@ -59,7 +59,7 @@ public class Tutorial : MonoBehaviour
     {
         if (tutorialActive)
         {
-
+            DisplayTutorial(currentTutorial);
         }
     }
 }
