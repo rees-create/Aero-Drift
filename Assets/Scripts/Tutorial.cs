@@ -39,6 +39,7 @@ public class Tutorial : MonoBehaviour
         public Vector2 objPosition;
         public Vector3 offset;
         public bool on;
+        public Transform transform;
     }
     public TutorialObject currentTutorial;
     public Queue<TutorialObject> onLoadTutorials;
@@ -51,8 +52,12 @@ public class Tutorial : MonoBehaviour
         
         if (displayTime < 0.0001) 
         {
-            print($"intended position: {transform.TransformPoint(currentTutorial.objPosition) + currentTutorial.offset}");
-            transform.localPosition = transform.TransformPoint(currentTutorial.objPosition) + currentTutorial.offset;
+            if (currentTutorial.transform)
+            {
+                print($"intended position: {currentTutorial.transform.position + /*transform.TransformPoint(currentTutorial.objPosition) +*/ currentTutorial.offset}");
+                transform.position = currentTutorial.transform.position +
+                    /*transform.TransformPoint(currentTutorial.objPosition) +*/ currentTutorial.offset;
+            }
         }
         
         displayTime += Time.deltaTime;

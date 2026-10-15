@@ -142,10 +142,11 @@ public class FlightJoystick : MonoBehaviour
         tut = new Tutorial.TutorialObject();
         //tut.SetTutorialActive();
         //TODO: check device type
+        tut.transform = transform;
         tut.title = "Joystick";
         tut.description = "Tap the right side of the joystick to fly!";
         tut.objPosition = tutorial.gameObject.transform.position;
-        tut.offset = Vector2.up * 10;
+        tut.offset = Vector2.zero; //(Vector2.up * 250) + Vector2.right *30;
         tut.delayTimeSeconds = 5;
         tutorial.onLoadTutorials.Enqueue(tut);
 
