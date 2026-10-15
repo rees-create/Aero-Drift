@@ -73,6 +73,7 @@
     <Compile Include="Assets\Scripts\Network Scripts\NetworkFlightControl.cs" />
     <Compile Include="Assets\Scripts\ExhaustControl.cs" />
     <Compile Include="Assets\Scripts\SceneTransitionControl.cs" />
+    <Compile Include="Assets\Scripts\Tutorial.cs" />
     <Compile Include="Assets\Scripts\FlightJoystick.cs" />
     <Compile Include="Assets\Scripts\PieSign.cs" />
     <Compile Include="Assets\Scripts\Network Scripts\PrefabAssign.cs" />
@@ -114,7 +115,6 @@
     <Compile Include="Assets\Scripts\DestroyPlane.cs" />
     <Compile Include="Assets\Scripts\PopBackSync.cs" />
     <Compile Include="Assets\Scripts\ActionRandomizer.cs" />
-    <Compile Include="Assets\Scripts\Tutorial.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

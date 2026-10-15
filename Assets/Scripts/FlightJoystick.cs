@@ -20,6 +20,7 @@ public class FlightJoystick : MonoBehaviour
     //TODO: use these values in FlightControl
     [NonSerialized] public FlightParams flightParams;
     public float throwIntensity;
+    public Tutorial tutorial;
 
     [SerializeField] int fixedFrameBuffer;
 
@@ -87,6 +88,10 @@ public class FlightJoystick : MonoBehaviour
             Vector2 localMousePosition = transform.InverseTransformPoint(Camera.main.ScreenToWorldPoint(Input.mousePosition));
             if (MouseInRange())
             {
+                //if (tut) //potential null check
+                //{
+                    tut.on = false;
+                //}
                 pod.transform.localPosition = localMousePosition;
                 float toPointer = Vector2.Distance(localMousePosition, middle);
                 joystickPos = (localMousePosition - middle) / innerRadius;
@@ -127,10 +132,24 @@ public class FlightJoystick : MonoBehaviour
             flightControl.SetJoystick(this);
         }
     }
-    
+
     // Start is called before the first frame update
+    Tutorial.TutorialObject tut;
     void Start()
     {
+        //Tutorial
+        tutorial.SetTutorialActive();
+        tut = new Tutorial.TutorialObject();
+        //tut.SetTutorialActive();
+        //TODO: check device type
+        tut.title = "Joystick";
+        tut.description = "Tap the right side of the joystick to fly!";
+        tut.objPosition = tutorial.gameObject.transform.position;
+        tut.offset = Vector2.up * 10;
+        tut.delayTimeSeconds = 5;
+        tutorial.onLoadTutorials.Enqueue(tut);
+
+
         if (setMiddleOnPlay)
         {
             middle = pod.transform.localPosition;
