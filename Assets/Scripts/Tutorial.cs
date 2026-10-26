@@ -63,13 +63,16 @@ public class Tutorial : MonoBehaviour
         displayTime += Time.deltaTime;
         //print($"displayTime {displayTime}");
         // if display time = 0, use a deactivation event or boolean to reset and dequeue in the next tutorial
-        currentTutorial.on = true;
+        //if (currentTutorial.title == "")
+        //{
+        //    currentTutorial.on = true;
+        //}
         if (onLoadTutorials != null && displayTime >= currentTutorial.delayTimeSeconds) 
         {
-            currentTutorial = default;
+            //currentTutorial = default;
             displayTime = 0f;
             //currentTutorial.on = false;
-            if (onLoadTutorials.Count > 0 && currentTutorial.on == false)
+            if (/*onLoadTutorials.Count > 0 &&*/ currentTutorial.on == false && currentTutorial.title != "")
             {
                 currentTutorial = onLoadTutorials.Dequeue();
             }
