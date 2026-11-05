@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -59,8 +60,11 @@ public class Tutorial : MonoBehaviour
                     /*transform.TransformPoint(currentTutorial.objPosition) +*/ currentTutorial.offset;
             }
         }
-        
-        displayTime += Time.deltaTime;
+        if (!currentTutorial.on)
+        {
+            //countdown & disable
+            displayTime += Time.deltaTime;
+        }
         //print($"displayTime {displayTime}");
         // if display time = 0, use a deactivation event or boolean to reset and dequeue in the next tutorial
         currentTutorial.on = true;
