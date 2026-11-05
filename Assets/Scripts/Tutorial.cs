@@ -55,9 +55,9 @@ public class Tutorial : MonoBehaviour
         {
             if (currentTutorial.transform)
             {
-                print($"intended position: {currentTutorial.transform.position + /*transform.TransformPoint(currentTutorial.objPosition) +*/ currentTutorial.offset}");
-                transform.position = currentTutorial.transform.position +
-                    /*transform.TransformPoint(currentTutorial.objPosition) +*/ currentTutorial.offset;
+                //print($"intended position: {currentTutorial.transform.position + /*transform.TransformPoint(currentTutorial.objPosition) +*/ currentTutorial.offset}");
+                //transform.position = currentTutorial.transform.position +
+                //    /*transform.TransformPoint(currentTutorial.objPosition) +*/ currentTutorial.offset;
             }
         }
         if (!currentTutorial.on)
@@ -67,7 +67,7 @@ public class Tutorial : MonoBehaviour
         }
         //print($"displayTime {displayTime}");
         // if display time = 0, use a deactivation event or boolean to reset and dequeue in the next tutorial
-        currentTutorial.on = true;
+        //currentTutorial.on = true;
         if (onLoadTutorials != null && displayTime >= currentTutorial.delayTimeSeconds) 
         {
             currentTutorial = default;
