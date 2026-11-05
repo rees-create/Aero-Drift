@@ -135,6 +135,7 @@ public class FlightJoystick : MonoBehaviour
 
     // Start is called before the first frame update
     Tutorial.TutorialObject tut;
+    bool tutorialOn;
     void Start()
     {
         //Tutorial
@@ -146,7 +147,7 @@ public class FlightJoystick : MonoBehaviour
         tut.title = "Joystick";
         tut.description = "Tap the right side of the joystick to fly!";
         tut.objPosition = tutorial.gameObject.transform.position;
-        tut.offset = Vector2.zero; //(Vector2.up * 250) + Vector2.right *30;
+        tut.offset = /*Vector2.zero;*/(Vector2.up * 250) + Vector2.right *30;
         tut.delayTimeSeconds = 1;
         tut.on = true;
         tutorial.onLoadTutorials.Enqueue(tut);
