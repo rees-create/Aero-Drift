@@ -198,6 +198,7 @@ public class FlightJoystick : MonoBehaviour
             throwJoystickSnapshot = joystickPos;
             
             flightParams = InputToFlightParams(joystickMagnitude);
+            tutorial.currentTutorial.on = false;
             //print("throw impulse: " + flightParams.throwImpulse);
         }
         else //(!Input.GetMouseButton(0)) 
